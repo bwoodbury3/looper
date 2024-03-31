@@ -22,7 +22,8 @@ bool go()
     Looper::InputDevice input("Microphone", "mic");
     ASSERT(input.init(), "Could not init mic");
 
-    Looper::OutputDevice output("Beats Fit Pro", "mic");
+    // Looper::OutputDevice output("Beats Fit Pro", "mic");
+    Looper::OutputDevice output("Output", "mic");
     ASSERT(output.init(), "Could not init output");
 
     while (true)

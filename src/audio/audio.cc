@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "src/framework/log.h"
+#include "src/framework/time.h"
 
 namespace Looper
 {
@@ -106,7 +107,7 @@ int audio_input_callback(const void *input_buffer, void *output_buffer,
     if (frames_per_buffer != device->buf.size())
     {
         LOG(ERROR, "Portaudio gave an unusual number of frames.");
-        return -1;
+        return paAbort;
     }
 
     /*
@@ -116,12 +117,11 @@ int audio_input_callback(const void *input_buffer, void *output_buffer,
     std::lock_guard<std::mutex> lock(device->mutex);
     for (size_t i = 0; i < device->buf.size(); i++)
     {
-        device->buf[i] = *(in++);
+        device->buf[i] = *in;
+        in++;
     }
 
-    LOG(DEBUG, "Got some audio: %s", print_stream(device->buf).c_str());
-
-    return 0;
+    return paContinue;
 }
 
 /**
@@ -138,7 +138,7 @@ int audio_output_callback(const void *input_buffer, void *output_buffer,
     if (frames_per_buffer != device->buf.size())
     {
         LOG(ERROR, "Portaudio gave an unusual number of frames.");
-        return -1;
+        return paAbort;
     }
 
     /*
@@ -153,10 +153,9 @@ int audio_output_callback(const void *input_buffer, void *output_buffer,
     float *out = (float *)output_buffer;
     for (size_t i = 0; i < device->buf.size(); i++)
     {
-        *(out++) = device->buf[i];
+        *out = device->buf[i];
+        out++;
     }
-
-    LOG(DEBUG, "Wrote some audio: %s", print_stream(device->buf).c_str());
 
     /*
      * Notify everyone that the buffer is empty.
@@ -164,7 +163,7 @@ int audio_output_callback(const void *input_buffer, void *output_buffer,
     device->buffer_full = false;
     device->cv.notify_one();
 
-    return 0;
+    return paContinue;
 }
 
 InputDevice::InputDevice(const std::string &_audio_device_name,
@@ -181,15 +180,17 @@ bool InputDevice::init()
     PaDeviceIndex index = -1;
     ASSERT(get_device_index(index, audio_device_name, true, false),
            "Error finding device.");
+    const PaDeviceInfo *info = Pa_GetDeviceInfo(index);
 
     /*
      * Parameters.
      */
-    const PaStreamParameters params = {.channelCount = 1,
-                                       .device = index,
-                                       .sampleFormat = SAMPLE_WIDTH,
-                                       .suggestedLatency = 0.01,
-                                       .hostApiSpecificStreamInfo = NULL};
+    const PaStreamParameters params = {
+        .channelCount = 1,
+        .device = index,
+        .sampleFormat = SAMPLE_WIDTH,
+        .suggestedLatency = info->defaultLowInputLatency,
+        .hostApiSpecificStreamInfo = NULL};
 
     /*
      * Open an audio I/O stream.
@@ -199,6 +200,13 @@ bool InputDevice::init()
                       paNoFlag, &audio_input_callback, (void *)this);
     ASSERT(err == paNoError, "Failed to open input device: %s: %s",
            audio_device_name.c_str(), Pa_GetErrorText(err));
+
+    /*
+     * Read back the stream info.
+     */
+    const PaStreamInfo *stream_info = Pa_GetStreamInfo(pa_stream);
+    LOG(DEBUG, "Input stream info: sample_rate=%f, latency=%f",
+        stream_info->sampleRate, stream_info->inputLatency);
 
     err = Pa_StartStream(pa_stream);
     ASSERT(err == paNoError, "Failed to start device stream: %s: %s",
@@ -233,15 +241,18 @@ bool OutputDevice::init()
     PaDeviceIndex index = -1;
     ASSERT(get_device_index(index, audio_device_name, false, true),
            "Error finding device.");
+    const PaDeviceInfo *info = Pa_GetDeviceInfo(index);
+    LOG(DEBUG, "API: %s", Pa_GetHostApiInfo(info->hostApi)->name);
 
     /*
      * Parameters.
      */
-    const PaStreamParameters params = {.channelCount = 1,
-                                       .device = index,
-                                       .sampleFormat = SAMPLE_WIDTH,
-                                       .suggestedLatency = 0.01,
-                                       .hostApiSpecificStreamInfo = NULL};
+    const PaStreamParameters params = {
+        .channelCount = 1,
+        .device = index,
+        .sampleFormat = SAMPLE_WIDTH,
+        .suggestedLatency = info->defaultLowOutputLatency,
+        .hostApiSpecificStreamInfo = NULL};
 
     /*
      * Open an audio I/O stream.
@@ -251,6 +262,13 @@ bool OutputDevice::init()
                       paNoFlag, &audio_output_callback, (void *)this);
     ASSERT(err == paNoError, "Failed to open output device: %s: %s",
            audio_device_name.c_str(), Pa_GetErrorText(err));
+
+    /*
+     * Read back the stream info.
+     */
+    const PaStreamInfo *stream_info = Pa_GetStreamInfo(pa_stream);
+    LOG(DEBUG, "Output stream info: sample_rate=%f, latency=%f",
+        stream_info->sampleRate, stream_info->outputLatency);
 
     err = Pa_StartStream(pa_stream);
     ASSERT(err == paNoError, "Failed to start device stream: %s: %s",

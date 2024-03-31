@@ -8,6 +8,6 @@ cc_library(
 cc_library(
     name = "framework",
     srcs = ["block.cc", "stream.cc"],
-    hdrs = ["block.h", "stream.h"],
+    hdrs = ["block.h", "stream.h", "time.h"],
     deps = [":log"],
 )

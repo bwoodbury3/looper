@@ -20,7 +20,7 @@ namespace Looper
 /**
  * The number of frames in a single stream buffer.
  */
-static const int64_t FRAMES_PER_BUFFER = 512;
+static const int64_t FRAMES_PER_BUFFER = 1024;
 
 /**
  * The sample rate of the audio.
