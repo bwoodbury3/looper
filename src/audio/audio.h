@@ -47,9 +47,59 @@ class InputDevice : public Source
     stream_t buf;
 
     /**
-     * Mutex for reading from the buffer.
+     * Mutex for interacting with the buffer.
      */
     std::mutex mutex;
+
+   private:
+    /**
+     * The name of the audio device.
+     */
+    const std::string &audio_device_name;
+
+    /**
+     * Pointer to the portaudio stream.
+     */
+    PaStream *pa_stream;
+};
+
+/**
+ * Output audio device.
+ */
+class OutputDevice : public Sink
+{
+   public:
+    /**
+     * Initialize an output audio I/O device.
+     *
+     * @param _audio_device_name The name of the device given by the platform.
+     * @param _input_channel See Looper::Sink
+     */
+    OutputDevice(const std::string &_audio_device_name,
+                 const std::string &_input_channel);
+
+    virtual bool init() override;
+    virtual bool write(const stream_t &stream) override;
+
+    /**
+     * Stream holding the latest round of data.
+     */
+    stream_t buf;
+
+    /**
+     * Mutex for interacting with the buffer.
+     */
+    std::mutex mutex;
+
+    /**
+     * Condition variable.
+     */
+    std::condition_variable cv;
+
+    /**
+     * Condition variable for buffer being full.
+     */
+    bool buffer_full;
 
    private:
     /**

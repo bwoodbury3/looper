@@ -2,6 +2,8 @@
  * Go!
  */
 
+#include <unistd.h>
+
 #include "audio/audio.h"
 #include "framework/log.h"
 
@@ -17,8 +19,18 @@ bool go()
 {
     ASSERT(Looper::init_audio(), "Could not initialize audio");
 
-    Looper::InputDevice input("sldas", "mic");
-    ASSERT(input.init(), "Could not start program");
+    Looper::InputDevice input("Microphone", "mic");
+    ASSERT(input.init(), "Could not init mic");
+
+    Looper::OutputDevice output("Beats Fit Pro", "mic");
+    ASSERT(output.init(), "Could not init output");
+
+    while (true)
+    {
+        stream_t stream;
+        ASSERT(input.read(stream), "Could not read from the stream");
+        ASSERT(output.write(stream), "Could not write to the stream");
+    }
 
     return true;
 }
