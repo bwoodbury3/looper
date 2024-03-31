@@ -1,0 +1,11 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "audio",
+    srcs = ["audio.cc"],
+    hdrs = ["audio.h"],
+    deps = [
+        "@portaudio//:portaudio",
+        "//src/framework",
+    ]
+)

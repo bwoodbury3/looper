@@ -1,0 +1,13 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "log",
+    hdrs = ["log.h"],
+)
+
+cc_library(
+    name = "framework",
+    srcs = ["block.cc"],
+    hdrs = ["block.h", "stream.h"],
+    deps = [":log"],
+)

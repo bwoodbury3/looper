@@ -1,0 +1,73 @@
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+# Big thanks to this person:
+# https://github.com/anokta/barelymusician/blob/main/WORKSPACE.bazel
+git_repository(
+    name = "portaudio",
+    remote = "https://github.com/PortAudio/portaudio.git",
+    commit = "147dd722548358763a8b649b3e4b41dfffbcfbb6",
+    build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["reciprocal"])
+
+exports_files(["LICENSE.txt"])
+
+cc_library(
+    name = "portaudio",
+    srcs = glob([
+        "src/common/*.c",
+        "src/common/*.h",
+        "include/*.h",
+    ]) + select({
+        "@platforms//os:linux": glob([
+            "src/hostapi/alsa/*.c",
+            "src/hostapi/alsa/*.h",
+            "src/os/unix/*.c",
+            "src/os/unix/*.h",
+        ]),
+        "@platforms//os:osx": glob([
+            "src/hostapi/coreaudio/*.c",
+            "src/hostapi/coreaudio/*.h",
+            "src/os/unix/*.c",
+            "src/os/unix/*.h",
+        ]),
+        "@platforms//os:windows": glob([
+            "src/hostapi/wmme/*.c",
+            "src/hostapi/wmme/*.h",
+            "src/os/win/*.c",
+            "src/os/win/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    hdrs = ["include/portaudio.h"],
+    copts = ["-w"],
+    defines = select({
+        "@platforms//os:linux": ["PA_USE_ALSA=1"],
+        "@platforms//os:osx": ["PA_USE_COREAUDIO=1"],
+        "@platforms//os:windows": ["PA_USE_WMME=1"],
+        "//conditions:default": [],
+    }),
+    includes = [
+        "include",
+        "src/common",
+        "src/os/unix",
+    ],
+    linkopts = select({
+        "@platforms//os:linux": [
+            "-lasound",
+            "-pthread",
+        ],
+        "@platforms//os:osx": [
+            "-framework AudioUnit",
+            "-framework CoreAudio",
+            "-framework AudioToolbox",
+            "-framework Carbon",
+        ],
+        "//conditions:default": [],
+    }),
+)
+"""
+)
