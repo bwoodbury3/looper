@@ -1,4 +1,5 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Big thanks to this person:
 # https://github.com/anokta/barelymusician/blob/main/WORKSPACE.bazel
@@ -70,4 +71,11 @@ cc_library(
     }),
 )
 """
+)
+
+http_archive(
+    name = "json",
+    url = "https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.zip",
+    integrity = "sha256-BAIrBdgG61/3MCPCgLaGl9Erk+G3JnoLIqGjnsdXgGk=",
+    strip_prefix = "json-3.11.3",
 )

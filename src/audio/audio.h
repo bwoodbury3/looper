@@ -32,14 +32,12 @@ class InputDevice : public Source
     /**
      * Initialize an input audio I/O device.
      *
-     * @param _audio_device_name The name of the device given by the platform.
-     * @param _output_channel See Looper::Source
+     * @param _configs The configs.
      */
-    InputDevice(const std::string &_audio_device_name,
-                const std::string &_output_channel);
+    InputDevice(const BlockConfig _configs);
 
     virtual bool init() override;
-    virtual bool read(stream_t &stream) override;
+    virtual bool read() override;
 
     /**
      * Stream holding the latest round of data.
@@ -52,11 +50,6 @@ class InputDevice : public Source
     std::mutex mutex;
 
    private:
-    /**
-     * The name of the audio device.
-     */
-    const std::string &audio_device_name;
-
     /**
      * Pointer to the portaudio stream.
      */
@@ -72,14 +65,12 @@ class OutputDevice : public Sink
     /**
      * Initialize an output audio I/O device.
      *
-     * @param _audio_device_name The name of the device given by the platform.
-     * @param _input_channel See Looper::Sink
+     * @param _configs The configs.
      */
-    OutputDevice(const std::string &_audio_device_name,
-                 const std::string &_input_channel);
+    OutputDevice(const BlockConfig _configs);
 
     virtual bool init() override;
-    virtual bool write(const stream_t &stream) override;
+    virtual bool write() override;
 
     /**
      * Stream holding the latest round of data.
@@ -102,11 +93,6 @@ class OutputDevice : public Sink
     bool buffer_full;
 
    private:
-    /**
-     * The name of the audio device.
-     */
-    const std::string &audio_device_name;
-
     /**
      * Pointer to the portaudio stream.
      */

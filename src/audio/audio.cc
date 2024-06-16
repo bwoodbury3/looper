@@ -8,6 +8,12 @@
 namespace Looper
 {
 
+/*
+ * Register audio devices as modules with the framework.
+ */
+bool is_registered = BlockFactory::register_source<InputDevice>("AudioInput") &&
+                     BlockFactory::register_sink<OutputDevice>("AudioOutput");
+
 /**
  * Whether portaudio has been initialized.
  */
@@ -19,7 +25,8 @@ bool init_audio()
      * Initialize portaudio if it hasn't been initialized yet.
      */
     auto err = Pa_Initialize();
-    ASSERT(err == paNoError, "Failed to initialize PortAudio: %s",
+    ASSERT(err == paNoError,
+           "Failed to initialize PortAudio: %s",
            Pa_GetErrorText(err));
     is_init = true;
     return true;
@@ -33,8 +40,10 @@ bool init_audio()
  * @param is_input Whether the device is an input.
  * @param is_output Whether the device is an output.
  */
-bool get_device_index(PaDeviceIndex &index, const std::string &name,
-                      bool is_input, bool is_output)
+bool get_device_index(PaDeviceIndex &index,
+                      const std::string &name,
+                      bool is_input,
+                      bool is_output)
 {
     ASSERT(is_init, "PortAudio was not initialized. Call init_audio()");
 
@@ -42,7 +51,8 @@ bool get_device_index(PaDeviceIndex &index, const std::string &name,
      * Get a list of devices.
      */
     const PaDeviceIndex numDevices = Pa_GetDeviceCount();
-    ASSERT(numDevices >= 0, "Failed to get devices: %s",
+    ASSERT(numDevices >= 0,
+           "Failed to get devices: %s",
            Pa_GetErrorText(numDevices));
 
     /*
@@ -98,10 +108,12 @@ bool get_device_index(PaDeviceIndex &index, const std::string &name,
  *
  * @see PaStreamCallback
  */
-int audio_input_callback(const void *input_buffer, void *output_buffer,
+int audio_input_callback(const void *input_buffer,
+                         void *output_buffer,
                          unsigned long frames_per_buffer,
                          const PaStreamCallbackTimeInfo *time_info,
-                         PaStreamCallbackFlags status_flags, void *data)
+                         PaStreamCallbackFlags status_flags,
+                         void *data)
 {
     InputDevice *device = (InputDevice *)data;
     if (frames_per_buffer != device->buf.size())
@@ -129,10 +141,12 @@ int audio_input_callback(const void *input_buffer, void *output_buffer,
  *
  * @see PaStreamCallback
  */
-int audio_output_callback(const void *input_buffer, void *output_buffer,
+int audio_output_callback(const void *input_buffer,
+                          void *output_buffer,
                           unsigned long frames_per_buffer,
                           const PaStreamCallbackTimeInfo *time_info,
-                          PaStreamCallbackFlags status_flags, void *data)
+                          PaStreamCallbackFlags status_flags,
+                          void *data)
 {
     OutputDevice *device = (OutputDevice *)data;
     if (frames_per_buffer != device->buf.size())
@@ -166,14 +180,14 @@ int audio_output_callback(const void *input_buffer, void *output_buffer,
     return paContinue;
 }
 
-InputDevice::InputDevice(const std::string &_audio_device_name,
-                         const std::string &_output_channel)
-    : Source(_output_channel), audio_device_name(_audio_device_name)
-{
-}
+InputDevice::InputDevice(const BlockConfig _configs) : Source(_configs) {}
 
 bool InputDevice::init()
 {
+    std::string audio_device_name;
+    ASSERT(configs.get_string("name", audio_device_name),
+           "Missing audio device name");
+
     /*
      * Get the device.
      */
@@ -195,46 +209,58 @@ bool InputDevice::init()
     /*
      * Open an audio I/O stream.
      */
-    PaError err =
-        Pa_OpenStream(&pa_stream, &params, NULL, SAMPLE_RATE, FRAMES_PER_BUFFER,
-                      paNoFlag, &audio_input_callback, (void *)this);
-    ASSERT(err == paNoError, "Failed to open input device: %s: %s",
-           audio_device_name.c_str(), Pa_GetErrorText(err));
+    PaError err = Pa_OpenStream(&pa_stream,
+                                &params,
+                                NULL,
+                                SAMPLE_RATE,
+                                FRAMES_PER_BUFFER,
+                                paNoFlag,
+                                &audio_input_callback,
+                                (void *)this);
+    ASSERT(err == paNoError,
+           "Failed to open input device: %s: %s",
+           audio_device_name.c_str(),
+           Pa_GetErrorText(err));
 
     /*
      * Read back the stream info.
      */
     const PaStreamInfo *stream_info = Pa_GetStreamInfo(pa_stream);
-    LOG(DEBUG, "Input stream info: sample_rate=%f, latency=%f",
-        stream_info->sampleRate, stream_info->inputLatency);
+    LOG(DEBUG,
+        "Input stream info: sample_rate=%f, latency=%f",
+        stream_info->sampleRate,
+        stream_info->inputLatency);
 
     err = Pa_StartStream(pa_stream);
-    ASSERT(err == paNoError, "Failed to start device stream: %s: %s",
-           audio_device_name.c_str(), Pa_GetErrorText(err));
+    ASSERT(err == paNoError,
+           "Failed to start device stream: %s: %s",
+           audio_device_name.c_str(),
+           Pa_GetErrorText(err));
 
     return true;
 }
 
-bool InputDevice::read(stream_t &stream)
+bool InputDevice::read()
 {
     /*
      * Simple copy.
      */
     std::lock_guard<std::mutex> lock(mutex);
-    std::copy(std::begin(buf), std::end(buf), std::begin(stream));
+    std::copy(std::begin(buf), std::end(buf), std::begin(*stream));
     return true;
 }
 
-OutputDevice::OutputDevice(const std::string &_audio_device_name,
-                           const std::string &_input_channel)
-    : Sink(_input_channel),
-      buffer_full(false),
-      audio_device_name(_audio_device_name)
+OutputDevice::OutputDevice(const BlockConfig _configs)
+    : Sink(_configs), buffer_full(false)
 {
 }
 
 bool OutputDevice::init()
 {
+    std::string audio_device_name;
+    ASSERT(configs.get_string("name", audio_device_name),
+           "Missing audio device name");
+
     /*
      * Get the device.
      */
@@ -257,27 +283,38 @@ bool OutputDevice::init()
     /*
      * Open an audio I/O stream.
      */
-    PaError err =
-        Pa_OpenStream(&pa_stream, NULL, &params, SAMPLE_RATE, FRAMES_PER_BUFFER,
-                      paNoFlag, &audio_output_callback, (void *)this);
-    ASSERT(err == paNoError, "Failed to open output device: %s: %s",
-           audio_device_name.c_str(), Pa_GetErrorText(err));
+    PaError err = Pa_OpenStream(&pa_stream,
+                                NULL,
+                                &params,
+                                SAMPLE_RATE,
+                                FRAMES_PER_BUFFER,
+                                paNoFlag,
+                                &audio_output_callback,
+                                (void *)this);
+    ASSERT(err == paNoError,
+           "Failed to open output device: %s: %s",
+           audio_device_name.c_str(),
+           Pa_GetErrorText(err));
 
     /*
      * Read back the stream info.
      */
     const PaStreamInfo *stream_info = Pa_GetStreamInfo(pa_stream);
-    LOG(DEBUG, "Output stream info: sample_rate=%f, latency=%f",
-        stream_info->sampleRate, stream_info->outputLatency);
+    LOG(DEBUG,
+        "Output stream info: sample_rate=%f, latency=%f",
+        stream_info->sampleRate,
+        stream_info->outputLatency);
 
     err = Pa_StartStream(pa_stream);
-    ASSERT(err == paNoError, "Failed to start device stream: %s: %s",
-           audio_device_name.c_str(), Pa_GetErrorText(err));
+    ASSERT(err == paNoError,
+           "Failed to start device stream: %s: %s",
+           audio_device_name.c_str(),
+           Pa_GetErrorText(err));
 
     return true;
 }
 
-bool OutputDevice::write(const stream_t &stream)
+bool OutputDevice::write()
 {
     /*
      * Wait until the underlying stream is ready to receive more data.
@@ -288,7 +325,7 @@ bool OutputDevice::write(const stream_t &stream)
     /*
      * Simple copy.
      */
-    std::copy(std::begin(stream), std::end(stream), std::begin(buf));
+    std::copy(std::begin(*stream), std::end(*stream), std::begin(buf));
 
     /*
      * Notify the stream that there's more data available.

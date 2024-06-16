@@ -1,0 +1,15 @@
+{
+    "constants": {},
+    "devices": {
+        "laptop_mic": {
+            "type": "AudioInput",
+            "name": "Built-in Microphone",
+            "output_channel": "mic"
+        },
+        "laptop_speaker": {
+            "type": "AudioOutput",
+            "name": "Built-in Output",
+            "input_channel": "mic"
+        }
+    }
+}

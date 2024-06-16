@@ -1,7 +1,16 @@
 #include "src/framework/stream.h"
 
+#include <map>
+
+#include "src/framework/log.h"
+
 namespace Looper
 {
+
+/**
+ * Map of all streams, indexed by name.
+ */
+std::map<const std::string, pstream_t> streams;
 
 std::string print_stream(const stream_t& stream)
 {
@@ -14,4 +23,25 @@ std::string print_stream(const stream_t& stream)
     return repr;
 }
 
+bool create_stream(const std::string& name, pstream_t& stream)
+{
+    ASSERT(streams.count(name) == 0,
+           "Attempted to create channel \"%s\" which was already created by "
+           "another block",
+           name.c_str());
+    streams[name] = std::make_shared<stream_t>();
+    stream = streams[name];
+    return true;
 }
+
+bool bind_stream(const std::string& name, pstream_t& stream)
+{
+    ASSERT(streams.count(name) == 1,
+           "Attempted to bind to channel \"%s\" which does not exist. (Are "
+           "your blocks are out of order?)",
+           name.c_str());
+    stream = streams[name];
+    return true;
+}
+
+}  // namespace Looper

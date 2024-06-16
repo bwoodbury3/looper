@@ -1,0 +1,8 @@
+
+type: AudioInput
+name: "Built-in Input"
+output_channel: mic
+
+type: AudioOutput
+name: "Built-in Output"
+input_channel: mic

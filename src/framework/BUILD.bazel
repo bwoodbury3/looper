@@ -6,8 +6,30 @@ cc_library(
 )
 
 cc_library(
-    name = "framework",
-    srcs = ["block.cc", "stream.cc"],
-    hdrs = ["block.h", "stream.h", "time.h"],
+    name = "stream",
+    srcs = ["stream.cc"],
+    hdrs = ["stream.h"],
     deps = [":log"],
+)
+
+cc_library(
+    name = "block",
+    srcs = ["block.cc"],
+    hdrs = ["block.h"],
+    deps = [
+        "@json//:json",
+        ":log",
+        ":stream",
+    ],
+)
+
+cc_library(
+    name = "framework",
+    srcs = ["config.cc"],
+    hdrs = ["config.h", "time.h"],
+    deps = [
+        "@json//:json",
+        ":block",
+        ":log",
+    ],
 )

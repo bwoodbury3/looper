@@ -27,31 +27,39 @@
  * @param level The log level (DEBUG, INFO, WARN, ERROR).
  * @param fmt printf style string format.
  */
-#define LOG(level, fmt, ...)                                             \
-    do                                                                   \
-    {                                                                    \
-        if (level >= LOG_LEVEL)                                          \
-        {                                                                \
-            fprintf(stderr, "%s:%d:%s(): " fmt "\n", __FILE__, __LINE__, \
-                    __func__, ##__VA_ARGS__);                            \
-        }                                                                \
+#define LOG(level, fmt, ...)                 \
+    do                                       \
+    {                                        \
+        if (level >= LOG_LEVEL)              \
+        {                                    \
+            fprintf(stderr,                  \
+                    "%s:%d:%s(): " fmt "\n", \
+                    __FILE__,                \
+                    __LINE__,                \
+                    __func__,                \
+                    ##__VA_ARGS__);          \
+        }                                    \
     } while (0)
 
 /**
- * Assert that an op is true.
+ * Assert that an op is true. Return false otherwise.
  *
  * @param result A bool result.
  * @param fmt String to print on failure.
  */
-#define ASSERT(result, fmt, ...)                                              \
-    do                                                                        \
-    {                                                                         \
-        if (!(result))                                                        \
-        {                                                                     \
-            fprintf(stderr, "%s:%d:%s(): ASSERT(false): " fmt "\n", __FILE__, \
-                    __LINE__, __func__, ##__VA_ARGS__);                       \
-            return false;                                                     \
-        }                                                                     \
+#define ASSERT(result, fmt, ...)                            \
+    do                                                      \
+    {                                                       \
+        if (!(result))                                      \
+        {                                                   \
+            fprintf(stderr,                                 \
+                    "%s:%d:%s(): ASSERT(false): " fmt "\n", \
+                    __FILE__,                               \
+                    __LINE__,                               \
+                    __func__,                               \
+                    ##__VA_ARGS__);                         \
+            return false;                                   \
+        }                                                   \
     } while (0)
 
 /**
@@ -59,10 +67,35 @@
  *
  * @param fmt String to print.
  */
-#define ABORT(fmt, ...)                                                       \
-    do                                                                        \
-    {                                                                         \
-        fprintf(stderr, "%s:%d:%s(): ABORT(): " fmt "\n", __FILE__, __LINE__, \
-                __func__, ##__VA_ARGS__);                                     \
-        return false;                                                         \
+#define ABORT(fmt, ...)                           \
+    do                                            \
+    {                                             \
+        fprintf(stderr,                           \
+                "%s:%d:%s(): ABORT(): " fmt "\n", \
+                __FILE__,                         \
+                __LINE__,                         \
+                __func__,                         \
+                ##__VA_ARGS__);                   \
+        return false;                             \
+    } while (0)
+
+/**
+ * Assert that an op is true. throw an exception otherwise.
+ *
+ * @param result A bool result.
+ * @param fmt String to print on failure.
+ */
+#define EASSERT(result, fmt, ...)                                    \
+    do                                                               \
+    {                                                                \
+        if (!(result))                                               \
+        {                                                            \
+            fprintf(stderr,                                          \
+                    "%s:%d:%s(): ASSERT(false): " fmt "\n",          \
+                    __FILE__,                                        \
+                    __LINE__,                                        \
+                    __func__,                                        \
+                    ##__VA_ARGS__);                                  \
+            throw std::runtime_error("Fatal error, see call stack"); \
+        }                                                            \
     } while (0)

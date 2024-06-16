@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "audio/audio.h"
+#include "framework/config.h"
 #include "framework/log.h"
 
 namespace Looper
@@ -19,18 +20,56 @@ bool go()
 {
     ASSERT(Looper::init_audio(), "Could not initialize audio");
 
-    Looper::InputDevice input("Microphone", "mic");
-    ASSERT(input.init(), "Could not init mic");
+    ConfigFile config("projects/test.json");
+    std::vector<pSource> sources;
+    std::vector<pSink> sinks;
+    std::vector<pTransformer> transformers;
+    ASSERT(config.get_blocks(sources, sinks, transformers),
+           "Config file parsing failed");
 
-    // Looper::OutputDevice output("Beats Fit Pro", "mic");
-    Looper::OutputDevice output("Output", "mic");
-    ASSERT(output.init(), "Could not init output");
+    LOG(DEBUG, "Num sources: %lu", sources.size());
+    LOG(DEBUG, "Num sinks: %lu", sinks.size());
+    LOG(DEBUG, "Num transformers: %lu", transformers.size());
 
+    /*
+     * Initialize all of the blocks.
+     */
+    for (auto& block : sources)
+    {
+        ASSERT(block->init_source() && block->init(),
+               "Unable to initialize \"%s\"",
+               block->name().c_str());
+    }
+    for (auto& block : sinks)
+    {
+        ASSERT(block->init_sink() && block->init(),
+               "Unable to initialize \"%s\"",
+               block->name().c_str());
+    }
+    for (auto& block : transformers)
+    {
+        ASSERT(block->init_transformer() && block->init(),
+               "Unable to initialize \"%s\"",
+               block->name().c_str());
+    }
+
+    /*
+     * Run!
+     */
     while (true)
     {
-        stream_t stream;
-        ASSERT(input.read(stream), "Could not read from the stream");
-        ASSERT(output.write(stream), "Could not write to the stream");
+        for (auto& source : sources)
+        {
+            source->read();
+        }
+        for (auto& transformer : transformers)
+        {
+            transformer->transform();
+        }
+        for (auto& sink : sinks)
+        {
+            sink->write();
+        }
     }
 
     return true;
@@ -38,7 +77,7 @@ bool go()
 
 }  // namespace Looper
 
-int main(int argc, const char **argv)
+int main(int argc, const char** argv)
 {
     if (!Looper::go())
     {
