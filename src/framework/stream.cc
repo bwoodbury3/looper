@@ -12,6 +12,24 @@ namespace Looper
  */
 std::map<const std::string, pstream_t> streams;
 
+stream_t& operator+=(stream_t& first, const stream_t& second)
+{
+    for (int i = 0; i < first.size(); ++i)
+    {
+        first[i] += second[i];
+    }
+    return first;
+}
+
+pstream_t& operator+=(pstream_t& first, const pstream_t& second)
+{
+    for (int i = 0; i < first->size(); ++i)
+    {
+        (*first)[i] += (*second)[i];
+    }
+    return first;
+}
+
 std::string print_stream(const stream_t& stream)
 {
     std::string repr = "[";

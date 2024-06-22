@@ -8,12 +8,6 @@
 namespace Looper
 {
 
-/*
- * Register audio devices as modules with the framework.
- */
-bool is_registered = BlockFactory::register_source<InputDevice>("AudioInput") &&
-                     BlockFactory::register_sink<OutputDevice>("AudioOutput");
-
 /**
  * Whether portaudio has been initialized.
  */

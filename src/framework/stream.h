@@ -9,6 +9,8 @@
 #include <array>
 #include <string>
 
+#include "src/framework/datatypes.h"
+
 namespace Looper
 {
 
@@ -20,7 +22,7 @@ namespace Looper
 /**
  * The number of frames in a single stream buffer.
  */
-static const int64_t FRAMES_PER_BUFFER = 1024;
+static const int64_t FRAMES_PER_BUFFER = 512;
 
 /**
  * The sample rate of the audio.
@@ -30,8 +32,14 @@ static const int64_t SAMPLE_RATE = 44100;
 /**
  * An audio stream.
  */
-typedef std::array<float, FRAMES_PER_BUFFER> stream_t;
+typedef std::array<sample_t, FRAMES_PER_BUFFER> stream_t;
 typedef std::shared_ptr<stream_t> pstream_t;
+
+/**
+ * Sum two arrays.
+ */
+stream_t& operator+=(stream_t& first, const stream_t& second);
+pstream_t& operator+=(pstream_t& first, const pstream_t& second);
 
 /**
  * Return a string representing some of the data in the stream.

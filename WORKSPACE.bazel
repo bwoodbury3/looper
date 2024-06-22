@@ -79,3 +79,11 @@ http_archive(
     integrity = "sha256-BAIrBdgG61/3MCPCgLaGl9Erk+G3JnoLIqGjnsdXgGk=",
     strip_prefix = "json-3.11.3",
 )
+
+http_archive(
+    name = "audiofile",
+    url = "https://github.com/adamstark/AudioFile/archive/refs/tags/1.1.1.zip",
+    integrity = "sha256-0xvupTILmd5q3vgmk2TH09hnDnba3rcJ2U89htMcW0Y=",
+    strip_prefix = "AudioFile-1.1.1",
+    build_file = "@//external/audiofile:BUILD.bazel",
+)

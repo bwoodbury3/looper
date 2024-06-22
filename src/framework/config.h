@@ -9,6 +9,14 @@
 namespace Looper
 {
 
+/**
+ * Read a file as json.
+ *
+ * @param filename The filename
+ * @param[out] data The json data
+ */
+bool read_json_file(const std::string &filename, json &data);
+
 class ConfigFile
 {
    public:

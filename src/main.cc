@@ -4,9 +4,11 @@
 
 #include <unistd.h>
 
-#include "audio/audio.h"
-#include "framework/config.h"
-#include "framework/log.h"
+#include "src/audio/audio.h"
+#include "src/framework/config.h"
+#include "src/framework/keyboard.h"
+#include "src/framework/log.h"
+#include "src/modules/modules.h"
 
 namespace Looper
 {
@@ -18,7 +20,8 @@ namespace Looper
  */
 bool go()
 {
-    ASSERT(Looper::init_audio(), "Could not initialize audio");
+    register_all_modules();
+    ASSERT(init_audio(), "Could not initialize audio");
 
     ConfigFile config("projects/test.json");
     std::vector<pSource> sources;
@@ -54,10 +57,21 @@ bool go()
     }
 
     /*
+     * Do this last so that ASSERT errors don't fail to clean up the keyboard.
+     */
+    ASSERT(Keyboard::init(), "Could not initialize the keyboard");
+
+    /*
      * Run!
      */
     while (true)
     {
+        if (!Keyboard::reset())
+        {
+            LOG(INFO, "Terminating program.");
+            break;
+        }
+
         for (auto& source : sources)
         {
             source->read();

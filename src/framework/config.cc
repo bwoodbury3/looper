@@ -8,6 +8,23 @@
 namespace Looper
 {
 
+bool read_json_file(const std::string &filename, json &data)
+{
+    std::ifstream stream(filename);
+    ASSERT(stream.good(), "File not found: %s", filename.c_str());
+
+    try
+    {
+        data = json::parse(stream);
+    }
+    catch (const json::parse_error &e)
+    {
+        ABORT("%s", e.what());
+    }
+
+    return true;
+}
+
 ConfigFile::ConfigFile(const std::string &_filename) : filename(_filename) {}
 
 bool ConfigFile::get_blocks(std::vector<pSource> &sources,
@@ -18,19 +35,8 @@ bool ConfigFile::get_blocks(std::vector<pSource> &sources,
     sinks.clear();
     transformers.clear();
 
-    std::ifstream stream(filename);
-    ASSERT(stream.good(), "File not found: %s", filename.c_str());
-
-    // Read the file as a JSON object.
     json data;
-    try
-    {
-        data = json::parse(stream);
-    }
-    catch (const json::parse_error &e)
-    {
-        ABORT("%s", e.what());
-    }
+    ASSERT(read_json_file(filename, data), "Error reading json file");
 
     // TODO: Iterate through constants
 

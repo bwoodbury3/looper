@@ -1,0 +1,17 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "virtual",
+    srcs = ["instrument.cc"],
+    hdrs = ["instrument.h"],
+    deps = [
+        "//src/framework:framework",
+        "//src/framework:keyboard",
+        "//src/framework:sampler",
+        "//src/framework:wav",
+    ],
+    data = [
+        "//assets/clips",
+        "//assets/instruments",
+    ]
+)

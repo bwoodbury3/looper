@@ -1,15 +1,16 @@
 {
     "constants": {},
     "devices": {
-        "laptop_mic": {
-            "type": "AudioInput",
-            "name": "Built-in Microphone",
-            "output_channel": "mic"
+        "drums": {
+            "type": "VirtualInstrument",
+            "instrument": "drums1",
+            "volume": 0.2,
+            "output_channel": "drums"
         },
         "laptop_speaker": {
             "type": "AudioOutput",
             "name": "Built-in Output",
-            "input_channel": "mic"
+            "input_channel": "drums"
         }
     }
 }

@@ -6,10 +6,18 @@ cc_library(
 )
 
 cc_library(
+    name = "datatypes",
+    hdrs = ["datatypes.h"],
+)
+
+cc_library(
     name = "stream",
     srcs = ["stream.cc"],
     hdrs = ["stream.h"],
-    deps = [":log"],
+    deps = [
+        ":datatypes",
+        ":log",
+    ],
 )
 
 cc_library(
@@ -32,4 +40,32 @@ cc_library(
         ":block",
         ":log",
     ],
+)
+
+cc_library(
+    name = "keyboard",
+    srcs = ["keyboard.cc"],
+    hdrs = ["keyboard.h"],
+    deps = [":log"],
+)
+
+cc_library(
+    name = "sampler",
+    srcs = ["sampler.cc"],
+    hdrs = ["sampler.h"],
+    deps = [
+        ":log",
+        ":stream",
+    ]
+)
+
+cc_library(
+    name = "wav",
+    srcs = ["wav.cc"],
+    hdrs = ["wav.h"],
+    deps = [
+        "@audiofile//:audiofile",
+        ":log",
+        ":datatypes",
+    ]
 )

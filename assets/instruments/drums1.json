@@ -1,0 +1,24 @@
+{
+    "sounds": [
+        {
+            "key": "a",
+            "file": "kick1.wav"
+        },
+        {
+            "key": "s",
+            "file": "snare1.wav"
+        },
+        {
+            "key": "d",
+            "file": "hihat-closed1.wav"
+        },
+        {
+            "key": "f",
+            "file": "hihat-open1.wav"
+        },
+        {
+            "key": "g",
+            "file": "crash-cymbal1.wav"
+        }
+    ]
+}
