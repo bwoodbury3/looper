@@ -20,10 +20,15 @@
             "freq": 440.0,
             "output_channel": "metronome"
         },
+        "combiner": {
+            "type": "Combiner",
+            "input_channels": ["drums", "metronome"],
+            "output_channels": ["audio_out"]
+        },
         "laptop_speaker": {
             "type": "AudioOutput",
             "name": "Built-in Output",
-            "input_channel": "metronome"
+            "input_channel": "audio_out"
         }
     }
 }

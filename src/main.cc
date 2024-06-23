@@ -44,15 +44,15 @@ bool go()
                "Unable to initialize \"%s\"",
                block->name().c_str());
     }
-    for (auto& block : sinks)
-    {
-        ASSERT(block->init_sink() && block->init(),
-               "Unable to initialize \"%s\"",
-               block->name().c_str());
-    }
     for (auto& block : transformers)
     {
         ASSERT(block->init_transformer() && block->init(),
+               "Unable to initialize \"%s\"",
+               block->name().c_str());
+    }
+    for (auto& block : sinks)
+    {
+        ASSERT(block->init_sink() && block->init(),
                "Unable to initialize \"%s\"",
                block->name().c_str());
     }

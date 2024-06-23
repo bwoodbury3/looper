@@ -6,5 +6,6 @@ cc_library(
     deps = [
         "//src/audio:audio",
         "//src/virtual:virtual",
+        "//src/transformers:transformers",
     ]
 )

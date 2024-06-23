@@ -1,4 +1,5 @@
 #include "src/audio/audio.h"
+#include "src/transformers/combiner.h"
 #include "src/virtual/instrument.h"
 #include "src/virtual/metronome.h"
 
@@ -25,6 +26,7 @@ inline void register_all_modules()
     /*
      * Transformers
      */
+    BlockFactory::register_transformer<Combiner>("Combiner");
 }
 
-}
+}  // namespace Looper
