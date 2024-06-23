@@ -19,12 +19,12 @@ namespace Looper
  *
  * @return True on success.
  */
-bool go()
+bool go(const std::string& filename)
 {
     register_all_modules();
     ASSERT(init_audio(), "Could not initialize audio");
 
-    ConfigFile config("projects/test.json");
+    ConfigFile config(filename);
     std::vector<pSource> sources;
     std::vector<pSink> sinks;
     std::vector<pTransformer> transformers;
@@ -94,9 +94,23 @@ bool go()
 
 }  // namespace Looper
 
+void help()
+{
+    fprintf(stderr, "~ L 0 0 P E R ~\n");
+    fprintf(stderr, "Usage:\n");
+    fprintf(stderr, "\tbazel run //src:looper <file.json>\n");
+}
+
 int main(int argc, const char** argv)
 {
-    if (!Looper::go())
+    if (argc < 2)
+    {
+        help();
+        return -1;
+    }
+
+    const std::string filename(argv[1]);
+    if (!Looper::go(filename))
     {
         return -1;
     }
