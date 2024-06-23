@@ -1,46 +1,29 @@
 #include "src/framework/block.h"
 
+#include "src/framework/json_util.h"
 #include "src/framework/log.h"
 
 namespace Looper
 {
 
-BlockConfig::BlockConfig(const std::string &_name, json &_base)
+BlockConfig::BlockConfig(const std::string &_name, const json &_base)
     : name(_name), base(_base)
 {
 }
 
 bool BlockConfig::get_string(const std::string &key, std::string &value) const
 {
-    ASSERT(base.contains(key),
-           "Error at Block=\"%s\": Missing parameter \"%s\"",
-           name.c_str(),
-           key.c_str());
-
-    json obj = base[key];
-    ASSERT(obj.is_string(),
-           "Error at Block=\"%s\": Parameter \"%s\" should be a string",
-           name.c_str(),
-           key.c_str());
-
-    value = obj.get<std::string>();
+    ASSERT(::Looper::get_string(base, key, value),
+           "Error parsing block \"%s\"",
+           name.c_str());
     return true;
 }
 
 bool BlockConfig::get_int(const std::string &key, int &value) const
 {
-    ASSERT(base.contains(key),
-           "Error at Block=\"%s\": Missing parameter \"%s\"",
-           name.c_str(),
-           key.c_str());
-
-    json obj = base[key];
-    ASSERT(obj.is_number_integer(),
-           "Error at Block=\"%s\": Parameter \"%s\" should be an int",
-           name.c_str(),
-           key.c_str());
-
-    value = obj.get<int>();
+    ASSERT(::Looper::get_int(base, key, value),
+           "Error parsing block \"%s\"",
+           name.c_str());
     return true;
 }
 
@@ -48,28 +31,17 @@ bool BlockConfig::get_int_default(const std::string &key,
                                   const int _default,
                                   int &value) const
 {
-    if (!base.contains(key))
-    {
-        value = _default;
-        return true;
-    }
-    return get_int(key, value);
+    ASSERT(::Looper::get_int_default(base, key, _default, value),
+           "Error parsing block \"%s\"",
+           name.c_str());
+    return true;
 }
 
 bool BlockConfig::get_float(const std::string &key, float &value) const
 {
-    ASSERT(base.contains(key),
-           "Error at Block=\"%s\": Missing parameter \"%s\"",
-           name.c_str(),
-           key.c_str());
-
-    json obj = base[key];
-    ASSERT(obj.is_number(),
-           "Error at Block=\"%s\": Parameter \"%s\" should be a float",
-           name.c_str(),
-           key.c_str());
-
-    value = obj.get<float>();
+    ASSERT(::Looper::get_float(base, key, value),
+           "Error parsing block \"%s\"",
+           name.c_str());
     return true;
 }
 
@@ -77,38 +49,18 @@ bool BlockConfig::get_float_default(const std::string &key,
                                     const float _default,
                                     float &value) const
 {
-    if (!base.contains(key))
-    {
-        value = _default;
-        return true;
-    }
-    return get_float(key, value);
+    ASSERT(::Looper::get_float_default(base, key, _default, value),
+           "Error parsing block \"%s\"",
+           name.c_str());
+    return true;
 }
 
 bool BlockConfig::get_string_v(const std::string &key,
                                std::vector<std::string> &value) const
 {
-    value.clear();
-    ASSERT(base.contains(key),
-           "Error at Block=\"%s\": Missing parameter \"%s\"",
-           name.c_str(),
-           key.c_str());
-
-    json obj = base[key];
-    ASSERT(obj.is_array(),
-           "Error at Block=\"%s\": Parameter \"%s\" should be an array",
-           name.c_str(),
-           key.c_str());
-
-    for (const auto &item : obj)
-    {
-        ASSERT(
-            item.is_string(),
-            "Error at Block=\"%s\": All list items of \"%s\" must be a string",
-            name.c_str(),
-            key.c_str());
-        value.push_back(item.get<std::string>());
-    }
+    ASSERT(::Looper::get_string_v(base, key, value),
+           "Error parsing block \"%s\"",
+           name.c_str());
     return true;
 }
 

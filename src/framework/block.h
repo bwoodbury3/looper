@@ -7,16 +7,14 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <string>
 
+#include "src/framework/json_util.h"
 #include "src/framework/log.h"
 #include "src/framework/stream.h"
 
 namespace Looper
 {
-
-using json = nlohmann::json;
 
 /**
  * BlockConfig object that can be passed to objects to contain arbitrary
@@ -28,7 +26,7 @@ class BlockConfig
     /**
      * Constructor
      */
-    BlockConfig(const std::string &_name, json &_base);
+    BlockConfig(const std::string &_name, const json &_base);
 
     /**
      * Get a string from a key.
@@ -102,11 +100,10 @@ class BlockConfig
      */
     const std::string name;
 
-   private:
     /**
-     * The backing json config object.
+     * The backing json config object if you want to access it directly.
      */
-    json base;
+    const json base;
 };
 
 /**

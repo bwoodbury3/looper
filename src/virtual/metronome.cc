@@ -35,12 +35,15 @@ bool Metronome::read()
 {
     stream->fill(0);
 
-    if (Tempo::on_beat())
+    if (Tempo::in_measure(start_measure, stop_measure))
     {
-        sampler.play(clip, false);
+        if (Tempo::on_beat())
+        {
+            sampler.play(clip, false);
+        }
     }
-    sampler.next(stream);
 
+    sampler.next(stream);
     return true;
 }
 

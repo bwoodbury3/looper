@@ -6,6 +6,16 @@ cc_library(
 )
 
 cc_library(
+    name = "json",
+    srcs = ["json_util.cc"],
+    hdrs = ["json_util.h"],
+    deps = [
+        "@json//:json",
+        ":log",
+    ],
+)
+
+cc_library(
     name = "datatypes",
     hdrs = ["datatypes.h"],
 )
@@ -25,7 +35,7 @@ cc_library(
     srcs = ["block.cc"],
     hdrs = ["block.h"],
     deps = [
-        "@json//:json",
+        ":json",
         ":log",
         ":stream",
     ],
@@ -65,7 +75,7 @@ cc_library(
     srcs = ["tempo.cc"],
     hdrs = ["tempo.h"],
     deps = [
-        "@json//:json",
+        ":json",
         ":stream",
     ],
 )

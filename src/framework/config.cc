@@ -54,12 +54,13 @@ bool ConfigFile::read_config(std::vector<pSource> &sources,
     ASSERT(data.contains("devices"),
            "Config file did not contain any audio devices");
     json devices = data["devices"];
-    for (const auto &[name, device] : devices.items())
+    for (const auto &device : devices)
     {
-        ASSERT(device.contains("type"),
-               "Device \"%s\" did not contain required \"type\" field",
+        std::string name, tname;
+        ASSERT(get_string(device, "name", name), "Unnamed block!");
+        ASSERT(get_string(device, "type", tname),
+               "Invalid type for block: %s",
                name.c_str());
-        const std::string tname = device["type"];
         const BlockConfig config(name, device);
 
         if (BlockFactory::is_source(tname))
@@ -92,6 +93,8 @@ bool ConfigFile::read_config(std::vector<pSource> &sources,
                   name.c_str(),
                   tname.c_str());
         }
+
+        LOG(DEBUG, "Added block %s(%s)", tname.c_str(), name.c_str());
     }
 
     return true;

@@ -21,6 +21,21 @@ class Sampler
     void play(paudio_clip_t _clip, bool _loop);
 
     /**
+     * Skip the current playback index forward by num_samples. This has no
+     * effect if nothing is playing.
+     *
+     * Skipping past the end of the clip will just skip to the end.
+     *
+     * @param num_samples The number of samples to skip.
+     */
+    void skip(size_t num_samples);
+
+    /**
+     * @return true if the sampler is currently playing audio.
+     */
+    bool playing();
+
+    /**
      * Stop playing an audio clip.
      */
     void stop();

@@ -55,4 +55,13 @@ bool in_measure(const float m1, const float m2);
  */
 bool on_beat(float beat_offset = 0.0);
 
+/**
+ * Convert a decimal number of measures to a count of samples.
+ *
+ * @param measures The number of measures
+ *
+ * @return The count of samples.
+ */
+size_t measures_to_samples(float measures);
+
 }  // namespace Looper::Tempo

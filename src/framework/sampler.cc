@@ -14,6 +14,16 @@ void Sampler::play(paudio_clip_t _clip, bool _loop)
     clip_index = 0;
 }
 
+void Sampler::skip(const size_t num_samples)
+{
+    clip_index = std::min(clip_index + num_samples, clip->size());
+}
+
+bool Sampler::playing()
+{
+    return is_playing;
+}
+
 void Sampler::stop()
 {
     clip = nullptr;

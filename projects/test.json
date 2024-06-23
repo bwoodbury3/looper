@@ -6,29 +6,48 @@
             "beat_duration": 4
         }
     },
-    "devices": {
-        "drums": {
+    "devices": [
+        {
+            "name": "drums",
             "type": "VirtualInstrument",
             "instrument": "drums1",
             "volume": 0.2,
             "output_channel": "drums"
         },
-        "metronome": {
+        {
+            "name": "metronome",
             "type": "Metronome",
             "start_measure": 1,
-            "stop_measure": 10,
+            "stop_measure": 4,
             "freq": 440.0,
             "output_channel": "metronome"
         },
-        "combiner": {
+        {
+            "name": "metronome_loop",
+            "type": "Loop",
+            "start_measure": 1,
+            "stop_measure": 2,
+            "replay_intervals": [
+                {
+                    "start_measure": 2,
+                    "stop_measure": 4,
+                    "offset": 0.125
+                }
+            ],
+            "input_channels": ["metronome"],
+            "output_channels": ["looped_metronome"]
+        },
+        {
+            "name": "combiner",
             "type": "Combiner",
-            "input_channels": ["drums", "metronome"],
+            "input_channels": ["drums", "metronome", "looped_metronome"],
             "output_channels": ["audio_out"]
         },
-        "laptop_speaker": {
+        {
+            "name": "laptop_speaker",
             "type": "AudioOutput",
-            "name": "Built-in Output",
+            "device": "Built-in Output",
             "input_channel": "audio_out"
         }
-    }
+    ]
 }

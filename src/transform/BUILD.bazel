@@ -1,0 +1,12 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "transformers",
+    srcs = ["combiner.cc", "looper.cc"],
+    hdrs = ["combiner.h", "looper.h"],
+    deps = [
+        "//src/framework:block",
+        "//src/framework:sampler",
+        "//src/framework:tempo",
+    ]
+)

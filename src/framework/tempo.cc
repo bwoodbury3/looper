@@ -1,5 +1,6 @@
 #include "src/framework/tempo.h"
 
+#include "src/framework/json_util.h"
 #include "src/framework/log.h"
 #include "src/framework/stream.h"
 
@@ -40,9 +41,19 @@ float seconds_per_step = -1;
 float seconds_per_beat = -1;
 
 /**
- * The number of beats in each step.
+ * The number of beats that pass for each step.
  */
 float beats_per_step = -1;
+
+/**
+ * The number of measures that pass for each step.
+ */
+float measures_per_step = -1;
+
+/**
+ * The number of samples per measure.
+ */
+float samples_per_measure = -1;
 
 /**
  * Epsilon value.
@@ -68,31 +79,6 @@ float current_beat = 0.0;
  */
 float current_time_s = 0.0;
 
-bool get_float(const json& config, const std::string& key, float& value)
-{
-    ASSERT(config.contains(key),
-           "Must define a \"%s\" config parameter!",
-           key.c_str());
-    json obj = config[key];
-    ASSERT(
-        obj.is_number(), "Config value \"%s\" must be a number", key.c_str());
-    value = obj.get<float>();
-    return true;
-}
-
-bool get_int(const json& config, const std::string& key, int& value)
-{
-    ASSERT(config.contains(key),
-           "Must define a \"%s\" config parameter!",
-           key.c_str());
-    json obj = config[key];
-    ASSERT(obj.is_number_integer(),
-           "Config value \"%s\" must be an int",
-           key.c_str());
-    value = obj.get<int>();
-    return true;
-}
-
 bool init(const json& data)
 {
     /*
@@ -110,6 +96,9 @@ bool init(const json& data)
                        static_cast<float>(SAMPLE_RATE);
     seconds_per_beat = 60.0 / bpm;
     beats_per_step = seconds_per_step / seconds_per_beat;
+    measures_per_step = beats_per_step / beats_per_measure;
+    samples_per_measure =
+        static_cast<float>(SAMPLES_PER_BUFFER) / measures_per_step;
     epsilon = beats_per_step / 2.0;
 
     return true;
@@ -140,6 +129,11 @@ bool on_beat(float beat_offset)
      */
     const float beat = current_beat - beat_offset;
     return abs(std::round(beat) - beat) < epsilon;
+}
+
+size_t measures_to_samples(float measures)
+{
+    return static_cast<size_t>(measures * samples_per_measure);
 }
 
 }  // namespace Looper::Tempo

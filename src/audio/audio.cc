@@ -179,7 +179,7 @@ InputDevice::InputDevice(const BlockConfig _configs) : Source(_configs) {}
 bool InputDevice::init()
 {
     std::string audio_device_name;
-    ASSERT(configs.get_string("name", audio_device_name),
+    ASSERT(configs.get_string("device", audio_device_name),
            "Missing audio device name");
 
     /*
@@ -252,7 +252,7 @@ OutputDevice::OutputDevice(const BlockConfig _configs)
 bool OutputDevice::init()
 {
     std::string audio_device_name;
-    ASSERT(configs.get_string("name", audio_device_name),
+    ASSERT(configs.get_string("device", audio_device_name),
            "Missing audio device name");
 
     /*
