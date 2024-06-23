@@ -42,6 +42,11 @@ stream_t& operator+=(stream_t& first, const stream_t& second);
 pstream_t& operator+=(pstream_t& first, const pstream_t& second);
 
 /**
+ * Delete all streams. You better know what you're doing.
+ */
+void clear_streams();
+
+/**
  * Return a string representing some of the data in the stream.
  *
  * @param stream The stream

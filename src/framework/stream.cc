@@ -30,6 +30,11 @@ pstream_t& operator+=(pstream_t& first, const pstream_t& second)
     return first;
 }
 
+void clear_streams()
+{
+    streams.clear();
+}
+
 void print_stream(const stream_t& stream)
 {
     std::string repr = "[";

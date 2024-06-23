@@ -2,10 +2,7 @@ cc_binary(
     name = "looper",
     srcs = ["main.cc"],
     deps = [
-        "//src/audio:audio",
-        "//src/framework:log",
-        "//src/framework:keyboard",
-        "//src/framework:tempo",
+        "//src/framework:runner",
         "//src/modules:all",
     ],
     data = [

@@ -9,11 +9,22 @@
 namespace Looper
 {
 
-bool read_json_file(const std::string &filename, json &data)
+bool _safe_parse(const std::string &str, json &data)
 {
-    std::ifstream stream(filename);
-    ASSERT(stream.good(), "File not found: %s", filename.c_str());
+    try
+    {
+        data = json::parse(str.begin(), str.end());
+    }
+    catch (const json::parse_error &e)
+    {
+        ABORT("%s", e.what());
+    }
 
+    return true;
+}
+
+bool _safe_parse(std::ifstream &stream, json &data)
+{
     try
     {
         data = json::parse(stream);
@@ -26,18 +37,26 @@ bool read_json_file(const std::string &filename, json &data)
     return true;
 }
 
-ConfigFile::ConfigFile(const std::string &_filename) : filename(_filename) {}
+bool read_json_file(const std::string &filename, json &data)
+{
+    std::ifstream stream(filename);
+    ASSERT(stream.good(), "File not found: %s", filename.c_str());
+    QASSERT(_safe_parse(stream, data));
+    return true;
+}
 
-bool ConfigFile::read_config(std::vector<pSource> &sources,
-                             std::vector<pSink> &sinks,
-                             std::vector<pTransformer> &transformers) noexcept
+bool read_config(const std::string &config_str,
+                 std::vector<pSource> &sources,
+                 std::vector<pSink> &sinks,
+                 std::vector<pTransformer> &transformers) noexcept
 {
     sources.clear();
     sinks.clear();
     transformers.clear();
 
     json data;
-    ASSERT(read_json_file(filename, data), "Error reading json file");
+    QASSERT(_safe_parse(config_str, data));
+
     ASSERT(data.contains("config"), "Must define \"config\" key");
     const json config = data["config"];
 

@@ -17,16 +17,18 @@ namespace Looper
  */
 bool read_json_file(const std::string &filename, json &data);
 
-class ConfigFile
-{
-   public:
-    ConfigFile(const std::string &filename);
-    bool read_config(std::vector<pSource> &sources,
-                     std::vector<pSink> &sinks,
-                     std::vector<pTransformer> &transformers) noexcept;
-
-   private:
-    const std::string filename;
-};
+/**
+ * Read configs into a list of sources/sinks/transformers, and initialize
+ * everything.
+ *
+ * @param config_str The config as a json stringstream
+ * @param[out] sources The source blocks
+ * @param[out] sinks The sink blocks
+ * @param[out] transformers The transformer blocks
+ */
+bool read_config(const std::string &config_str,
+                 std::vector<pSource> &sources,
+                 std::vector<pSink> &sinks,
+                 std::vector<pTransformer> &transformers) noexcept;
 
 }  // namespace Looper
