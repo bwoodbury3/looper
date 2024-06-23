@@ -5,6 +5,7 @@ cc_binary(
         "//src/audio:audio",
         "//src/framework:log",
         "//src/framework:keyboard",
+        "//src/framework:tempo",
         "//src/modules:all",
     ],
     data = [

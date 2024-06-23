@@ -2,12 +2,13 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "virtual",
-    srcs = ["instrument.cc"],
-    hdrs = ["instrument.h"],
+    srcs = ["instrument.cc", "metronome.cc"],
+    hdrs = ["instrument.h", "metronome.h"],
     deps = [
         "//src/framework:framework",
         "//src/framework:keyboard",
         "//src/framework:sampler",
+        "//src/framework:tempo",
         "//src/framework:wav",
     ],
     data = [

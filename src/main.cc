@@ -8,6 +8,7 @@
 #include "src/framework/config.h"
 #include "src/framework/keyboard.h"
 #include "src/framework/log.h"
+#include "src/framework/tempo.h"
 #include "src/modules/modules.h"
 
 namespace Looper
@@ -27,7 +28,7 @@ bool go()
     std::vector<pSource> sources;
     std::vector<pSink> sinks;
     std::vector<pTransformer> transformers;
-    ASSERT(config.get_blocks(sources, sinks, transformers),
+    ASSERT(config.read_config(sources, sinks, transformers),
            "Config file parsing failed");
 
     LOG(DEBUG, "Num sources: %lu", sources.size());
@@ -84,6 +85,8 @@ bool go()
         {
             sink->write();
         }
+
+        Tempo::step();
     }
 
     return true;

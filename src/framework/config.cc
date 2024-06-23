@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "src/framework/log.h"
+#include "src/framework/tempo.h"
 
 namespace Looper
 {
@@ -27,9 +28,9 @@ bool read_json_file(const std::string &filename, json &data)
 
 ConfigFile::ConfigFile(const std::string &_filename) : filename(_filename) {}
 
-bool ConfigFile::get_blocks(std::vector<pSource> &sources,
-                            std::vector<pSink> &sinks,
-                            std::vector<pTransformer> &transformers) noexcept
+bool ConfigFile::read_config(std::vector<pSource> &sources,
+                             std::vector<pSink> &sinks,
+                             std::vector<pTransformer> &transformers) noexcept
 {
     sources.clear();
     sinks.clear();
@@ -37,8 +38,15 @@ bool ConfigFile::get_blocks(std::vector<pSource> &sources,
 
     json data;
     ASSERT(read_json_file(filename, data), "Error reading json file");
+    ASSERT(data.contains("config"), "Must define \"config\" key");
+    const json config = data["config"];
 
-    // TODO: Iterate through constants
+    /*
+     * Initialize the tempo system.
+     */
+    ASSERT(config.contains("tempo"), "Must define \"tempo\" key");
+    ASSERT(Tempo::init(config["tempo"]),
+           "Failed to initialize tempo framework");
 
     /*
      * Get all audio devices.

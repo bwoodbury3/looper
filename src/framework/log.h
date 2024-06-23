@@ -63,6 +63,25 @@
     } while (0)
 
 /**
+ * Assert that an op is true. Return false otherwise. No error message.
+ *
+ * @param result A bool result.
+ */
+#define QASSERT(result)                            \
+    do                                             \
+    {                                              \
+        if (!(result))                             \
+        {                                          \
+            fprintf(stderr,                        \
+                    "%s:%d:%s(): ASSERT(false)\n", \
+                    __FILE__,                      \
+                    __LINE__,                      \
+                    __func__);                     \
+            return false;                          \
+        }                                          \
+    } while (0)
+
+/**
  * Abort.
  *
  * @param fmt String to print.

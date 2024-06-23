@@ -32,11 +32,67 @@ class BlockConfig
 
     /**
      * Get a string from a key.
+     *
+     * @param key The key
+     * @param[out] value The value
+     *
+     * @return True on success.
      */
     bool get_string(const std::string &key, std::string &value) const;
 
     /**
+     * Get an int from a key.
+     *
+     * @param key The key
+     * @param[out] value The value
+     *
+     * @return True on success.
+     */
+    bool get_int(const std::string &key, int &value) const;
+
+    /**
+     * Get an int from a key with a default value.
+     *
+     * @param key The key
+     * @param _default The default value
+     * @param[out] value The value
+     *
+     * @return True on success.
+     */
+    bool get_int_default(const std::string &key,
+                         const int _default,
+                         int &value) const;
+
+    /**
+     * Get a float from a key.
+     *
+     * @param key The key
+     * @param[out] value The value
+     *
+     * @return True on success.
+     */
+    bool get_float(const std::string &key, float &value) const;
+
+    /**
+     * Get a float from a key with a default value.
+     *
+     * @param key The key
+     * @param _default The default value
+     * @param[out] value The value
+     *
+     * @return True on success.
+     */
+    bool get_float_default(const std::string &key,
+                           const float _default,
+                           float &value) const;
+
+    /**
      * Get a list of strings from a key.
+     *
+     * @param key The key
+     * @param[out] value The value
+     *
+     * @return True on success.
      */
     bool get_string_v(const std::string &key,
                       std::vector<std::string> &value) const;

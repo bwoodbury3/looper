@@ -1,5 +1,11 @@
 {
-    "constants": {},
+    "config": {
+        "tempo": {
+            "bpm": 100,
+            "beats_per_measure": 4,
+            "beat_duration": 4
+        }
+    },
     "devices": {
         "drums": {
             "type": "VirtualInstrument",
@@ -7,10 +13,17 @@
             "volume": 0.2,
             "output_channel": "drums"
         },
+        "metronome": {
+            "type": "Metronome",
+            "start_measure": 1,
+            "stop_measure": 10,
+            "freq": 440.0,
+            "output_channel": "metronome"
+        },
         "laptop_speaker": {
             "type": "AudioOutput",
             "name": "Built-in Output",
-            "input_channel": "drums"
+            "input_channel": "metronome"
         }
     }
 }

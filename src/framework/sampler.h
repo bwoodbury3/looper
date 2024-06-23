@@ -1,3 +1,5 @@
+#pragma once
+
 #include "src/framework/datatypes.h"
 #include "src/framework/log.h"
 #include "src/framework/stream.h"

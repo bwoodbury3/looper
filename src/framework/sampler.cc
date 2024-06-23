@@ -42,8 +42,6 @@ void Sampler::next(pstream_t &stream)
               clip->begin() + stop_index,
               stream->begin());
 
-    LOG(DEBUG, "Playing clip index=(%lu, %lu)", start_index, stop_index);
-
     /*
      * Stop the clip or restart the loop if we're at the end of the clip.
      */

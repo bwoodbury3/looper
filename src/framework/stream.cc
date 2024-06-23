@@ -30,7 +30,7 @@ pstream_t& operator+=(pstream_t& first, const pstream_t& second)
     return first;
 }
 
-std::string print_stream(const stream_t& stream)
+void print_stream(const stream_t& stream)
 {
     std::string repr = "[";
     for (size_t i = 0; i < 5; i++)
@@ -38,7 +38,7 @@ std::string print_stream(const stream_t& stream)
         repr += std::to_string(stream[i]) + ", ";
     }
     repr += "...]";
-    return repr;
+    LOG(DEBUG, "%s", repr.c_str());
 }
 
 bool create_stream(const std::string& name, pstream_t& stream)

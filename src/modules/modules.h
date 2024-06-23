@@ -1,5 +1,6 @@
 #include "src/audio/audio.h"
 #include "src/virtual/instrument.h"
+#include "src/virtual/metronome.h"
 
 namespace Looper
 {
@@ -14,6 +15,7 @@ inline void register_all_modules()
      */
     BlockFactory::register_source<InputDevice>("AudioInput");
     BlockFactory::register_source<Instrument>("VirtualInstrument");
+    BlockFactory::register_source<Metronome>("Metronome");
 
     /*
      * Sinks

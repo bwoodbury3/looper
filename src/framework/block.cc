@@ -27,6 +27,64 @@ bool BlockConfig::get_string(const std::string &key, std::string &value) const
     return true;
 }
 
+bool BlockConfig::get_int(const std::string &key, int &value) const
+{
+    ASSERT(base.contains(key),
+           "Error at Block=\"%s\": Missing parameter \"%s\"",
+           name.c_str(),
+           key.c_str());
+
+    json obj = base[key];
+    ASSERT(obj.is_number_integer(),
+           "Error at Block=\"%s\": Parameter \"%s\" should be an int",
+           name.c_str(),
+           key.c_str());
+
+    value = obj.get<int>();
+    return true;
+}
+
+bool BlockConfig::get_int_default(const std::string &key,
+                                  const int _default,
+                                  int &value) const
+{
+    if (!base.contains(key))
+    {
+        value = _default;
+        return true;
+    }
+    return get_int(key, value);
+}
+
+bool BlockConfig::get_float(const std::string &key, float &value) const
+{
+    ASSERT(base.contains(key),
+           "Error at Block=\"%s\": Missing parameter \"%s\"",
+           name.c_str(),
+           key.c_str());
+
+    json obj = base[key];
+    ASSERT(obj.is_number(),
+           "Error at Block=\"%s\": Parameter \"%s\" should be a float",
+           name.c_str(),
+           key.c_str());
+
+    value = obj.get<float>();
+    return true;
+}
+
+bool BlockConfig::get_float_default(const std::string &key,
+                                    const float _default,
+                                    float &value) const
+{
+    if (!base.contains(key))
+    {
+        value = _default;
+        return true;
+    }
+    return get_float(key, value);
+}
+
 bool BlockConfig::get_string_v(const std::string &key,
                                std::vector<std::string> &value) const
 {

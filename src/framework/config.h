@@ -21,9 +21,9 @@ class ConfigFile
 {
    public:
     ConfigFile(const std::string &filename);
-    bool get_blocks(std::vector<pSource> &sources,
-                    std::vector<pSink> &sinks,
-                    std::vector<pTransformer> &transformers) noexcept;
+    bool read_config(std::vector<pSource> &sources,
+                     std::vector<pSink> &sinks,
+                     std::vector<pTransformer> &transformers) noexcept;
 
    private:
     const std::string filename;

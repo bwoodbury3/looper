@@ -39,6 +39,7 @@ cc_library(
         "@json//:json",
         ":block",
         ":log",
+        ":tempo",
     ],
 )
 
@@ -57,6 +58,16 @@ cc_library(
         ":log",
         ":stream",
     ]
+)
+
+cc_library(
+    name = "tempo",
+    srcs = ["tempo.cc"],
+    hdrs = ["tempo.h"],
+    deps = [
+        "@json//:json",
+        ":stream",
+    ],
 )
 
 cc_library(

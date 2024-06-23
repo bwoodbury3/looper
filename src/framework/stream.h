@@ -22,7 +22,7 @@ namespace Looper
 /**
  * The number of frames in a single stream buffer.
  */
-static const int64_t FRAMES_PER_BUFFER = 512;
+static const int64_t SAMPLES_PER_BUFFER = 512;
 
 /**
  * The sample rate of the audio.
@@ -32,7 +32,7 @@ static const int64_t SAMPLE_RATE = 44100;
 /**
  * An audio stream.
  */
-typedef std::array<sample_t, FRAMES_PER_BUFFER> stream_t;
+typedef std::array<sample_t, SAMPLES_PER_BUFFER> stream_t;
 typedef std::shared_ptr<stream_t> pstream_t;
 
 /**
@@ -48,7 +48,7 @@ pstream_t& operator+=(pstream_t& first, const pstream_t& second);
  *
  * @return A string of text representing this stream.
  */
-std::string print_stream(const stream_t& stream);
+void print_stream(const stream_t& stream);
 
 /**
  * Create a stream.

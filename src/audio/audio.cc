@@ -207,7 +207,7 @@ bool InputDevice::init()
                                 &params,
                                 NULL,
                                 SAMPLE_RATE,
-                                FRAMES_PER_BUFFER,
+                                SAMPLES_PER_BUFFER,
                                 paNoFlag,
                                 &audio_input_callback,
                                 (void *)this);
@@ -281,7 +281,7 @@ bool OutputDevice::init()
                                 NULL,
                                 &params,
                                 SAMPLE_RATE,
-                                FRAMES_PER_BUFFER,
+                                SAMPLES_PER_BUFFER,
                                 paNoFlag,
                                 &audio_output_callback,
                                 (void *)this);
