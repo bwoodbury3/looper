@@ -7,6 +7,7 @@ py_binary(
     name = "server",
     srcs = ["server.py"],
     deps = [
+        "//src/framework:looper",
         requirement("flask"),
     ],
     data = [

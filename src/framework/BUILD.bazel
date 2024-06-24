@@ -1,3 +1,5 @@
+load("//python:pybind.bzl", "pybind_extension")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -91,6 +93,7 @@ cc_library(
     ]
 )
 
+# Top level API for interfacing with looper.
 cc_library(
     name = "runner",
     srcs = ["runner.cc"],
@@ -102,4 +105,16 @@ cc_library(
         "//src/framework:tempo",
         "//src/modules:all",
     ]
+)
+
+pybind_extension(
+    name = "looper",
+    srcs = ["runner_py.cc"],
+    deps = [":runner"],
+)
+
+py_library(
+    name = "looper",
+    data = [":looper.so"],
+    imports = ["."],
 )

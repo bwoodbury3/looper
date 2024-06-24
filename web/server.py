@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 import json
 
+import looper
+
 app = Flask(__name__)
 
 
@@ -22,5 +24,8 @@ def play():
 
     return "", 200
 
+
+assert looper.init_audio()
+looper.register_modules()
 
 app.run(host="0.0.0.0", port=1080)
