@@ -1,5 +1,13 @@
 function stop() {
     console.log("Stopping playback");
+
+    /* TODO */
+}
+
+function pause() {
+    console.log("Pausing playback");
+
+    /* TODO */
 }
 
 function play() {
@@ -21,4 +29,11 @@ function play() {
             "Content-type": "application/json; charset=UTF-8"
         }
     });
+}
+
+function volume() {
+    var volume_slider = document.getElementById("volume-slider");
+    console.log("Setting volume:", volume_slider.value);
+
+    /* TODO */
 }

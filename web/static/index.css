@@ -1,3 +1,48 @@
 /*
  * Empty for now
  */
+
+.ui-base {
+    width: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.layer {
+    position: relative;
+    border: 1px solid #cccccc;
+    width: 100%;
+    height: 100px;
+}
+
+.layer-settings {
+    position: absolute;
+    background-color: #333333;
+    border-right: 1px solid #cccccc;
+    cursor: pointer;
+    height: 100%;
+    left: 0;
+    top: 0;
+    width: 200px;
+}
+.layer-settings:hover {
+    background-color: #444444;
+}
+
+.layer-create {
+    position: absolute;
+    background-color: #333333;
+    height: 100%;
+    left: 200px;
+    right: 0;
+    top: 0;
+}
+
+.layer-vertical-drag {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    cursor: ns-resize;
+}

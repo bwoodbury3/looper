@@ -5,41 +5,71 @@
         <link href="/static/index.css" rel="stylesheet"></link>
     </head>
     <body>
-        <div class="container">
-            <nav class="navbar navbar-expand-lg navbar-dark">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#">Looper</a>
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="#">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Link</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav mx-auto px-5 text-center">
-                        <li class="nav-item" style="cursor: pointer">
-                            <!-- Stop button -->
-                            <a class="nav-link" onclick="stop()" id="stop-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-stop" viewBox="0 0 16 16">
-                                    <path d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5z"/>
-                                </svg>
-                            </a>
-                        </li>
-                        <li class="nav-item" style="cursor: pointer">
-                            <!-- Play button -->
-                            <a class="nav-link" onclick="play()" id="play-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
-                                    <path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/>
-                                </svg>
-                            </a>
-                        </li>
-                    </ul>
+        <!-- Main UI: full size of the page minus playback control -->
+        <div class="container d-flex flex-column" style="height: calc(100vh - 80px)">
+            <div class="row">
+                <nav class="navbar navbar-expand-lg navbar-dark">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="#">Looper</a>
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="#">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Link</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="row ui-base">
+                <div id="ui" class="ui-base">
                 </div>
-            </nav>
+            </div>
+        </div>
+
+        <!-- Playback control (play, pause, stop, volume) -->
+        <div class="fixed-bottom" id="playback-control" style="height: 80px">
+            <div class="row mx-auto w-25 my-2">
+                <div class="col-4 text-end" style="cursor: pointer">
+                    <!-- Stop button -->
+                    <a class="nav-link" onclick="stop()" id="stop-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-stop" viewBox="0 0 16 16">
+                            <path d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5z"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="col-4 text-center" style="cursor: pointer">
+                    <!-- Play button -->
+                    <a class="nav-link" onclick="play()" id="play-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+                            <path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="col-4 text-start" style="cursor: pointer">
+                    <!-- Pause button -->
+                    <a class="nav-link" onclick="pause()" id="pause-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+                            <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="row mx-auto w-25">
+                <input type="range"
+                    class="form-range"
+                    min="0"
+                    max="100"
+                    onmouseup="volume()"
+                    id="volume-slider">
+            </div>
         </div>
 
         <script src="/static/bootstrap.bundle.min.js"></script>
+
         <script src="/static/index.js"></script>
+        <script type="module" src="/static/ui/ui.js"></script>
     </body>
 </html>
