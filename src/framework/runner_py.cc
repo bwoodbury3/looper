@@ -8,14 +8,18 @@
 #include "src/framework/runner.h"
 #include "src/modules/modules.h"
 
+namespace py = pybind11;
+
 PYBIND11_MODULE(looper, m)
 {
     /*
      * Runner
      */
-    pybind11::class_<Looper::Runner>(m, "Runner")
-        .def(pybind11::init())
-        .def("run", &Looper::Runner::run)
+    py::class_<Looper::Runner>(m, "Runner")
+        .def(py::init())
+        .def("run",
+             &Looper::Runner::run,
+             py::call_guard<py::gil_scoped_release>())
         .def("stop", &Looper::Runner::stop);
 
     /*

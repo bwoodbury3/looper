@@ -24,7 +24,20 @@ function draw() {
     for (const layer of layers) {
         layer.set_event_callbacks();
     }
+}
 
+// Get all data from the UI.
+export function get_data() {
+    var devices = [];
+    for (const layer of layers) {
+        var data = layer.get_data();
+        if (Object.keys(data).length > 0) {
+            devices.push(data);
+        }
+    }
+    return {
+        devices: devices,
+    }
 }
 
 draw();

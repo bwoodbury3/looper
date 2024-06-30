@@ -1,17 +1,27 @@
-function stop() {
+import {get_data} from "/static/ui/ui.js";
+
+function stop(e) {
     console.log("Stopping playback");
 
-    /* TODO */
+    fetch("/api/stop", {
+        method: "POST",
+        body: "",
+        headers: {
+            "Content-type": "application/json; charset=UTF-8"
+        }
+    });
 }
 
-function pause() {
+function pause(e) {
     console.log("Pausing playback");
 
     /* TODO */
 }
 
-function play() {
+function play(e) {
     console.log("Starting playback");
+
+    var data = get_data();
 
     fetch("/api/play", {
         method: "POST",
@@ -22,8 +32,8 @@ function play() {
                     beats_per_measure: 4,
                     beat_duration: 4,
                 },
-                devices: [],
-            }
+            },
+            devices: data.devices,
         }),
         headers: {
             "Content-type": "application/json; charset=UTF-8"
@@ -37,3 +47,16 @@ function volume() {
 
     /* TODO */
 }
+
+function set_callbacks() {
+    var stop_button = document.getElementById("stop-button");
+    stop_button.onclick = stop;
+
+    var pause_button = document.getElementById("pause-button");
+    pause_button.onclick = pause;
+
+    var play_button = document.getElementById("play-button");
+    play_button.onclick = play;
+}
+
+set_callbacks();

@@ -39,7 +39,7 @@ export var devices = {
             },
         ],
     },
-    "Audio Output": {
+    AudioOutput: {
         required_fields: [
             {
                 name: "device",
@@ -52,7 +52,7 @@ export var devices = {
         ],
         optional_fields: [],
     },
-    "Audio Input": {
+    AudioInput: {
         required_fields: [
             {
                 name: "device",

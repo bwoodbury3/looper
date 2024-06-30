@@ -10,8 +10,13 @@
 namespace Looper
 {
 
-bool Runner::run(const std::string& config_str)
+bool Runner::run(const std::string config_str)
 {
+    {
+        std::lock_guard<std::mutex> lock(mu);
+        ASSERT(!running, "Already running; refusing to re-run");
+    }
+
     ASSERT(read_config(config_str, sources, sinks, transformers),
            "Config file parsing failed");
 
@@ -47,6 +52,15 @@ bool Runner::run(const std::string& config_str)
     ASSERT(Keyboard::init(), "Could not initialize the keyboard");
 
     /*
+     * Mark ourselves running after all assertions are complete.
+     */
+    {
+        std::lock_guard<std::mutex> lock(mu);
+        running = true;
+        request_stop = false;
+    }
+
+    /*
      * Run!
      */
     while (true)
@@ -71,6 +85,23 @@ bool Runner::run(const std::string& config_str)
         }
 
         Tempo::step();
+
+        {
+            std::lock_guard<std::mutex> lock(mu);
+            if (request_stop)
+            {
+                break;
+            }
+        }
+    }
+
+    /*
+     * Stop
+     */
+    {
+        std::lock_guard<std::mutex> lock(mu);
+        running = false;
+        cv.notify_all();
     }
 
     return true;
@@ -78,11 +109,18 @@ bool Runner::run(const std::string& config_str)
 
 bool Runner::stop()
 {
-    if (!running)
+    /*
+     * Request main thread to stop.
+     */
     {
-        return true;
+        std::unique_lock<std::mutex> lock(mu);
+        if (running)
+        {
+            request_stop = true;
+            cv.wait_for(lock, std::chrono::seconds(1));
+            ASSERT(!running, "Failed to stop the main thread!");
+        }
     }
-    running = false;
 
     /*
      * Delete all sources/sinks/transformers.

@@ -32,10 +32,10 @@ export class Layer {
     }
 
     // Callback to set settings.
-    settings(e) {
+    _settings(e) {
         // Show the dialog.
         var dialog = document.getElementById(this.settings_dialog_id);
-        dialog.innerHTML = this.draw_settings_dialog();
+        dialog.innerHTML = this._draw_settings_dialog();
         var modal = new bootstrap.Modal(dialog);
         modal.show();
 
@@ -43,7 +43,7 @@ export class Layer {
         var settings_device_type = document.getElementById(this.settings_device_type_id);
         var settings_additional_fields = document.getElementById(this.settings_additional_fields_id);
         settings_device_type.addEventListener("change", e => {
-            settings_additional_fields.innerHTML = this.draw_additional_settings(settings_device_type.value);
+            settings_additional_fields.innerHTML = this._draw_additional_settings(settings_device_type.value);
         });
 
         // Listen for the user hitting the submit button.
@@ -52,13 +52,29 @@ export class Layer {
             // Add all form data to our internal data object.
             this.layer_name = document.getElementById(this.settings_name_id).value;
             this.device_type = document.getElementById(this.settings_device_type_id).value;
+
+            this.data = {};
             if (this.device_type in devices) {
                 var schema = devices[this.device_type];
                 for (var field of schema.required_fields) {
-                    this.data[field.name] = document.getElementById(`layer-${this.id}-${field.name}`).value;
+                    var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
+                    var type = field.type;
+                    if (type === "int")
+                        this.data[field.name] = parseInt(value);
+                    else if (type === "float")
+                        this.data[field.name] = parseFloat(value);
+                    else
+                        this.data[field.name] = value;
                 }
                 for (var field of schema.optional_fields) {
-                    this.data[field.name] = document.getElementById(`layer-${this.id}-${field.name}`).value;
+                    var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
+                    var type = field.type;
+                    if (type === "int")
+                        this.data[field.name] = parseInt(value);
+                    else if (type === "float")
+                        this.data[field.name] = parseFloat(value);
+                    else
+                        this.data[field.name] = value;
                 }
                 modal.hide();
             }
@@ -69,7 +85,7 @@ export class Layer {
     }
 
     // Draw the settings dialog.
-    draw_settings_dialog() {
+    _draw_settings_dialog() {
         var device_type = this.device_type ? this.device_type : "Please select one...";
         return `
 <div class="modal-dialog modal-lg">
@@ -98,7 +114,7 @@ export class Layer {
                 </div>
 
                 <div id="${this.settings_additional_fields_id}">
-                    ${this.draw_additional_settings(this.device_type)}
+                    ${this._draw_additional_settings(this.device_type)}
                 </div>
             </form>
         </div>
@@ -145,7 +161,7 @@ export class Layer {
     }
 
     // Draw the remaining fields required for this device type.
-    draw_additional_settings(device_type) {
+    _draw_additional_settings(device_type) {
         if (!(device_type in devices)) {
             return "";
         }
@@ -213,7 +229,20 @@ export class Layer {
         });
 
         layer_settings.onclick = e => {
-            this.settings(e);
+            this._settings(e);
         }
+    }
+
+    // Get the configured data for this layer.
+    get_data() {
+        if (!this.device_type) {
+            return {};
+        }
+
+        return {
+            name: this.layer_name,
+            type: this.device_type,
+            ...this.data
+        };
     }
 };
