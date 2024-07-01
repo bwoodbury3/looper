@@ -1,9 +1,10 @@
 import {devices, device_names} from "/static/ui/devices.js"
+import {options_list} from "/static/ui/util.js";
 
 var _ids = 0;
 
 export class Layer {
-    constructor() {
+    constructor(store) {
         this.id = _ids++;
         this.layer_id = `layer-${this.id}`;
         this.layer_settings_id = `layer-settings-${this.id}`;
@@ -16,19 +17,14 @@ export class Layer {
         this.settings_submit_id = `settings-submit-${this.id}`;
         this.is_resizing = false;
 
-        // Defaults
-        this.layer_name = `Layer-${this.id}`;
-        this.device_type = null;
-        this.data = {};
-    }
-
-    // Return a list of values as a list of options.
-    _options_list(values) {
-        var options = "";
-        for (const value of values) {
-            options += `<option>${value}</option>`
-        }
-        return options;
+        // Initialize from backing store.
+        this.store = store;
+        if (!("layer_name" in this.store))
+            this.store.layer_name = `Layer-${this.id}`;
+        if (!("device_type" in this.store))
+            this.store.device_type = null;
+        if (!("data" in this.store))
+            this.store.data = {};
     }
 
     // Callback to set settings.
@@ -50,43 +46,43 @@ export class Layer {
         var submit_button = document.getElementById(this.settings_submit_id);
         submit_button.onclick = e => {
             // Add all form data to our internal data object.
-            this.layer_name = document.getElementById(this.settings_name_id).value;
-            this.device_type = document.getElementById(this.settings_device_type_id).value;
+            this.store.layer_name = document.getElementById(this.settings_name_id).value;
+            this.store.device_type = document.getElementById(this.settings_device_type_id).value;
 
-            this.data = {};
-            if (this.device_type in devices) {
-                var schema = devices[this.device_type];
+            this.store.data = {};
+            if (this.store.device_type in devices) {
+                var schema = devices[this.store.device_type];
                 for (var field of schema.required_fields) {
                     var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
                     var type = field.type;
                     if (type === "int")
-                        this.data[field.name] = parseInt(value);
+                        this.store.data[field.name] = parseInt(value);
                     else if (type === "float")
-                        this.data[field.name] = parseFloat(value);
+                        this.store.data[field.name] = parseFloat(value);
                     else
-                        this.data[field.name] = value;
+                        this.store.data[field.name] = value;
                 }
                 for (var field of schema.optional_fields) {
                     var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
                     var type = field.type;
                     if (type === "int")
-                        this.data[field.name] = parseInt(value);
+                        this.store.data[field.name] = parseInt(value);
                     else if (type === "float")
-                        this.data[field.name] = parseFloat(value);
+                        this.store.data[field.name] = parseFloat(value);
                     else
-                        this.data[field.name] = value;
+                        this.store.data[field.name] = value;
                 }
                 modal.hide();
             }
 
             // Update the settings summary.
-            document.getElementById(this.layer_settings_id).innerHTML = this.draw_settings_summary();
+            document.getElementById(this.layer_settings_id).innerHTML = this._draw_settings_summary();
         };
     }
 
     // Draw the settings dialog.
     _draw_settings_dialog() {
-        var device_type = this.device_type ? this.device_type : "Please select one...";
+        var device_type = this.store.device_type ? this.store.device_type : "Please select one...";
         return `
 <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -99,7 +95,7 @@ export class Layer {
                 <div class="form-group row mb-3">
                     <label class="col-3 col-form-label">Layer Name</label>
                     <div class="col-9">
-                        <input class="form-control" id="${this.settings_name_id}" value="${this.layer_name}" type="text">
+                        <input class="form-control" id="${this.settings_name_id}" value="${this.store.layer_name}" type="text">
                     </div>
                 </div>
 
@@ -108,13 +104,13 @@ export class Layer {
                     <div class="col-9">
                         <select class="form-control" id="${this.settings_device_type_id}">
                             <option selected>${device_type}</option>
-                            ${this._options_list(device_names())}
+                            ${options_list(device_names())}
                         </select>
                     </div>
                 </div>
 
                 <div id="${this.settings_additional_fields_id}">
-                    ${this._draw_additional_settings(this.device_type)}
+                    ${this._draw_additional_settings(this.store.device_type)}
                 </div>
             </form>
         </div>
@@ -133,20 +129,20 @@ export class Layer {
 
         var input = `<p>I don't know how to handle field "${field.name}" (${field.type})</p>`;
         if (field.type === "string") {
-            var value = this.data[field.name] ? this.data[field.name] : "";
+            var value = this.store.data[field.name] ? this.store.data[field.name] : "";
             input = `<input class="form-control" id="${field_id}" value="${value}" type="text">`;
         } else if (field.type === "float") {
-            var value = this.data[field.name] ? this.data[field.name] : 1.0;
+            var value = this.store.data[field.name] ? this.store.data[field.name] : 1.0;
             input = `<input class="form-control" id="${field_id}" value="${value}" type="number">`;
         } else if (field.type === "int") {
-            var value = this.data[field.name] ? this.data[field.name] : 1;
+            var value = this.store.data[field.name] ? this.store.data[field.name] : 1;
             input = `<input class="form-control" id="${field_id}" value="${value}" type="number" step="1">`;
         } else if (field.type === "choice") {
-            var value = this.data[field.name] ? this.data[field.name] : "Please select one...";
+            var value = this.store.data[field.name] ? this.store.data[field.name] : "Please select one...";
             input = `
 <select class="form-control" id="${field_id}">
     <option selected>${value}</option>
-    ${this._options_list(field.choices)}
+    ${options_list(field.choices)}
 </select>
 `
         }
@@ -178,30 +174,30 @@ export class Layer {
         return form;
     }
 
-    // Draw the layer.
-    draw() {
-        return `
-<div id=${this.layer_id} class="layer">
-    <div class="layer-settings p-2" id="${this.layer_settings_id}">
-        ${this.draw_settings_summary()}
-    </div>
-    <div class="layer-create" id="${this.layer_create_id}"></div>
-    <div class="layer-vertical-drag" id="${this.layer_vertical_drag_id}"></div>
-    <div id="${this.settings_dialog_id}" class="modal fade"></div>
-</div>
-`
-    }
-
     // Draw a summary of this layer in the box on the left.
-    draw_settings_summary() {
-        if (!this.device_type) {
+    _draw_settings_summary() {
+        if (!this.store.device_type) {
             return "";
         }
 
         return `
 <div>
-    <h5>${this.layer_name}</h5>
-    <p>${this.device_type}</p>
+    <h5>${this.store.layer_name}</h5>
+    <p>${this.store.device_type}</p>
+</div>
+`
+    }
+
+    // Draw the layer.
+    draw() {
+        return `
+<div id=${this.layer_id} class="layer">
+    <div class="layer-settings p-2" id="${this.layer_settings_id}">
+        ${this._draw_settings_summary()}
+    </div>
+    <div class="layer-create" id="${this.layer_create_id}"></div>
+    <div class="layer-vertical-drag" id="${this.layer_vertical_drag_id}"></div>
+    <div id="${this.settings_dialog_id}" class="modal fade"></div>
 </div>
 `
     }
@@ -235,14 +231,14 @@ export class Layer {
 
     // Get the configured data for this layer.
     get_data() {
-        if (!this.device_type) {
+        if (!this.store.device_type) {
             return {};
         }
 
         return {
-            name: this.layer_name,
-            type: this.device_type,
-            ...this.data
+            name: this.store.layer_name,
+            type: this.store.device_type,
+            ...this.store.data
         };
     }
 };

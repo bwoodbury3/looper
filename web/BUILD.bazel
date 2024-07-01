@@ -3,6 +3,11 @@ load("@rules_python//python:defs.bzl", "py_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+py_library(
+    name = "lib",
+    srcs = ["file_io.py"],
+)
+
 py_binary(
     name = "server",
     srcs = ["server.py"],
@@ -11,7 +16,9 @@ py_binary(
         requirement("flask"),
     ],
     data = [
+        "//web:lib",
         "//web/static:static",
         "//web/templates:templates",
-    ]
+    ],
+    imports = ["."],
 )

@@ -12,15 +12,28 @@
                     <div class="container-fluid">
                         <a class="navbar-brand" href="#">Looper</a>
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="#">Home</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbar-file-dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    File
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbar-file-dropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="navbar-load">Load</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="navbar-save">Save</a>
+                                    </li>
+                                </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Link</a>
+                                <a class="nav-link" href="#">Reserved</a>
                             </li>
                         </ul>
                     </div>
                 </nav>
+
+                <div class="modal fade" id="navbar-load-modal"></div>
+                <div class="modal fade" id="navbar-save-modal"></div>
             </div>
 
             <div class="row ui-base">
@@ -68,7 +81,6 @@
         </div>
 
         <script src="/static/bootstrap.bundle.min.js"></script>
-
         <script type="module" src="/static/index.js"></script>
     </body>
 </html>

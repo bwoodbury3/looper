@@ -3,6 +3,7 @@ import json
 import threading
 
 import looper
+import file_io
 
 
 # Init flask
@@ -56,6 +57,48 @@ def stop():
     print("Stopped")
 
     return "", 200
+
+
+@app.route("/api/save", methods=["POST"])
+def save():
+    """
+    Save to a file.
+
+    Params:
+        data: The data to save.
+        name: The filename.
+    """
+    data = request.json
+    name = data["name"]
+    content = json.dumps(data["data"])
+    file_io.save_project(name, content)
+    return "", 200
+
+
+@app.route("/api/load", methods=["POST"])
+def load():
+    """
+    Load from a file.
+
+    Params:
+        name: The filename.
+    """
+    data = request.json
+    name = data["name"]
+    print(f"Loading {name} from [{file_io.all_projects()}]")
+    if name in file_io.all_projects():
+        content = file_io.restore_project(name)
+        return content, 200
+    return "", 404
+
+
+@app.route("/api/projects", methods=["GET"])
+def get_projects():
+    """
+    Get all project names.
+    """
+    names = file_io.all_projects()
+    return json.dumps({"projects": names}), 200
 
 
 # Run flask
