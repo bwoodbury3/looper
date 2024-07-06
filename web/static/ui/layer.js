@@ -1,4 +1,5 @@
 import {devices, device_names} from "/static/ui/devices.js"
+import {LayerCreate} from "/static/ui/layer-create.js";
 import {options_list} from "/static/ui/util.js";
 
 var _ids = 0;
@@ -8,7 +9,6 @@ export class Layer {
         this.id = _ids++;
         this.layer_id = `layer-${this.id}`;
         this.layer_settings_id = `layer-settings-${this.id}`;
-        this.layer_create_id = `layer-create-${this.id}`;
         this.layer_vertical_drag_id = `layer-vertical-drag-${this.id}`;
         this.settings_dialog_id = `layer-settings-dialog-${this.id}`;
         this.settings_name_id = `settings-name-${this.id}`;
@@ -16,6 +16,9 @@ export class Layer {
         this.settings_additional_fields_id = `settings-remaining-fields-${this.id}`;
         this.settings_submit_id = `settings-submit-${this.id}`;
         this.is_resizing = false;
+
+        // Subclasses.
+        this.layer_create = new LayerCreate(this.id, store);
 
         // Initialize from backing store.
         this.store = store;
@@ -192,10 +195,10 @@ export class Layer {
     draw() {
         return `
 <div id=${this.layer_id} class="layer">
-    <div class="layer-settings p-2" id="${this.layer_settings_id}">
+    <div class="layer-settings settings-column-width clickable-dark p-2" id="${this.layer_settings_id}">
         ${this._draw_settings_summary()}
     </div>
-    <div class="layer-create" id="${this.layer_create_id}"></div>
+    ${this.layer_create.draw()}
     <div class="layer-vertical-drag" id="${this.layer_vertical_drag_id}"></div>
     <div id="${this.settings_dialog_id}" class="modal fade"></div>
 </div>
@@ -214,7 +217,8 @@ export class Layer {
 
         window.addEventListener("mousemove", e => {
             if (this.is_resizing) {
-                var mouse_pos = e.clientY + layer.parentElement.scrollTop;
+                var parent = layer.parentElement;
+                var mouse_pos = e.clientY + parent.scrollTop - parent.getBoundingClientRect().y;
                 var height = Math.max(mouse_pos - layer.offsetTop, 100);
                 layer.style.height = `${height}px`;
             }
@@ -227,6 +231,9 @@ export class Layer {
         layer_settings.onclick = e => {
             this._settings(e);
         }
+
+        // Recurse on child class(es)
+        this.layer_create.set_event_callbacks();
     }
 
     // Get the configured data for this layer.

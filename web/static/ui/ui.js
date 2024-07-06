@@ -1,18 +1,26 @@
 import {Layer} from "/static/ui/layer.js";
 import {project} from "/static/ui/project.js";
+import {VerticalBar} from "/static/ui/vertical-bar.js";
 
 var ui_main = document.getElementById("ui");
 var layers = [];
+var vertical_bar = new VerticalBar(0);
 
 // Draw the UI
 export function draw_ui() {
     ui_main.innerHTML = "";
+
+    /* Draw child content */
     for (const layer of layers) {
         ui_main.innerHTML += layer.draw();
     }
+    ui_main.innerHTML += vertical_bar.draw();
+
+    vertical_bar.set_event_callbacks();
     for (const layer of layers) {
         layer.set_event_callbacks();
     }
+    /* Set event callbacks */
 }
 
 // Initialize UI with default data.

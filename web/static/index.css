@@ -1,11 +1,35 @@
-/*
- * Empty for now
- */
+:root {
+    --settings-width: 200px;
+}
 
 .ui-base {
+    position: relative;
     width: 100%;
     max-height: 100%;
+    padding: 0;
     overflow-y: auto;
+}
+
+.settings-column-width {
+    width: var(--settings-width);
+}
+
+.clickable-dark:hover {
+    background-color: #444444;
+}
+
+.drawable {
+    cursor: crosshair;
+}
+
+.vertical-bar {
+    position: absolute;
+    height: 100%;
+    background-color: whitesmoke;
+    width: 1px;
+    top: 0;
+    left: 0;
+    pointer-events: none;
 }
 
 .layer {
@@ -16,24 +40,20 @@
 }
 
 .layer-settings {
+    cursor: pointer;
     position: absolute;
     background-color: #333333;
     border-right: 1px solid #cccccc;
-    cursor: pointer;
     height: 100%;
     left: 0;
     top: 0;
-    width: 200px;
-}
-.layer-settings:hover {
-    background-color: #444444;
 }
 
 .layer-create {
     position: absolute;
     background-color: #333333;
     height: 100%;
-    left: 200px;
+    left: var(--settings-width);
     right: 0;
     top: 0;
 }

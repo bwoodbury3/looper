@@ -102,4 +102,4 @@ def get_projects():
 
 
 # Run flask
-app.run(host="0.0.0.0", threaded=True, port=1082)
+app.run(host="0.0.0.0", threaded=True, port=1080)
