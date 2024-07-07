@@ -4,6 +4,31 @@ import {options_list} from "/static/ui/util.js";
 
 var _ids = 0;
 
+// Get a list of channels from the channel string.
+function get_channels(channel_str) {
+    var output = [];
+    var channels_split = channel_str.split(/[\s,]+/);
+    for (var channel of channels_split) {
+        var sanitized = channel.trim();
+        if (sanitized.length) {
+            output.push(sanitized);
+        }
+    }
+    return output;
+}
+
+// Validate the number of channels provided against the min/max count.
+function validate_channel_counts(channels, min_count, max_count, errors) {
+    if (channels.length < min_count) {
+        errors.push(`Provided too few channels. At least ${min_count} are required.`);
+        return false;
+    } else if (max_count >= 0 && channels.length > max_count) {
+        errors.push(`Provided too many channels! At most ${max_count} are allowed.`);
+        return false;
+    }
+    return true;
+}
+
 export class Layer {
     constructor(store) {
         this.id = _ids++;
@@ -11,9 +36,11 @@ export class Layer {
         this.layer_settings_id = `layer-settings-${this.id}`;
         this.layer_vertical_drag_id = `layer-vertical-drag-${this.id}`;
         this.settings_dialog_id = `layer-settings-dialog-${this.id}`;
+        this.layer_settings_errors_id = `layer-settings-errors-${this.id}`;
         this.settings_name_id = `settings-name-${this.id}`;
         this.settings_device_type_id = `settings-device-type-${this.id}`;
         this.settings_additional_fields_id = `settings-remaining-fields-${this.id}`;
+        this.settings_channels_fields_id = `settings-channels-fields-${this.id}`;
         this.settings_submit_id = `settings-submit-${this.id}`;
         this.is_resizing = false;
 
@@ -55,8 +82,10 @@ export class Layer {
         // Listen for changes in the settings device type.
         var settings_device_type = document.getElementById(this.settings_device_type_id);
         var settings_additional_fields = document.getElementById(this.settings_additional_fields_id);
+        var settings_channels_fields = document.getElementById(this.settings_channels_fields_id);
         settings_device_type.addEventListener("change", e => {
             settings_additional_fields.innerHTML = this._draw_additional_settings(settings_device_type.value);
+            settings_channels_fields.innerHTML = this._draw_channels_fields(settings_device_type.value);
         });
 
         // Listen for the user hitting the submit button.
@@ -70,6 +99,10 @@ export class Layer {
             if (this.store.device_type in devices) {
                 var schema = devices[this.store.device_type];
                 this.store.schema = schema;
+
+                var schema_errors = [];
+
+                // Parse the required fields from the schema.
                 for (var field of schema.required_fields) {
                     var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
                     var type = field.type;
@@ -80,6 +113,8 @@ export class Layer {
                     else
                         this.store.data[field.name] = value;
                 }
+
+                // Parse the optional fields from the schema.
                 for (var field of schema.optional_fields) {
                     var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
                     var type = field.type;
@@ -90,7 +125,39 @@ export class Layer {
                     else
                         this.store.data[field.name] = value;
                 }
-                modal.hide();
+
+                // Parse the input channels.
+                if (schema_query.has_inputs(this.store.device_type)) {
+                    var value = document.getElementById(`layer-${this.id}-input_channels`).value;
+                    var channels = get_channels(value);
+                    if (validate_channel_counts(channels,
+                                                schema.input_channels.min_count,
+                                                schema.input_channels.max_count,
+                                                schema_errors)) {
+                        this.store.data.input_channels = channels;
+                    }
+                }
+
+                // Parse the output channels.
+                if (schema_query.has_outputs(this.store.device_type)) {
+                    var value = document.getElementById(`layer-${this.id}-output_channels`).value;
+                    var channels = get_channels(value);
+                    if (validate_channel_counts(channels,
+                                                schema.output_channels.min_count,
+                                                schema.output_channels.max_count,
+                                                schema_errors)) {
+                        this.store.data.output_channels = channels;
+                    }
+                }
+
+                var errors = document.getElementById(this.layer_settings_errors_id);
+                if (schema_errors.length > 0) {
+                    errors.innerHTML = schema_errors.join("\n\n");
+                    errors.style.visibility = "visible";
+                } else {
+                    errors.style.visibility = "hidden";
+                    modal.hide();
+                }
             }
 
             // Update the settings summary.
@@ -109,6 +176,9 @@ export class Layer {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+            <div class="layer-settings-errors p-2 mb-2" id=${this.layer_settings_errors_id}>
+
+            </div>
             <form>
                 <div class="form-group row mb-3">
                     <label class="col-3 col-form-label">Layer Name</label>
@@ -129,6 +199,10 @@ export class Layer {
 
                 <div id="${this.settings_additional_fields_id}">
                     ${this._draw_additional_settings(this.store.device_type)}
+                </div>
+
+                <div id="${this.settings_channels_fields_id}">
+                    ${this._draw_channels_fields(this.store.device_type)}
                 </div>
             </form>
         </div>
@@ -166,7 +240,7 @@ export class Layer {
         }
         return `
 <div class="form-group row mb-3">
-    <label class="col-3 col-form-label">${field.name}</label>
+    <label class="col-3 col-form-label">${field.display}</label>
     <div class="col-9">
         ${input}
     </div>
@@ -174,21 +248,60 @@ export class Layer {
 `
     }
 
-    // Draw the remaining fields required for this device type.
+    // Draw the remaining required/optional fields required for this device type.
     _draw_additional_settings(device_type) {
         if (!(device_type in devices)) {
             return "";
         }
 
-        var form = "<hr/>";
+        var form = "";
         var schema = devices[device_type];
-        for (var field of schema.required_fields) {
-            form += this._draw_field(field);
+
+        if (schema.required_fields.length > 0)
+        {
+            form += "<hr/>";
+            for (var field of schema.required_fields) {
+                form += this._draw_field(field);
+            }
         }
-        form += "<hr/>";
-        for (var field of schema.optional_fields) {
-            form += this._draw_field(field);
+
+        if (schema.optional_fields.length > 0)
+        {
+            form += "<hr/>";
+            for (var field of schema.optional_fields) {
+                form += this._draw_field(field);
+            }
         }
+        return form;
+    }
+
+    // Draw the input/output channel selector tool.
+    _draw_channels_fields(device_type) {
+        if (!(device_type in devices)) {
+            return "";
+        }
+
+        var form = "";
+        var schema = devices[device_type];
+
+        if (schema_query.has_inputs(device_type)) {
+            form += "<hr/>";
+            form += this._draw_field({
+                display: "Input Channel(s)",
+                name: "input_channels",
+                type: "string"
+            });
+        }
+
+        if (schema_query.has_outputs(device_type)) {
+            form += "<hr/>";
+            form += this._draw_field({
+                display: "Output Channel(s)",
+                name: "output_channels",
+                type: "string"
+            });
+        }
+
         return form;
     }
 

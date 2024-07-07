@@ -71,4 +71,12 @@ bool create_stream(const std::string& name, pstream_t& stream);
  */
 bool bind_stream(const std::string& name, pstream_t& stream);
 
+/**
+ * Fill all streams with the provided value.
+ *
+ * @param streams The streams.
+ * @param value The value to fill.
+ */
+void fill_all(std::vector<pstream_t>& streams, sample_t value);
+
 }  // namespace Looper

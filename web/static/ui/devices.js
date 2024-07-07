@@ -17,19 +17,17 @@ export var devices = {
     VirtualInstrument: {
         required_fields: [
             {
+                display: "Instrument Preset",
                 name: "instrument",
                 type: "choice",
                 choices: [
                     "drums1",
                 ],
             },
-            {
-                name: "output_channel",
-                type: "string",
-            },
         ],
         optional_fields: [
             {
+                display: "Volume",
                 name: "volume",
                 type: "float",
             },
@@ -44,12 +42,7 @@ export var devices = {
         },
     },
     Metronome: {
-        required_fields: [
-            {
-                name: "output_channel",
-                type: "string",
-            },
-        ],
+        required_fields: [],
         optional_fields: [],
         output_channels: {
             min_count: 1,
@@ -63,11 +56,8 @@ export var devices = {
     AudioOutput: {
         required_fields: [
             {
+                display: "System Device Name",
                 name: "device",
-                type: "string",
-            },
-            {
-                name: "input_channel",
                 type: "string",
             },
         ],
@@ -84,11 +74,8 @@ export var devices = {
     AudioInput: {
         required_fields: [
             {
-                name: "Device Name",
-                type: "string",
-            },
-            {
-                name: "output_channel",
+                display: "System Device Name",
+                name: "device",
                 type: "string",
             },
         ],
@@ -102,6 +89,18 @@ export var devices = {
             max_count: -1,
         },
     },
+    Combiner: {
+        required_fields: [],
+        optional_fields: [],
+        input_channels: {
+            min_count: 0,
+            max_count: -1,
+        },
+        output_channels: {
+            min_count: 1,
+            max_count: 1,
+        }
+    }
 };
 
 // Convenience helper functions.

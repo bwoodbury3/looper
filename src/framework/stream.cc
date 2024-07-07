@@ -67,4 +67,12 @@ bool bind_stream(const std::string& name, pstream_t& stream)
     return true;
 }
 
+void fill_all(std::vector<pstream_t>& streams, sample_t value = 0)
+{
+    for (auto& stream : streams)
+    {
+        stream->fill(value);
+    }
+}
+
 }  // namespace Looper

@@ -74,6 +74,14 @@
     top: 0;
 }
 
+.layer-settings-errors {
+    background-color: #ffdedb;
+    border: 1px solid #a10d00;
+    border-radius: 5px;
+    color: #000000;
+    visibility: hidden;
+}
+
 .layer-create {
     position: absolute;
     background-color: #333333;

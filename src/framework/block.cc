@@ -111,9 +111,13 @@ Source::Source(const BlockConfig &_configs) : Block(_configs) {}
 
 bool Source::init_source()
 {
-    ASSERT(configs.get_string("output_channel", output_channel),
-           "Missing output_channel parameter for \"%s\"",
+    std::vector<std::string> channels;
+    ASSERT(configs.get_string_v("output_channels", channels),
+           "Missing output_channels parameter for \"%s\"",
            configs.name.c_str());
+    ASSERT(channels.size() == 1, "Sources may only have one output");
+    output_channel = channels[0];
+
     ASSERT(create_stream(output_channel, stream),
            "Failed to create output stream for \"%s\"",
            output_channel.c_str());
@@ -125,9 +129,13 @@ Sink::Sink(const BlockConfig &_configs) : Block(_configs) {}
 
 bool Sink::init_sink()
 {
-    ASSERT(configs.get_string("input_channel", input_channel),
-           "Missing input_channel parameter for \"%s\"",
+    std::vector<std::string> channels;
+    ASSERT(configs.get_string_v("input_channels", channels),
+           "Missing input_channels parameter for \"%s\"",
            configs.name.c_str());
+    ASSERT(channels.size() == 1, "Sink may only have one input");
+    input_channel = channels[0];
+
     ASSERT(bind_stream(input_channel, stream),
            "Failed to bind to input stream for \"%s\"",
            input_channel.c_str());
