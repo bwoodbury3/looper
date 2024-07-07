@@ -29,14 +29,9 @@ class Metronome : public Source
     Sampler sampler;
 
     /**
-     * The start measure.
+     * The segments to play the metronome.
      */
-    float start_measure;
-
-    /**
-     * The stop measure.
-     */
-    float stop_measure;
+    std::vector<Segment> segments;
 
     /**
      * The frequency.

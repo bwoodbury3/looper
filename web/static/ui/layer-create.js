@@ -1,9 +1,9 @@
 import {schema_query} from "/static/ui/devices.js";
 import {Segment} from "/static/ui/segment.js";
-import {options_list} from "/static/ui/util.js";
+import {constants, options_list} from "/static/ui/util.js";
 
 const SEGMENT_PADDING_Y = 10;
-const PIXELS_PER_MEASURE = 100;
+
 const SEGMENT_RADIUS = 5;
 const SEGMENT_BORDER = "#bcc4d1";
 const SEGMENT_FILL = "#63738f";
@@ -91,9 +91,9 @@ export class LayerCreate {
             ctx.strokeStyle = SEGMENT_BORDER;
             ctx.fillStyle = SEGMENT_FILL;
             ctx.beginPath();
-            ctx.roundRect(PIXELS_PER_MEASURE * segment.measure_start(),
+            ctx.roundRect(constants.PIXELS_PER_MEASURE * segment.measure_start(),
                           SEGMENT_PADDING_Y,
-                          PIXELS_PER_MEASURE * segment.measure_duration(),
+                          constants.PIXELS_PER_MEASURE * segment.measure_duration(),
                           canvas.height - (2 * SEGMENT_PADDING_Y),
                           SEGMENT_RADIUS);
             ctx.fill();

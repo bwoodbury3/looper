@@ -11,6 +11,7 @@
 
 #include "src/framework/json_util.h"
 #include "src/framework/log.h"
+#include "src/framework/segment.h"
 #include "src/framework/stream.h"
 
 namespace Looper
@@ -94,6 +95,15 @@ class BlockConfig
      */
     bool get_string_v(const std::string &key,
                       std::vector<std::string> &value) const;
+
+    /**
+     * Get all of the segments.
+     *
+     * @param[out] segments The segments.
+     *
+     * @return True on success.
+     */
+    bool get_segments(std::vector<Segment> &segments) const;
 
     /**
      * The name of the block. Helpful for debug prints.

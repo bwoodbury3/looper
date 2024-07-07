@@ -64,6 +64,37 @@ bool BlockConfig::get_string_v(const std::string &key,
     return true;
 }
 
+bool BlockConfig::get_segments(std::vector<Segment> &segments) const
+{
+    json_v json_segments;
+    ASSERT(::Looper::get_array(base, "segments", json_segments),
+           "Missing \"segments\" key in block \"%s\"",
+           name.c_str());
+
+    for (const auto &json_segment : json_segments)
+    {
+        Segment segment;
+        ASSERT(::Looper::get_float(json_segment, "start", segment.start),
+               "Error parsing segments on block %s",
+               name.c_str());
+        ASSERT(::Looper::get_float(json_segment, "stop", segment.stop),
+               "Error parsing segments on block %s",
+               name.c_str());
+
+        std::string segment_str;
+        ASSERT(::Looper::get_string(json_segment, "type", segment_str),
+               "Error parsing segments on block %s",
+               name.c_str());
+        ASSERT(Segment::to_segment_type(segment_str, segment.segment_type),
+               "Error reading segment type on block %s",
+               name.c_str());
+
+        segments.push_back(std::move(segment));
+    }
+
+    return true;
+}
+
 Block::Block(const BlockConfig &_configs) : configs(_configs) {}
 
 bool Block::init()

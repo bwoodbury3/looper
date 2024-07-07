@@ -5,18 +5,30 @@
 namespace Looper
 {
 
-Metronome::Metronome(const BlockConfig &_configs) : Source(_configs) {}
+Metronome::Metronome(const BlockConfig& _configs) : Source(_configs) {}
 
 bool Metronome::init()
 {
-    QASSERT(configs.get_float("start_measure", start_measure));
-    QASSERT(configs.get_float("stop_measure", stop_measure));
     QASSERT(configs.get_float_default("freq", freq, freq));
     QASSERT(configs.get_float_default("volume", volume, volume));
+    QASSERT(configs.get_segments(segments));
 
     const size_t num_samples = 0.05 * SAMPLE_RATE;
     const float step = 1.0 / SAMPLE_RATE;
     const float PI_2_freq = PI_2 * freq;
+
+    /*
+     * Sanity check that all of the segments are outputs.
+     */
+    if (segments.size() == 0)
+    {
+        LOG(WARN, "Metronome has no segment outputs");
+    }
+    for (const auto& segment : segments)
+    {
+        ASSERT(segment.segment_type == segment_type_t::output,
+               "Metronome only accepts output segments");
+    }
 
     /*
      * Initialize the little beep tone that plays when the metronome fires.
@@ -35,11 +47,14 @@ bool Metronome::read()
 {
     stream->fill(0);
 
-    if (Tempo::in_measure(start_measure, stop_measure))
+    for (const auto& segment : segments)
     {
-        if (Tempo::on_beat())
+        if (Tempo::in_measure(segment.start, segment.stop))
         {
-            sampler.play(clip, false);
+            if (Tempo::on_beat())
+            {
+                sampler.play(clip, false);
+            }
         }
     }
 

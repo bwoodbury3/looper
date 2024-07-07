@@ -32,7 +32,7 @@ export class Layer {
         }
 
         // Child classes.
-        this.layer_create = new LayerCreate(this.id, store);
+        this.layer_create = new LayerCreate(this.id, this.store);
     }
 
     // Clear the layer.
@@ -260,6 +260,7 @@ export class Layer {
         return {
             name: this.store.layer_name,
             type: this.store.device_type,
+            segments: this.store.segments,
             ...this.store.data
         };
     }

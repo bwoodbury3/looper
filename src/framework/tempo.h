@@ -27,7 +27,7 @@ bool init(const json &data);
 void step();
 
 /**
- * Get the current measure, 1-indexed. A fractional value that also tells you
+ * Get the current measure, 0-indexed. A fractional value that also tells you
  * how far into the measure you are, if you care.
  */
 float current_measure();

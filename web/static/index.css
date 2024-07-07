@@ -39,6 +39,31 @@
     height: 100px;
 }
 
+.ruler-row {
+    position: relative;
+    border: 1px solid #cccccc;
+    width: 100%;
+    height: 45px;
+}
+
+.settings-header {
+    position: absolute;
+    background-color: #333333;
+    border-right: 1px solid #cccccc;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.ruler {
+    position: absolute;
+    background-color: #333333;
+    height: 100%;
+    left: var(--settings-width);
+    right: 0;
+    top: 0;
+}
+
 .layer-settings {
     cursor: pointer;
     position: absolute;

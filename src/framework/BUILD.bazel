@@ -34,8 +34,8 @@ cc_library(
 
 cc_library(
     name = "block",
-    srcs = ["block.cc"],
-    hdrs = ["block.h"],
+    srcs = ["block.cc", "segment.cc"],
+    hdrs = ["block.h", "segment.h"],
     deps = [
         ":json",
         ":log",

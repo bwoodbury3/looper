@@ -101,6 +101,13 @@ bool init(const json& data)
         static_cast<float>(SAMPLES_PER_BUFFER) / measures_per_step;
     epsilon = beats_per_step / 2.0;
 
+    /*
+     * Reset the stateful variables.
+     */
+    current_chunk = 0;
+    current_time_s = 0;
+    current_beat = 0;
+
     return true;
 }
 
@@ -113,13 +120,18 @@ void step()
 
 float current_measure()
 {
-    return current_beat / beats_per_measure + 1.0;
+    return current_beat / beats_per_measure;
 }
 
 bool in_measure(const float m1, const float m2)
 {
     const float curr = current_measure();
-    return m1 <= curr && curr < m2;
+
+    /*
+     * HACK: Epsilon is used in the beginning of the measure but not the end
+     * for the metronome specifically.
+     */
+    return m1 - epsilon <= curr && curr < m2;
 }
 
 bool on_beat(float beat_offset)
