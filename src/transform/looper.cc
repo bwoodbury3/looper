@@ -21,47 +21,44 @@ bool Loop::init()
     /*
      * Read in configs.
      */
-    QASSERT(configs.get_float("start_measure", recording_interval.start));
-    QASSERT(configs.get_float("stop_measure", recording_interval.stop));
-    ASSERT(recording_interval.start < recording_interval.stop,
-           "Invalid recording interval bounds: [%f, %f]",
-           recording_interval.start,
-           recording_interval.stop);
-    const float record_interval_duration =
-        recording_interval.stop - recording_interval.start;
+    bool has_recording_segment = false;
+    for (const auto& segment : segments)
+    {
+        if (segment.segment_type == segment_type_t::input)
+        {
+            has_recording_segment = true;
+            recording_segment = segment;
+        }
+        else if (segment.segment_type == segment_type_t::output)
+        {
+            replay_segments.push_back(segment);
+        }
+        else
+        {
+            ABORT("Unsupported segment type. Only support inputs/outputs");
+        }
+    }
 
     /*
-     * Read in the replay intervals.
+     * Sanity check the recording interval.
      */
-    json_v raw_intervals;
-    QASSERT(get_array(configs.base, "replay_intervals", raw_intervals));
+    ASSERT(has_recording_segment, "Didn't find an input segment!");
+    ASSERT(recording_segment.start < recording_segment.stop,
+           "Invalid recording interval bounds: [%f, %f]",
+           recording_segment.start,
+           recording_segment.stop);
 
-    for (const json& raw_interval : raw_intervals)
+    /*
+     * Sanity check the replay intervals.
+     */
+    for (const auto& interval : replay_segments)
     {
-        replay_interval_t interval;
-        QASSERT(get_float(raw_interval, "start_measure", interval.start));
-        QASSERT(get_float(raw_interval, "stop_measure", interval.stop));
-        QASSERT(get_float_default(
-            raw_interval, "offset", 0.0, interval.measure_offset));
-
-        /*
-         * Sanity check the replay interval.
-         */
         ASSERT(interval.start < interval.stop,
                "Invalid replay interval bounds: [%f, %f]",
                interval.start,
                interval.stop);
-        ASSERT(interval.start >= recording_interval.stop,
+        ASSERT(interval.start >= recording_segment.stop,
                "Replay interval is before the end of the record interval");
-        ASSERT(interval.measure_offset < record_interval_duration,
-               "Measure offset is longer than the recording");
-
-        replay_intervals.push_back(std::move(interval));
-
-        LOG(DEBUG,
-            "Added playback interval: [%f, %f]",
-            interval.start,
-            interval.stop);
     }
 
     return true;
@@ -72,7 +69,7 @@ bool Loop::transform()
     const auto& input_stream = input_streams[0];
     auto& output_stream = output_streams[0];
 
-    if (Tempo::in_measure(recording_interval.start, recording_interval.stop))
+    if (Tempo::in_measure(recording_segment.start, recording_segment.stop))
     {
         if (recording->size() == 0)
         {
@@ -93,13 +90,11 @@ bool Loop::transform()
      * Figure out if we're in a replay interval and should be playing.
      */
     bool should_play = false;
-    size_t skip_samples = 0;
-    for (const auto& interval : replay_intervals)
+    for (const auto& interval : replay_segments)
     {
         if (Tempo::in_measure(interval.start, interval.stop))
         {
             should_play = true;
-            skip_samples = Tempo::measures_to_samples(interval.measure_offset);
             break;
         }
     }
@@ -114,7 +109,6 @@ bool Loop::transform()
         {
             LOG(DEBUG, "Playing loop");
             sampler.play(recording, true);
-            sampler.skip(skip_samples);
         }
     }
     else

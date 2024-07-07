@@ -11,7 +11,6 @@ bool Metronome::init()
 {
     QASSERT(configs.get_float_default("freq", freq, freq));
     QASSERT(configs.get_float_default("volume", volume, volume));
-    QASSERT(configs.get_segments(segments));
 
     const size_t num_samples = 0.05 * SAMPLE_RATE;
     const float step = 1.0 / SAMPLE_RATE;
@@ -20,10 +19,6 @@ bool Metronome::init()
     /*
      * Sanity check that all of the segments are outputs.
      */
-    if (segments.size() == 0)
-    {
-        LOG(WARN, "Metronome has no segment outputs");
-    }
     for (const auto& segment : segments)
     {
         ASSERT(segment.segment_type == segment_type_t::output,

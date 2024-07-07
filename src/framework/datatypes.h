@@ -22,20 +22,4 @@ static const float PI_2 = PI * 2.0;
 typedef std::vector<sample_t> audio_clip_t;
 typedef std::shared_ptr<audio_clip_t> paudio_clip_t;
 
-/**
- * An interval between two measures [start, stop].
- */
-struct measure_interval_t
-{
-    /**
-     * The measure at which the interval starts.
-     */
-    float start;
-
-    /**
-     * The measure at which the interval stops.
-     */
-    float stop;
-};
-
 }

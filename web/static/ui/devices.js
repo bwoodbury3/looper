@@ -100,7 +100,27 @@ export var devices = {
             min_count: 1,
             max_count: 1,
         }
-    }
+    },
+    Looper: {
+        required_fields: [],
+        optional_fields: [],
+        input_channels: {
+            min_count: 1,
+            max_count: 1,
+        },
+        output_channels: {
+            min_count: 1,
+            max_count: 1,
+        },
+        input_segments: {
+            min_count: 1,
+            max_count: 1,
+        },
+        output_segments: {
+            min_count: 0,
+            max_count: -1,
+        },
+    },
 };
 
 // Convenience helper functions.

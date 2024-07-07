@@ -29,11 +29,6 @@ class Metronome : public Source
     Sampler sampler;
 
     /**
-     * The segments to play the metronome.
-     */
-    std::vector<Segment> segments;
-
-    /**
      * The frequency.
      */
     float freq = 440.0;

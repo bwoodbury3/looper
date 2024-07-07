@@ -141,7 +141,15 @@ class Block
     const std::string &name() const;
 
    protected:
+    /**
+     * User-defined configs that the block has access to.
+     */
     const BlockConfig configs;
+
+    /**
+     * Segments that turn behavior on/off.
+     */
+    std::vector<Segment> segments;
 };
 
 /**

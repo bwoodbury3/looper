@@ -28,7 +28,7 @@ inline void register_all_modules()
      * Transformers
      */
     BlockFactory::register_transformer<Combiner>("Combiner");
-    BlockFactory::register_transformer<Loop>("Loop");
+    BlockFactory::register_transformer<Loop>("Looper");
 }
 
 }  // namespace Looper

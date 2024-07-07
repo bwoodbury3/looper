@@ -122,6 +122,8 @@ bool Source::init_source()
            "Failed to create output stream for \"%s\"",
            output_channel.c_str());
 
+    QASSERT(configs.get_segments(segments));
+
     return true;
 }
 
@@ -139,6 +141,8 @@ bool Sink::init_sink()
     ASSERT(bind_stream(input_channel, stream),
            "Failed to bind to input stream for \"%s\"",
            input_channel.c_str());
+
+    QASSERT(configs.get_segments(segments));
 
     return true;
 }
@@ -170,6 +174,8 @@ bool Transformer::init_transformer()
                input_channel.c_str());
         input_streams.push_back(pstream);
     }
+
+    QASSERT(configs.get_segments(segments));
 
     return true;
 }
