@@ -23,6 +23,10 @@ export var devices = {
                     "drums1",
                 ],
             },
+            {
+                name: "output_channel",
+                type: "string",
+            },
         ],
         optional_fields: [
             {
@@ -40,7 +44,12 @@ export var devices = {
         },
     },
     Metronome: {
-        required_fields: [],
+        required_fields: [
+            {
+                name: "output_channel",
+                type: "string",
+            },
+        ],
         optional_fields: [],
         output_channels: {
             min_count: 1,
@@ -57,6 +66,10 @@ export var devices = {
                 name: "device",
                 type: "string",
             },
+            {
+                name: "input_channel",
+                type: "string",
+            },
         ],
         optional_fields: [],
         input_channels: {
@@ -71,7 +84,11 @@ export var devices = {
     AudioInput: {
         required_fields: [
             {
-                name: "device",
+                name: "Device Name",
+                type: "string",
+            },
+            {
+                name: "output_channel",
                 type: "string",
             },
         ],

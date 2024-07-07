@@ -28,7 +28,7 @@ export class LayerCreate {
         if (!("segments" in this.store)) {
             this.store.segments = [];
         } else {
-            for (segment of this.store.segments) {
+            for (var segment of this.store.segments) {
                 this.segments.push(new Segment(segment));
             }
         }
