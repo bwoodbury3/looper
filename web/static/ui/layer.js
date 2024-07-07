@@ -1,4 +1,4 @@
-import {devices, device_names} from "/static/ui/devices.js"
+import {devices, schema_query} from "/static/ui/devices.js"
 import {LayerCreate} from "/static/ui/layer-create.js";
 import {options_list} from "/static/ui/util.js";
 
@@ -17,17 +17,31 @@ export class Layer {
         this.settings_submit_id = `settings-submit-${this.id}`;
         this.is_resizing = false;
 
-        // Subclasses.
-        this.layer_create = new LayerCreate(this.id, store);
-
         // Initialize from backing store.
         this.store = store;
-        if (!("layer_name" in this.store))
+        if (!("layer_name" in this.store)) {
             this.store.layer_name = `Layer-${this.id}`;
-        if (!("device_type" in this.store))
+        }
+        if (!("device_type" in this.store)) {
             this.store.device_type = null;
-        if (!("data" in this.store))
+        } else {
+            this.store.schema = devices[this.store.device_type];
+        }
+        if (!("data" in this.store)) {
             this.store.data = {};
+        }
+
+        // Child classes.
+        this.layer_create = new LayerCreate(this.id, store);
+    }
+
+    // Clear the layer.
+    clear() {
+        delete this.store.schema;
+        this.store.device_type = null;
+        this.store.data = {};
+
+        this.layer_create.clear();
     }
 
     // Callback to set settings.
@@ -55,6 +69,7 @@ export class Layer {
             this.store.data = {};
             if (this.store.device_type in devices) {
                 var schema = devices[this.store.device_type];
+                this.store.schema = schema;
                 for (var field of schema.required_fields) {
                     var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
                     var type = field.type;
@@ -107,7 +122,7 @@ export class Layer {
                     <div class="col-9">
                         <select class="form-control" id="${this.settings_device_type_id}">
                             <option selected>${device_type}</option>
-                            ${options_list(device_names())}
+                            ${options_list(schema_query.device_names())}
                         </select>
                     </div>
                 </div>

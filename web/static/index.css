@@ -58,6 +58,11 @@
     top: 0;
 }
 
+.layer-create-canvas {
+    width: 100%;
+    height: 100%;
+}
+
 .layer-vertical-drag {
     position: absolute;
     bottom: 0;
