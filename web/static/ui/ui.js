@@ -1,3 +1,5 @@
+import {io} from "/static/socket.io-client.js";
+
 import {Layer} from "/static/ui/layer.js";
 import {project} from "/static/ui/project.js";
 import {Ruler} from "/static/ui/ruler.js";
@@ -74,3 +76,16 @@ export function get_save_data() {
 
 init_default();
 draw_ui();
+
+// Websocket for interfacing with the backend.
+const socket = io("ws://localhost:1080", {
+    reconnectionDelayMax: 10000,
+});
+
+// Detect keypress and send to the server.
+document.onkeydown = e => {
+    var data = {
+        key: e.key,
+    };
+    socket.emit("keypress", data);
+}

@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask_socketio import SocketIO, emit
 import json
 import threading
 
@@ -8,6 +9,7 @@ import file_io
 
 # Init flask
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 # Init audio.
 assert looper.init_audio()
@@ -101,5 +103,16 @@ def get_projects():
     return json.dumps({"projects": names}), 200
 
 
+@socketio.on("keypress")
+def keypress(data: dict):
+    """
+    Keypress handler.
+
+    Params:
+        data: The data of the keypress
+    """
+    runner.queue_keypress(data["key"])
+
+
 # Run flask
-app.run(host="0.0.0.0", threaded=True, port=1080)
+socketio.run(app, host="0.0.0.0", debug=True, port=1080)

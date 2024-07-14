@@ -26,6 +26,11 @@ class Runner
      */
     bool stop();
 
+    /**
+     * Queue a keypress.
+     */
+    void queue_keypress(const std::string &key);
+
    private:
     /**
      * Runtime orchestration.

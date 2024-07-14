@@ -23,4 +23,12 @@ const std::vector<std::string> &get_keys();
  */
 bool reset();
 
+/**
+ * Out-of-band call to inject a keypress into the system via some mechanism
+ * other than stdin.
+ *
+ * @param key The key that was pressed.
+ */
+void queue_keypress(const std::string &key);
+
 }

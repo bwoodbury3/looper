@@ -18,6 +18,12 @@ constexpr size_t BUFSIZE = 256;
 std::vector<std::string> keys;
 
 /**
+ * Set of keys that have been queued before the top of the cycle.
+ */
+std::vector<std::string> queued_keys;
+std::mutex keys_mtx;
+
+/**
  * The stdin settings on the terminal prior to starting the program.
  */
 struct termios old_settings;
@@ -58,38 +64,61 @@ bool reset()
 {
     keys.clear();
 
-    fd_set set;
-    FD_ZERO(&set);
-    FD_SET(fileno(stdin), &set);
-
-    /* nonblocking */
-    struct timeval tv = {.tv_sec = 0, .tv_usec = 0};
-    int res = select(fileno(stdin) + 1, &set, NULL, NULL, &tv);
-
-    if (res > 0)
+    /*
+     * Read keys in from stdin directly.
+     */
     {
-        char buf[BUFSIZE];
-        auto count = read(fileno(stdin), &buf, BUFSIZE);
-        keys.reserve(count);
+        fd_set set;
+        FD_ZERO(&set);
+        FD_SET(fileno(stdin), &set);
 
-        /*
-         * Read stdin char-by-char.
-         */
-        for (ssize_t i = 0; i < count; i++)
+        /* nonblocking */
+        struct timeval tv = {.tv_sec = 0, .tv_usec = 0};
+        int res = select(fileno(stdin) + 1, &set, NULL, NULL, &tv);
+
+        if (res > 0)
         {
-            const char c = buf[i];
-            if (c == 0x3 /* EOF */)
-            {
-                _reset_stdin();
-                return false;
-            }
+            char buf[BUFSIZE];
+            auto count = read(fileno(stdin), &buf, BUFSIZE);
+            keys.reserve(count);
 
-            keys.push_back({c});
-            LOG(DEBUG, "Keypress: %s", keys[i].c_str());
+            /*
+             * Read stdin char-by-char.
+             */
+            for (ssize_t i = 0; i < count; i++)
+            {
+                const char c = buf[i];
+                if (c == 0x3 /* EOF */)
+                {
+                    _reset_stdin();
+                    return false;
+                }
+
+                keys.push_back({c});
+                LOG(DEBUG, "Keypress: %s", keys[i].c_str());
+            }
         }
     }
 
+    /*
+     * Read keys in from the queue.
+     */
+    {
+        std::lock_guard<std::mutex> lock(keys_mtx);
+        for (const auto &key : queued_keys)
+        {
+            keys.push_back(key);
+        }
+        queued_keys.clear();
+    }
+
     return true;
+}
+
+void queue_keypress(const std::string &key)
+{
+    std::lock_guard<std::mutex> lock(keys_mtx);
+    queued_keys.push_back(key);
 }
 
 }  // namespace Looper::Keyboard

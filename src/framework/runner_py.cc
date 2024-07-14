@@ -20,7 +20,8 @@ PYBIND11_MODULE(looper, m)
         .def("run",
              &Looper::Runner::run,
              py::call_guard<py::gil_scoped_release>())
-        .def("stop", &Looper::Runner::stop);
+        .def("stop", &Looper::Runner::stop)
+        .def("queue_keypress", &Looper::Runner::queue_keypress);
 
     /*
      * One-time functions.

@@ -2,3 +2,4 @@
 # any changes:
 #     $ bazel run //pip:requirements.update
 flask>=3.0.3
+flask-socketio>=5.3.6

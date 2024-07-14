@@ -137,4 +137,15 @@ bool Runner::stop()
     return true;
 }
 
+void Runner::queue_keypress(const std::string& key)
+{
+    /*
+     * Only queue keypress when it's running.
+     */
+    if (running)
+    {
+        Keyboard::queue_keypress(key);
+    }
+}
+
 }  // namespace Looper

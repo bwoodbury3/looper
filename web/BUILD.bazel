@@ -14,6 +14,7 @@ py_binary(
     deps = [
         "//src/framework:looper",
         requirement("flask"),
+        requirement("flask-socketio"),
     ],
     data = [
         "//web:lib",
