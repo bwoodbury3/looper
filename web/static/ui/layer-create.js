@@ -92,6 +92,32 @@ export class LayerCreate {
         }
     }
 
+    _edit(e, segment) {
+        // This layer has no input or output segments.
+        if (!schema_query.has_input_segments(this.store.device_type) &&
+            !schema_query.has_output_segments(this.store.device_type)) {
+            return;
+        }
+
+        // Show the dialog.
+        var dialog = document.getElementById(this.segment_dialog_id);
+        dialog.innerHTML = this._draw_segment_dialog();
+        var modal = new bootstrap.Modal(dialog);
+        modal.show();
+
+        // Listen for the user to submit the form.
+        var submit_button = document.getElementById(this.segment_submit_id);
+        submit_button.onclick = e => {
+            segment.store.type = document.getElementById(this.segment_type_id).value;
+            segment.store.start = parseFloat(document.getElementById(this.measure_start_id).value);
+            segment.store.stop = parseFloat(document.getElementById(this.measure_stop_id).value);
+
+            modal.hide();
+
+            this._refresh_canvas();
+        }
+    }
+
     // Get the segment corresponding to a click.
     _get_segment(e) {
         var measure = this._get_mouse_measure(e);
@@ -201,9 +227,18 @@ export class LayerCreate {
         this._refresh_canvas();
 
         layer_canvas.onclick = e => {
+            // Prevent child targets from triggering this event.
+            if (e.target.id !== this.layer_create_canvas_id) {
+                return;
+            }
+
             // Get the segment corresponding to this click.
             var segment = this._get_segment(e);
-            // this._new(e);
+            if (!segment) {
+                this._new(e);
+            } else {
+                this._edit(e, segment);
+            }
         }
     }
 }
