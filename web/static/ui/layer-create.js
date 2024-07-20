@@ -34,6 +34,20 @@ export class LayerCreate {
         }
     }
 
+    // Get the relative mouse position inside of the layer.
+    _relative_mouse_position(e) {
+        var element = document.getElementById(this.layer_create_canvas_id);
+        var x = e.clientX - element.getBoundingClientRect().x;
+        var y = e.clientY - element.getBoundingClientRect().y;
+        return {x: x, y: y};
+    }
+
+    // Get the mouse position as a measure.
+    _get_mouse_measure(e) {
+        var pos = this._relative_mouse_position(e);
+        return pos.x / constants.PIXELS_PER_MEASURE;
+    }
+
     // Callback for creating a new segment.
     _new(e) {
         // Prevent child targets from triggering this event.
@@ -76,6 +90,18 @@ export class LayerCreate {
 
             this._refresh_canvas();
         }
+    }
+
+    // Get the segment corresponding to a click.
+    _get_segment(e) {
+        var measure = this._get_mouse_measure(e);
+        for (var segment of this.segments) {
+            if (segment.measure_start() < measure && segment.measure_stop() > measure) {
+                return segment;
+            }
+        }
+
+        return null;
     }
 
     // Redraw the canvas.
@@ -175,7 +201,9 @@ export class LayerCreate {
         this._refresh_canvas();
 
         layer_canvas.onclick = e => {
-            this._new(e);
+            // Get the segment corresponding to this click.
+            var segment = this._get_segment(e);
+            // this._new(e);
         }
     }
 }

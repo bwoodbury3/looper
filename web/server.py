@@ -1,21 +1,26 @@
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 import json
 import threading
 
 import looper
+import monitor
 import file_io
 
 
 # Init flask
 app = Flask(__name__)
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode="threading")
 
 # Init audio.
 assert looper.init_audio()
 looper.register_modules()
 runner = looper.Runner()
 runner_thread = None
+
+# Monitor of the runner.
+runner_monitor = monitor.Monitor(socketio, runner)
+runner_monitor.run()
 
 
 @app.route("/", methods=["GET"])

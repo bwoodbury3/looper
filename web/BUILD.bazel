@@ -10,7 +10,7 @@ py_library(
 
 py_binary(
     name = "server",
-    srcs = ["server.py"],
+    srcs = ["monitor.py", "server.py"],
     deps = [
         "//src/framework:looper",
         requirement("flask"),

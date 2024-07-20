@@ -22,6 +22,10 @@
     cursor: crosshair;
 }
 
+.grayed-out {
+    color: #888888 !important;
+}
+
 .vertical-bar {
     position: absolute;
     height: 100%;

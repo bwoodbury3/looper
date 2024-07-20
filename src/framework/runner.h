@@ -31,6 +31,16 @@ class Runner
      */
     void queue_keypress(const std::string &key);
 
+    /**
+     * Whether the runner is currently running.
+     */
+    bool is_running();
+
+    /**
+     * Get the progress.
+     */
+    float current_measure();
+
    private:
     /**
      * Runtime orchestration.

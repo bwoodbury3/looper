@@ -148,4 +148,15 @@ void Runner::queue_keypress(const std::string& key)
     }
 }
 
+bool Runner::is_running()
+{
+    std::lock_guard<std::mutex> lock(mu);
+    return running;
+}
+
+float Runner::current_measure()
+{
+    return Tempo::current_measure();
+}
+
 }  // namespace Looper

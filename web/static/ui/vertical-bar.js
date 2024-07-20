@@ -24,4 +24,10 @@ export class VerticalBar {
             this._handle_move(e);
         }
     }
+
+    set_left(left) {
+        var vertical_bar = document.getElementById(this.vertical_bar_id);
+        var x = left + settings_width;
+        vertical_bar.style.left = `${x}px`;
+    }
 }
