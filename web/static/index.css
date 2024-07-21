@@ -18,10 +18,6 @@
     background-color: #444444;
 }
 
-.drawable {
-    cursor: crosshair;
-}
-
 .grayed-out {
     color: #888888 !important;
 }

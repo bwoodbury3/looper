@@ -6,7 +6,8 @@ const SEGMENT_PADDING_Y = 10;
 
 const SEGMENT_RADIUS = 5;
 const SEGMENT_BORDER = "#bcc4d1";
-const SEGMENT_FILL = "#63738f";
+const INPUT_SEGMENT_FILL = "#4c576b"
+const OUTPUT_SEGMENT_FILL = "#63738f";
 
 /**
  * The view for building a layer.
@@ -68,7 +69,7 @@ export class LayerCreate {
 
         // Show the dialog.
         var dialog = document.getElementById(this.segment_dialog_id);
-        dialog.innerHTML = this._draw_segment_dialog();
+        dialog.innerHTML = this._draw_segment_dialog(new Segment({}));
         var modal = new bootstrap.Modal(dialog);
         modal.show();
 
@@ -101,7 +102,7 @@ export class LayerCreate {
 
         // Show the dialog.
         var dialog = document.getElementById(this.segment_dialog_id);
-        dialog.innerHTML = this._draw_segment_dialog();
+        dialog.innerHTML = this._draw_segment_dialog(segment);
         var modal = new bootstrap.Modal(dialog);
         modal.show();
 
@@ -141,7 +142,11 @@ export class LayerCreate {
 
         for (var segment of this.segments) {
             ctx.strokeStyle = SEGMENT_BORDER;
-            ctx.fillStyle = SEGMENT_FILL;
+            if (segment.store.type === "input") {
+                ctx.fillStyle = INPUT_SEGMENT_FILL;
+            } else {
+                ctx.fillStyle = OUTPUT_SEGMENT_FILL;
+            }
             ctx.beginPath();
             ctx.roundRect(constants.PIXELS_PER_MEASURE * segment.measure_start(),
                           SEGMENT_PADDING_Y,
@@ -154,7 +159,11 @@ export class LayerCreate {
     }
 
     // Drag a dialog that lets the user interact with the segment.
-    _draw_segment_dialog() {
+    _draw_segment_dialog(segment) {
+        var default_type = segment.store.type ?? "";
+        var default_start = segment.store.start ?? "";
+        var default_stop = segment.store.stop ?? "";
+
         var possible_types = [];
         if (schema_query.has_input_segments(this.store.device_type)) {
             possible_types.push("input");
@@ -162,6 +171,7 @@ export class LayerCreate {
         if (schema_query.has_output_segments(this.store.device_type)) {
             possible_types.push("output");
         }
+        possible_types = possible_types.filter(item => item !== default_type);
 
         return `
 <div class="modal-dialog modal-lg">
@@ -176,21 +186,21 @@ export class LayerCreate {
                     <label class="col-3 col-form-label">Segment Type</label>
                     <div class="col-9">
                         <select class="form-control" id="${this.segment_type_id}">
-                            <option selected>${possible_types[0]}</option>
-                            ${options_list(possible_types.slice(1))}
+                            <option selected>${default_type}</option>
+                            ${options_list(possible_types)}
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mb-3">
                     <label class="col-3 col-form-label">Measure Start</label>
                     <div class="col-9">
-                        <input class="form-control" type="number" id="${this.measure_start_id}">
+                        <input class="form-control" type="number" value="${default_start}" id="${this.measure_start_id}">
                     </div>
                 </div>
                 <div class="form-group row mb-3">
                     <label class="col-3 col-form-label">Measure Stop</label>
                     <div class="col-9">
-                        <input class="form-control" type="number" id="${this.measure_stop_id}">
+                        <input class="form-control" type="number" value="${default_stop}" id="${this.measure_stop_id}">
                     </div>
                 </div>
             </form>
@@ -212,7 +222,7 @@ export class LayerCreate {
     // Draw the layer.
     draw() {
         return `
-<div class="layer-create drawable" id="${this.layer_create_id}">
+<div class="layer-create" id="${this.layer_create_id}">
     <canvas class="layer-create-canvas" id="${this.layer_create_canvas_id}"></canvas>
     <div id="${this.segment_dialog_id}" class="modal fade"></div>
 </div>

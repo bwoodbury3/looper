@@ -15,7 +15,7 @@ export class VerticalBar {
     }
 
     draw() {
-        return `<div class="vertical-bar drawable" id="${this.vertical_bar_id}"></div>`;
+        return `<div class="vertical-bar" id="${this.vertical_bar_id}"></div>`;
     }
 
     set_event_callbacks() {
