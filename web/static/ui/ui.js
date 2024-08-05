@@ -1,7 +1,19 @@
 import {io} from "/static/socket.io-client.js";
 
+import {
+    clear_blocks,
+    update_block,
+    get_all_blocks,
+    Block,
+} from '/static/model/blocks.js';
+import {
+    add_segment,
+    clear_segments,
+    clear_segment_callbacks,
+    get_all_segments,
+    Segment,
+} from '/static/model/segments.js';
 import {Layer} from "/static/ui/layer.js";
-import {project} from "/static/ui/project.js";
 import {Ruler} from "/static/ui/ruler.js";
 import {VerticalBar} from "/static/ui/vertical-bar.js";
 import {constants} from "/static/ui/util.js";
@@ -38,25 +50,44 @@ export function draw_ui() {
 function init_default() {
     layers = [];
     for (var i = 0; i < 10; i++) {
-        var layer_data = {};
-        project.layers.push(layer_data)
-        layers.push(new Layer(layer_data));
+        layers.push(new Layer(i));
     }
 }
 
-// Set the project data.
+/**
+ * Load in external data to the UI.
+ *
+ * @param {data} data The data to load.
+ */
 export function load_project_data(data) {
     layers = [];
 
-    // Clear the project.
-    for (var item in project) {
-        delete project[item];
+    clear_segment_callbacks();
+    clear_blocks();
+    clear_segments();
+
+    for (var block_id in data.blocks) {
+        var block_data = data.blocks[block_id];
+        var block = new Block(
+            block_id,
+            block_data.name,
+            block_data.type,
+            block_data.data
+        );
+        update_block(block_id, block);
+        layers.push(new Layer(block_id));
     }
 
-    // Assign the data to the project.
-    Object.assign(project, data);
-    for (var layer_data of project.layers) {
-        layers.push(new Layer(layer_data));
+    for (var block_id in data.segments) {
+        var segments = data.segments[block_id];
+        for (var segment_data of segments) {
+            var segment = new Segment(
+                segment_data.start,
+                segment_data.stop,
+                segment_data.type
+            );
+            add_segment(block_id, segment);
+        }
     }
 }
 
@@ -76,7 +107,10 @@ export function get_play_data() {
 
 // Get all state that needs to be saved to disk.
 export function get_save_data() {
-    return project;
+    return {
+        blocks: get_all_blocks(),
+        segments: get_all_segments(),
+    };
 }
 
 init_default();

@@ -1,4 +1,6 @@
-import {devices, schema_query} from "/static/ui/devices.js"
+import {get_block, update_block, Block} from "/static/model/blocks.js";
+import {get_segments} from "/static/model/segments.js";
+import {devices, schema_query} from "/static/model/devices.js"
 import {LayerCreate} from "/static/ui/layer-create.js";
 import {options_list} from "/static/ui/util.js";
 
@@ -30,8 +32,8 @@ function validate_channel_counts(channels, min_count, max_count, errors) {
 }
 
 export class Layer {
-    constructor(store) {
-        this.id = _ids++;
+    constructor(id) {
+        this.id = id;
         this.layer_id = `layer-${this.id}`;
         this.layer_settings_id = `layer-settings-${this.id}`;
         this.layer_vertical_drag_id = `layer-vertical-drag-${this.id}`;
@@ -44,30 +46,12 @@ export class Layer {
         this.settings_submit_id = `settings-submit-${this.id}`;
         this.is_resizing = false;
 
-        // Initialize from backing store.
-        this.store = store;
-        if (!("layer_name" in this.store)) {
-            this.store.layer_name = `Layer-${this.id}`;
-        }
-        if (!("device_type" in this.store)) {
-            this.store.device_type = null;
-        } else {
-            this.store.schema = devices[this.store.device_type];
-        }
-        if (!("data" in this.store)) {
-            this.store.data = {};
-        }
-
         // Child classes.
-        this.layer_create = new LayerCreate(this.id, this.store);
+        this.layer_create = new LayerCreate(this.id);
     }
 
     // Clear the layer.
     clear() {
-        delete this.store.schema;
-        this.store.device_type = null;
-        this.store.data = {};
-
         this.layer_create.clear();
     }
 
@@ -91,15 +75,15 @@ export class Layer {
         // Listen for the user hitting the submit button.
         var submit_button = document.getElementById(this.settings_submit_id);
         submit_button.onclick = e => {
-            // Add all form data to our internal data object.
-            this.store.layer_name = document.getElementById(this.settings_name_id).value;
-            this.store.device_type = document.getElementById(this.settings_device_type_id).value;
-
-            this.store.data = {};
-            if (this.store.device_type in devices) {
-                var schema = devices[this.store.device_type];
-                this.store.schema = schema;
-
+            // Update the block data.
+            var block = new Block(
+                this.id,
+                document.getElementById(this.settings_name_id).value,
+                document.getElementById(this.settings_device_type_id).value,
+                {},
+            );
+            if (block.type in devices) {
+                var schema = devices[block.type];
                 var schema_errors = [];
 
                 // Parse the required fields from the schema.
@@ -107,11 +91,11 @@ export class Layer {
                     var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
                     var type = field.type;
                     if (type === "int")
-                        this.store.data[field.name] = parseInt(value);
+                        block.data[field.name] = parseInt(value);
                     else if (type === "float")
-                        this.store.data[field.name] = parseFloat(value);
+                        block.data[field.name] = parseFloat(value);
                     else
-                        this.store.data[field.name] = value;
+                        block.data[field.name] = value;
                 }
 
                 // Parse the optional fields from the schema.
@@ -119,34 +103,34 @@ export class Layer {
                     var value = document.getElementById(`layer-${this.id}-${field.name}`).value;
                     var type = field.type;
                     if (type === "int")
-                        this.store.data[field.name] = parseInt(value);
+                        block.data[field.name] = parseInt(value);
                     else if (type === "float")
-                        this.store.data[field.name] = parseFloat(value);
+                        block.data[field.name] = parseFloat(value);
                     else
-                        this.store.data[field.name] = value;
+                        block.data[field.name] = value;
                 }
 
                 // Parse the input channels.
-                if (schema_query.has_inputs(this.store.device_type)) {
+                if (schema_query.has_inputs(block.type)) {
                     var value = document.getElementById(`layer-${this.id}-input_channels`).value;
                     var channels = get_channels(value);
                     if (validate_channel_counts(channels,
                                                 schema.input_channels.min_count,
                                                 schema.input_channels.max_count,
                                                 schema_errors)) {
-                        this.store.data.input_channels = channels;
+                        block.data.input_channels = channels;
                     }
                 }
 
                 // Parse the output channels.
-                if (schema_query.has_outputs(this.store.device_type)) {
+                if (schema_query.has_outputs(block.type)) {
                     var value = document.getElementById(`layer-${this.id}-output_channels`).value;
                     var channels = get_channels(value);
                     if (validate_channel_counts(channels,
                                                 schema.output_channels.min_count,
                                                 schema.output_channels.max_count,
                                                 schema_errors)) {
-                        this.store.data.output_channels = channels;
+                        block.data.output_channels = channels;
                     }
                 }
 
@@ -156,6 +140,7 @@ export class Layer {
                     errors.style.visibility = "visible";
                 } else {
                     errors.style.visibility = "hidden";
+                    update_block(block.id, block);
                     modal.hide();
                 }
             }
@@ -167,7 +152,9 @@ export class Layer {
 
     // Draw the settings dialog.
     _draw_settings_dialog() {
-        var device_type = this.store.device_type ? this.store.device_type : "Please select one...";
+        var block = get_block(this.id) ?? {};
+        var device_type = block.type ? block.type : "Please select one...";
+        var device_name = block.name ? block.name : "";
         return `
 <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -183,7 +170,7 @@ export class Layer {
                 <div class="form-group row mb-3">
                     <label class="col-3 col-form-label">Layer Name</label>
                     <div class="col-9">
-                        <input class="form-control" id="${this.settings_name_id}" value="${this.store.layer_name}" type="text">
+                        <input class="form-control" id="${this.settings_name_id}" value="${device_name}" type="text">
                     </div>
                 </div>
 
@@ -198,11 +185,11 @@ export class Layer {
                 </div>
 
                 <div id="${this.settings_additional_fields_id}">
-                    ${this._draw_additional_settings(this.store.device_type)}
+                    ${this._draw_additional_settings(device_type)}
                 </div>
 
                 <div id="${this.settings_channels_fields_id}">
-                    ${this._draw_channels_fields(this.store.device_type)}
+                    ${this._draw_channels_fields(device_type)}
                 </div>
             </form>
         </div>
@@ -217,20 +204,22 @@ export class Layer {
 
     // Render a single device input field.
     _draw_field(field) {
+        var block = get_block(this.id);
+        var data = block ? block.data : {};
         var field_id = `layer-${this.id}-${field.name}`;
 
         var input = `<p>I don't know how to handle field "${field.name}" (${field.type})</p>`;
         if (field.type === "string") {
-            var value = this.store.data[field.name] ? this.store.data[field.name] : "";
+            var value = data[field.name] ? data[field.name] : "";
             input = `<input class="form-control" id="${field_id}" value="${value}" type="text">`;
         } else if (field.type === "float") {
-            var value = this.store.data[field.name] ? this.store.data[field.name] : 1.0;
+            var value = data[field.name] ? data[field.name] : 1.0;
             input = `<input class="form-control" id="${field_id}" value="${value}" type="number">`;
         } else if (field.type === "int") {
-            var value = this.store.data[field.name] ? this.store.data[field.name] : 1;
+            var value = data[field.name] ? data[field.name] : 1;
             input = `<input class="form-control" id="${field_id}" value="${value}" type="number" step="1">`;
         } else if (field.type === "choice") {
-            var value = this.store.data[field.name] ? this.store.data[field.name] : "Please select one...";
+            var value = data[field.name] ? data[field.name] : "Please select one...";
             input = `
 <select class="form-control" id="${field_id}">
     <option selected>${value}</option>
@@ -307,14 +296,15 @@ export class Layer {
 
     // Draw a summary of this layer in the box on the left.
     _draw_settings_summary() {
-        if (!this.store.device_type) {
+        var block = get_block(this.id);
+        if (!block) {
             return "";
         }
 
         return `
 <div>
-    <h5>${this.store.layer_name}</h5>
-    <p>${this.store.device_type}</p>
+    <h5>${block.name}</h5>
+    <p>${block.type}</p>
 </div>
 `
     }
@@ -366,15 +356,16 @@ export class Layer {
 
     // Get the configured data for this layer.
     get_data() {
-        if (!this.store.device_type) {
+        var block = get_block(this.id);
+        if (!block) {
             return {};
         }
 
         return {
-            name: this.store.layer_name,
-            type: this.store.device_type,
-            segments: this.store.segments,
-            ...this.store.data
+            name: block.name,
+            type: block.type,
+            segments: get_segments(this.id),
+            ...block.data
         };
     }
 };

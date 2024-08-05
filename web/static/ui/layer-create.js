@@ -1,5 +1,15 @@
-import {schema_query} from "/static/ui/devices.js";
-import {Segment} from "/static/ui/segment.js";
+import {
+    get_block,
+} from "/static/model/blocks.js";
+import {
+    add_segment,
+    get_segments,
+    get_segment_at_measure,
+    on_segment_update,
+    update_segment,
+    Segment,
+} from "/static/model/segments.js";
+import {schema_query} from "/static/model/devices.js";
 import {constants, options_list} from "/static/ui/util.js";
 
 const SEGMENT_PADDING_Y = 10;
@@ -13,7 +23,7 @@ const OUTPUT_SEGMENT_FILL = "#63738f";
  * The view for building a layer.
  */
 export class LayerCreate {
-    constructor(id, store) {
+    constructor(id) {
         this.id = id;
         this.layer_create_id = `layer-create-${this.id}`;
         this.layer_create_canvas_id = `layer-create-canvas-${this.id}`;
@@ -22,17 +32,6 @@ export class LayerCreate {
         this.measure_start_id = `measure-start-${this.id}`;
         this.measure_stop_id = `measure-stop-${this.id}`;
         this.segment_submit_id = `segment-submit-${this.id}`;
-        this.segments = [];
-
-        // Initialize from backing store.
-        this.store = store;
-        if (!("segments" in this.store)) {
-            this.store.segments = [];
-        } else {
-            for (var segment of this.store.segments) {
-                this.segments.push(new Segment(segment));
-            }
-        }
     }
 
     // Get the relative mouse position inside of the layer.
@@ -57,19 +56,20 @@ export class LayerCreate {
         }
 
         // This layer isn't configured yet.
-        if (!this.store.schema || !this.store.device_type) {
+        var block = get_block(this.id);
+        if (!block) {
             return;
         }
 
         // This layer has no input or output segments.
-        if (!schema_query.has_input_segments(this.store.device_type) &&
-            !schema_query.has_output_segments(this.store.device_type)) {
+        if (!schema_query.has_input_segments(block.type) &&
+            !schema_query.has_output_segments(block.type)) {
             return;
         }
 
         // Show the dialog.
         var dialog = document.getElementById(this.segment_dialog_id);
-        dialog.innerHTML = this._draw_segment_dialog(new Segment({}));
+        dialog.innerHTML = this._draw_segment_dialog({});
         var modal = new bootstrap.Modal(dialog);
         modal.show();
 
@@ -80,23 +80,22 @@ export class LayerCreate {
             var segment_start = parseFloat(document.getElementById(this.measure_start_id).value);
             var segment_stop = parseFloat(document.getElementById(this.measure_stop_id).value);
 
-            var segment_data = {
-                type: segment_type,
-                start: segment_start,
-                stop: segment_stop,
-            };
-            this.store.segments.push(segment_data);
-            this.segments.push(new Segment(segment_data));
+            add_segment(this.id, new Segment(segment_start, segment_stop, segment_type));
             modal.hide();
-
-            this._refresh_canvas();
         }
     }
 
     _edit(e, segment) {
+        // This is a coding error. How could we have segments if there's no block?
+        var block = get_block(this.id);
+        if (!block) {
+            console.log(`ERROR: Segment found for layer ${this.id}`)
+            return;
+        }
+
         // This layer has no input or output segments.
-        if (!schema_query.has_input_segments(this.store.device_type) &&
-            !schema_query.has_output_segments(this.store.device_type)) {
+        if (!schema_query.has_input_segments(block.type) &&
+            !schema_query.has_output_segments(block.type)) {
             return;
         }
 
@@ -109,26 +108,15 @@ export class LayerCreate {
         // Listen for the user to submit the form.
         var submit_button = document.getElementById(this.segment_submit_id);
         submit_button.onclick = e => {
-            segment.store.type = document.getElementById(this.segment_type_id).value;
-            segment.store.start = parseFloat(document.getElementById(this.measure_start_id).value);
-            segment.store.stop = parseFloat(document.getElementById(this.measure_stop_id).value);
+            segment.type = document.getElementById(this.segment_type_id).value;
+            segment.start = parseFloat(document.getElementById(this.measure_start_id).value);
+            segment.stop = parseFloat(document.getElementById(this.measure_stop_id).value);
+            update_segment(this.id, segment);
 
             modal.hide();
 
             this._refresh_canvas();
         }
-    }
-
-    // Get the segment corresponding to a click.
-    _get_segment(e) {
-        var measure = this._get_mouse_measure(e);
-        for (var segment of this.segments) {
-            if (segment.measure_start() < measure && segment.measure_stop() > measure) {
-                return segment;
-            }
-        }
-
-        return null;
     }
 
     // Redraw the canvas.
@@ -140,17 +128,19 @@ export class LayerCreate {
         var ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-        for (var segment of this.segments) {
+        const segments = get_segments(this.id);
+
+        for (var segment of segments) {
             ctx.strokeStyle = SEGMENT_BORDER;
-            if (segment.store.type === "input") {
+            if (segment.type === "input") {
                 ctx.fillStyle = INPUT_SEGMENT_FILL;
             } else {
                 ctx.fillStyle = OUTPUT_SEGMENT_FILL;
             }
             ctx.beginPath();
-            ctx.roundRect(constants.PIXELS_PER_MEASURE * segment.measure_start(),
+            ctx.roundRect(constants.PIXELS_PER_MEASURE * segment.start,
                           SEGMENT_PADDING_Y,
-                          constants.PIXELS_PER_MEASURE * segment.measure_duration(),
+                          constants.PIXELS_PER_MEASURE * segment.segment_duration(),
                           canvas.height - (2 * SEGMENT_PADDING_Y),
                           SEGMENT_RADIUS);
             ctx.fill();
@@ -160,15 +150,22 @@ export class LayerCreate {
 
     // Drag a dialog that lets the user interact with the segment.
     _draw_segment_dialog(segment) {
-        var default_type = segment.store.type ?? "";
-        var default_start = segment.store.start ?? "";
-        var default_stop = segment.store.stop ?? "";
+        // This is a coding error. How could we have segments if there's no block?
+        var block = get_block(this.id);
+        if (!block) {
+            console.log(`ERROR: Segment found for layer ${this.id}`)
+            return;
+        }
+
+        var default_type = segment.type ?? "";
+        var default_start = segment.start ?? "";
+        var default_stop = segment.stop ?? "";
 
         var possible_types = [];
-        if (schema_query.has_input_segments(this.store.device_type)) {
+        if (schema_query.has_input_segments(block.type)) {
             possible_types.push("input");
         }
-        if (schema_query.has_output_segments(this.store.device_type)) {
+        if (schema_query.has_output_segments(block.type)) {
             possible_types.push("output");
         }
         possible_types = possible_types.filter(item => item !== default_type);
@@ -243,12 +240,14 @@ export class LayerCreate {
             }
 
             // Get the segment corresponding to this click.
-            var segment = this._get_segment(e);
+            var segment = get_segment_at_measure(this.id, this._get_mouse_measure(e));
             if (!segment) {
                 this._new(e);
             } else {
                 this._edit(e, segment);
             }
         }
+
+        on_segment_update(this.id, e => this._refresh_canvas());
     }
 }
