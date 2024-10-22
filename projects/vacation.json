@@ -1,0 +1,66 @@
+{
+    "config": {
+        "tempo": {
+            "bpm": 81,
+            "beats_per_measure": 2,
+            "beat_duration": 4
+        }
+    },
+    "devices": [
+        {
+            "name": "drums",
+            "type": "VirtualInstrument",
+            "instrument": "drums1",
+            "volume": 0.2,
+            "output_channels": ["drums"],
+            "segments": []
+        },
+        {
+            "name": "metronome",
+            "type": "Metronome",
+            "start_measure": 1,
+            "stop_measure": 4,
+            "freq": 440.0,
+            "output_channels": ["metronome"],
+            "segments": [
+                {
+                    "type": "output",
+                    "start": 0,
+                    "stop": 4
+                }
+            ]
+        },
+        {
+            "name": "drum_loop",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 2,
+                    "stop": 4
+                },
+                {
+                    "type": "output",
+                    "start": 4,
+                    "stop": 6
+                }
+            ],
+            "input_channels": ["drums"],
+            "output_channels": ["looped_drums"]
+        },
+        {
+            "name": "combiner",
+            "type": "Combiner",
+            "segments": [],
+            "input_channels": ["drums", "metronome", "looped_drums"],
+            "output_channels": ["audio_out"]
+        },
+        {
+            "name": "laptop_speaker",
+            "type": "AudioOutput",
+            "device": "Built-in Output",
+            "segments": [],
+            "input_channels": ["audio_out"]
+        }
+    ]
+}
