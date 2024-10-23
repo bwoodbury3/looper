@@ -18,6 +18,21 @@ using json_v = std::vector<json>;
 bool get_string(const json &data, const std::string &key, std::string &value);
 
 /**
+ * Get a string from a key with a default value..
+ *
+ * @param data The data
+ * @param key The key
+ * @param _default The default value
+ * @param[out] value The value
+ *
+ * @return True on success.
+ */
+bool get_string_default(const json &data,
+                        const std::string &key,
+                        const std::string &_default,
+                        std::string &value);
+
+/**
  * Get an int from a key.
  *
  * @param data The data

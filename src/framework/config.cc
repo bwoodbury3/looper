@@ -119,4 +119,14 @@ bool read_config(const std::string &config_str,
     return true;
 }
 
+std::string instrument_path(const std::string &name) noexcept
+{
+    return "assets/instruments/" + name + ".json";
+}
+
+std::string clip_path(const std::string &name) noexcept
+{
+    return "assets/clips/" + name + ".wav";
+}
+
 }  // namespace Looper

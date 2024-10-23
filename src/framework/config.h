@@ -31,4 +31,22 @@ bool read_config(const std::string &config_str,
                  std::vector<pSink> &sinks,
                  std::vector<pTransformer> &transformers) noexcept;
 
+/**
+ * Get the path to an instrument file on disk.
+ *
+ * @param name The name of the instrument.
+ *
+ * @return The path to the instrument config file.
+ */
+std::string instrument_path(const std::string &name) noexcept;
+
+/**
+ * Get the path to an audio clip on disk.
+ *
+ * @param name The name of the clip.
+ *
+ * @return The path to the clip audio file.
+ */
+std::string clip_path(const std::string &name) noexcept;
+
 }  // namespace Looper

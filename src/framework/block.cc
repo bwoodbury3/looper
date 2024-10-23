@@ -19,6 +19,16 @@ bool BlockConfig::get_string(const std::string &key, std::string &value) const
     return true;
 }
 
+bool BlockConfig::get_string_default(const std::string &key,
+                                     const std::string &_default,
+                                     std::string &value) const
+{
+    ASSERT(::Looper::get_string_default(base, key, _default, value),
+           "Error parsing block \"%s\"",
+           name.c_str());
+    return true;
+}
+
 bool BlockConfig::get_int(const std::string &key, int &value) const
 {
     ASSERT(::Looper::get_int(base, key, value),

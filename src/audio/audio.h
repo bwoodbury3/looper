@@ -49,6 +49,16 @@ class InputDevice : public Source
      */
     std::mutex mutex;
 
+    /**
+     * Condition variable.
+     */
+    std::condition_variable cv;
+
+    /**
+     * Condition variable for buffer being full.
+     */
+    bool buffer_full;
+
    private:
     /**
      * Pointer to the portaudio stream.

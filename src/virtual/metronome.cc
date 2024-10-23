@@ -1,6 +1,8 @@
 #include "src/virtual/metronome.h"
 
+#include "src/framework/config.h"
 #include "src/framework/tempo.h"
+#include "src/framework/wav.h"
 
 namespace Looper
 {
@@ -11,6 +13,9 @@ bool Metronome::init()
 {
     QASSERT(configs.get_float_default("freq", freq, freq));
     QASSERT(configs.get_float_default("volume", volume, volume));
+
+    std::string clip_name;
+    QASSERT(configs.get_string_default("sound", "", clip_name));
 
     const size_t num_samples = 0.05 * SAMPLE_RATE;
     const float step = 1.0 / SAMPLE_RATE;
@@ -25,14 +30,28 @@ bool Metronome::init()
                "Metronome only accepts output segments");
     }
 
-    /*
-     * Initialize the little beep tone that plays when the metronome fires.
-     */
-    clip = std::make_shared<audio_clip_t>();
-    clip->resize(num_samples);
-    for (size_t i = 0; i < num_samples; i++)
+    if (clip_name == "")
     {
-        (*clip)[i] = volume * std::sin(PI_2_freq * i * step);
+        /*
+         * If the user didn't specify a sample to play, create a little beep
+         * tone that plays when the metronome fires.
+         */
+        clip = std::make_shared<audio_clip_t>();
+        clip->resize(num_samples);
+        for (size_t i = 0; i < num_samples; i++)
+        {
+            (*clip)[i] = volume * std::sin(PI_2_freq * i * step);
+        }
+    }
+    else
+    {
+        /*
+         * Otherwise load that audio sample in.
+         */
+        const std::string cpath = clip_path(clip_name);
+        ASSERT(read_wav_file(cpath, clip),
+               "Could not read clip \"%s\"",
+               clip_name.c_str());
     }
 
     return true;

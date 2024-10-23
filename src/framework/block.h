@@ -40,6 +40,19 @@ class BlockConfig
     bool get_string(const std::string &key, std::string &value) const;
 
     /**
+     * Get a string from a key with a default value.
+     *
+     * @param key The key
+     * @param _default The default value
+     * @param[out] value The value
+     *
+     * @return True on success.
+     */
+    bool get_string_default(const std::string &key,
+                            const std::string &_default,
+                            std::string &value) const;
+
+    /**
      * Get an int from a key.
      *
      * @param key The key

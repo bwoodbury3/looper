@@ -117,15 +117,26 @@ int audio_input_callback(const void *input_buffer,
     }
 
     /*
+     * Wait until the previous data has been processed.
+     */
+    std::unique_lock<std::mutex> lock(device->mutex);
+    while (device->buffer_full)
+    {
+        device->cv.wait(lock);
+    }
+
+    /*
      * Copy off the device buffer to our internal buffer.
      */
     float *in = (float *)input_buffer;
-    std::lock_guard<std::mutex> lock(device->mutex);
     for (size_t i = 0; i < device->buf.size(); i++)
     {
         device->buf[i] = *in;
         in++;
     }
+
+    device->buffer_full = true;
+    device->cv.notify_one();
 
     return paContinue;
 }
@@ -153,7 +164,10 @@ int audio_output_callback(const void *input_buffer,
      * Wait until the underlying stream is ready to send more data.
      */
     std::unique_lock<std::mutex> lock(device->mutex);
-    device->cv.wait(lock, [device] { return device->buffer_full; });
+    while (!device->buffer_full)
+    {
+        device->cv.wait(lock);
+    }
 
     /*
      * Copy off the device buffer to our internal buffer.
@@ -239,8 +253,17 @@ bool InputDevice::read()
     /*
      * Simple copy.
      */
-    std::lock_guard<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
+    while (!buffer_full)
+    {
+        cv.wait(lock);
+    }
+
     std::copy(std::begin(buf), std::end(buf), std::begin(*stream));
+
+    buffer_full = false;
+    cv.notify_all();
+
     return true;
 }
 
@@ -314,7 +337,10 @@ bool OutputDevice::write()
      * Wait until the underlying stream is ready to receive more data.
      */
     std::unique_lock<std::mutex> lock(mutex);
-    cv.wait(lock, [this] { return !buffer_full; });
+    while (buffer_full)
+    {
+        cv.wait(lock);
+    }
 
     /*
      * Simple copy.

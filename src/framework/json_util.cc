@@ -16,6 +16,18 @@ bool get_string(const json &data, const std::string &key, std::string &value)
     return true;
 }
 
+bool get_string_default(const json &data,
+                        const std::string &key,
+                        const std::string &_default,
+                        std::string &value)
+{
+    if (!data.contains(key))
+    {
+        value = _default;
+    }
+    return get_string(data, key, value);
+}
+
 bool get_int(const json &data, const std::string &key, int &value)
 {
     ASSERT(data.contains(key), "Missing parameter \"%s\"", key.c_str());
