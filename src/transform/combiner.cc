@@ -14,7 +14,7 @@ bool Combiner::init()
 
 bool Combiner::transform()
 {
-    pstream_t stream = output_streams[0];
+    pstream_t& stream = output_streams[0];
     stream->fill(0);
 
     for (const pstream_t& input : input_streams)

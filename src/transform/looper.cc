@@ -92,7 +92,7 @@ bool Loop::transform()
     bool should_play = false;
     for (const auto& interval : replay_segments)
     {
-        if (Tempo::in_measure(interval.start, interval.stop))
+        if (Tempo::in_measure(interval.start, interval.stop, 1.0))
         {
             should_play = true;
             break;

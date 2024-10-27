@@ -95,7 +95,6 @@ bool reset()
                 }
 
                 keys.push_back({c});
-                LOG(DEBUG, "Keypress: %s", keys[i].c_str());
             }
         }
     }

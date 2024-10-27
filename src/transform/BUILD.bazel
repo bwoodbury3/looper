@@ -1,12 +1,40 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "transformers",
-    srcs = ["combiner.cc", "looper.cc"],
-    hdrs = ["combiner.h", "looper.h"],
+    name = "combiner",
+    srcs = ["combiner.cc"],
+    hdrs = ["combiner.h"],
+    deps = [
+        "//src/framework:block",
+    ],
+)
+
+cc_library(
+    name = "looper",
+    srcs = ["looper.cc"],
+    hdrs = ["looper.h"],
     deps = [
         "//src/framework:block",
         "//src/framework:sampler",
         "//src/framework:tempo",
+    ],
+)
+
+cc_library(
+    name = "toggle",
+    srcs = ["toggle.cc"],
+    hdrs = ["toggle.h"],
+    deps = [
+        "//src/framework:block",
+        "//src/framework:tempo",
+    ],
+)
+
+cc_library(
+    name = "transformers",
+    deps = [
+        ":combiner",
+        ":looper",
+        ":toggle",
     ]
 )

@@ -24,6 +24,7 @@ bool get_string_default(const json &data,
     if (!data.contains(key))
     {
         value = _default;
+        return true;
     }
     return get_string(data, key, value);
 }

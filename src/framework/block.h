@@ -323,8 +323,6 @@ static bool register_source(const std::string &tname)
     source_builders[tname] = [](const BlockConfig &configs)
     { return std::make_shared<T>(configs); };
 
-    LOG(DEBUG, "Registered source \"%s\"", tname.c_str());
-
     return true;
 }
 
@@ -344,8 +342,6 @@ static bool register_sink(const std::string &tname)
     sink_builders[tname] = [](const BlockConfig &configs)
     { return std::make_shared<T>(configs); };
 
-    LOG(DEBUG, "Registered sink \"%s\"", tname.c_str());
-
     return true;
 }
 
@@ -364,8 +360,6 @@ static bool register_transformer(const std::string &tname)
 
     transformer_builders[tname] = [](const BlockConfig &configs)
     { return std::make_shared<T>(configs); };
-
-    LOG(DEBUG, "Registered transformer \"%s\"", tname.c_str());
 
     return true;
 }

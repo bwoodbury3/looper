@@ -30,6 +30,11 @@ struct Segment
     float stop;
 
     /**
+     * Optional cue message.
+     */
+    std::string name = "";
+
+    /**
      * The type of segment.
      */
     segment_type_t segment_type;

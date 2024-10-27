@@ -4,7 +4,18 @@
             "bpm": 82,
             "beats_per_measure": 2,
             "beat_duration": 4
-        }
+        },
+        "NOTES": [
+            "Intro is 0-26",
+            "Verse 1 is 26-58",
+            "Chorus 1 is 58-66",
+            "Interlude is 66-70",
+            "Verse 2 is 70-102",
+            "Chorus 2 is 102-110",
+            "Bridge is 110-126",
+            "Build back up 126-134",
+            "Final Chorus is 134-150"
+        ]
     },
     "devices": [
         {
@@ -12,8 +23,31 @@
             "type": "VirtualInstrument",
             "instrument": "drums1",
             "volume": 0.15,
-            "output_channels": ["drums"],
-            "segments": []
+            "segments": [],
+            "output_channels": ["drums"]
+        },
+        {
+            "name": "drums_toggle",
+            "type": "Toggle",
+            "segments": [
+                {
+                    "type": "output",
+                    "start": 9,
+                    "stop": 14
+                },
+                {
+                    "type": "output",
+                    "start": 66,
+                    "stop": 70
+                },
+                {
+                    "type": "output",
+                    "start": 126,
+                    "stop": 134
+                }
+            ],
+            "input_channels": ["drums"],
+            "output_channels": ["drums_toggle"]
         },
         {
             "name": "amp",
@@ -36,7 +70,7 @@
             ]
         },
         {
-            "name": "drum_loop",
+            "name": "verse_drum_loop",
             "type": "Looper",
             "segments": [
                 {
@@ -47,11 +81,77 @@
                 {
                     "type": "output",
                     "start": 14,
-                    "stop": 50
+                    "stop": 64
+                },
+                {
+                    "type": "output",
+                    "start": 70,
+                    "stop": 108
+                },
+                {
+                    "type": "output",
+                    "start": 134,
+                    "stop": 140
+                },
+                {
+                    "type": "output",
+                    "start": 142,
+                    "stop": 148
                 }
             ],
             "input_channels": ["drums"],
-            "output_channels": ["looped_drums"]
+            "output_channels": ["verse_drums"]
+        },
+        {
+            "name": "chorus_drum_loop_fill",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 56,
+                    "stop": 58
+                },
+                {
+                    "type": "output",
+                    "start": 64,
+                    "stop": 66
+                },
+                {
+                    "type": "output",
+                    "start": 108,
+                    "stop": 110
+                },
+                {
+                    "type": "output",
+                    "start": 140,
+                    "stop": 142
+                },
+                {
+                    "type": "output",
+                    "start": 148,
+                    "stop": 150
+                }
+            ],
+            "input_channels": ["drums"],
+            "output_channels": ["chorus_drums_fill"]
+        },
+        {
+            "name": "bridge_drum_loop",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 66,
+                    "stop": 70
+                },
+                {
+                    "type": "output",
+                    "start": 110,
+                    "stop": 126
+                }
+            ],
+            "input_channels": ["drums"],
+            "output_channels": ["bridge_drums"]
         },
         {
             "name": "rhythm_guitar_loop",
@@ -65,7 +165,27 @@
                 {
                     "type": "output",
                     "start": 6,
-                    "stop": 50
+                    "stop": 64
+                },
+                {
+                    "type": "output",
+                    "start": 70,
+                    "stop": 108
+                },
+                {
+                    "type": "output",
+                    "start": 108,
+                    "stop": 110
+                },
+                {
+                    "type": "output",
+                    "start": 130,
+                    "stop": 134
+                },
+                {
+                    "type": "output",
+                    "start": 134,
+                    "stop": 140
                 }
             ],
             "input_channels": ["amp"],
@@ -78,8 +198,10 @@
             "input_channels": [
                 "metronome",
                 "amp",
-                "drums",
-                "looped_drums",
+                "drums_toggle",
+                "verse_drums",
+                "chorus_drums_fill",
+                "bridge_drums",
                 "rhythm_guitar"
             ],
             "output_channels": ["audio_out"]

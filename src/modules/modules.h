@@ -1,6 +1,7 @@
 #include "src/audio/audio.h"
 #include "src/transform/combiner.h"
 #include "src/transform/looper.h"
+#include "src/transform/toggle.h"
 #include "src/virtual/instrument.h"
 #include "src/virtual/metronome.h"
 
@@ -29,6 +30,7 @@ inline void register_all_modules()
      */
     BlockFactory::register_transformer<Combiner>("Combiner");
     BlockFactory::register_transformer<Loop>("Looper");
+    BlockFactory::register_transformer<Toggle>("Toggle");
 }
 
 }  // namespace Looper

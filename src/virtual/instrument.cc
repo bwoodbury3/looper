@@ -2,6 +2,7 @@
 
 #include "src/framework/config.h"
 #include "src/framework/keyboard.h"
+#include "src/framework/tempo.h"
 #include "src/framework/wav.h"
 
 namespace Looper
@@ -45,6 +46,15 @@ bool Instrument::init()
         clips[key] = clip;
     }
 
+    /*
+     * Sanity check that all of the segments are outputs.
+     */
+    for (const auto &segment : segments)
+    {
+        ASSERT(segment.segment_type == segment_type_t::output,
+               "Instrument only accepts output segments");
+    }
+
     return true;
 }
 
@@ -60,7 +70,6 @@ bool Instrument::read()
     {
         if (clips.count(key) == 1)
         {
-            LOG(DEBUG, "Playing sample: %s", key.c_str());
             samplers[key].play(clips[key], false);
         }
     }
@@ -75,6 +84,7 @@ bool Instrument::read()
 
         stream += tmp;
     }
+
     return true;
 }
 

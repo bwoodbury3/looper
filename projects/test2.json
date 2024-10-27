@@ -1,0 +1,94 @@
+{
+    "config": {
+        "tempo": {
+            "bpm": 120,
+            "beats_per_measure": 4,
+            "beat_duration": 4
+        }
+    },
+    "devices": [
+        {
+            "name": "drums",
+            "type": "VirtualInstrument",
+            "instrument": "drums1",
+            "volume": 0.15,
+            "output_channels": ["drums"],
+            "segments": []
+        },
+        {
+            "name": "amp",
+            "type": "AudioInput",
+            "device": "Cable Creation",
+            "segments": [],
+            "output_channels": ["amp"]
+        },
+        {
+            "name": "metronome",
+            "type": "Metronome",
+            "sound": "kick1",
+            "output_channels": ["metronome"],
+            "segments": [
+                {
+                    "type": "output",
+                    "start": 0,
+                    "stop": 7
+                }
+            ]
+        },
+        {
+            "name": "drum_loop",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 6,
+                    "stop": 8
+                },
+                {
+                    "type": "output",
+                    "start": 8,
+                    "stop": 12
+                }
+            ],
+            "input_channels": ["drums"],
+            "output_channels": ["looped_drums"]
+        },
+        {
+            "name": "rhythm_guitar_loop",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 2,
+                    "stop": 4
+                },
+                {
+                    "type": "output",
+                    "start": 4,
+                    "stop": 12
+                }
+            ],
+            "input_channels": ["amp"],
+            "output_channels": ["rhythm_guitar"]
+        },
+        {
+            "name": "combiner",
+            "type": "Combiner",
+            "segments": [],
+            "input_channels": [
+                "metronome",
+                "amp",
+                "looped_drums",
+                "rhythm_guitar"
+            ],
+            "output_channels": ["audio_out"]
+        },
+        {
+            "name": "laptop_speaker",
+            "type": "AudioOutput",
+            "device": "Built-in Output",
+            "segments": [],
+            "input_channels": ["audio_out"]
+        }
+    ]
+}

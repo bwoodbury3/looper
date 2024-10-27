@@ -43,8 +43,9 @@ float current_measure();
  *
  * @param m1 The beginning of the measure interval
  * @param m2 The end of the measure interval
+ * @param step_offset Offset the trigger by step_offset.
  */
-bool in_measure(const float m1, const float m2);
+bool in_measure(const float m1, const float m2, const float step_offset = 0.0);
 
 /**
  * Returns true on the rising edge of the next beat. This is useful if you want

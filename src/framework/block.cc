@@ -90,6 +90,10 @@ bool BlockConfig::get_segments(std::vector<Segment> &segments) const
         ASSERT(::Looper::get_float(json_segment, "stop", segment.stop),
                "Error parsing segments on block %s",
                name.c_str());
+        ASSERT(::Looper::get_string_default(
+                   json_segment, "name", "", segment.name),
+               "Error parsing segments on block %s",
+               name.c_str());
 
         std::string segment_str;
         ASSERT(::Looper::get_string(json_segment, "type", segment_str),
