@@ -2,8 +2,10 @@ import {io} from "/static/socket.io-client.js";
 
 import {
     clear_blocks,
-    update_block,
+    clear_block_callbacks,
     get_all_blocks,
+    on_blocks_changed,
+    update_block,
     Block,
 } from '/static/model/blocks.js';
 import {
@@ -26,8 +28,13 @@ var time_bar = new VerticalBar(1);
 
 var last_monitor_data = {};
 
-// Draw the UI
+/**
+ * Draw the UI
+ */
 export function draw_ui() {
+    layers = [];
+    var m_blocks = get_all_blocks();
+
     ui_main.innerHTML = "";
 
     /* Draw child content */
@@ -37,6 +44,14 @@ export function draw_ui() {
     }
     ui_main.innerHTML += mouse_bar.draw();
     ui_main.innerHTML += time_bar.draw();
+}
+
+/**
+ * Set callbacks
+ */
+export function set_callbacks() {
+    clear_block_callbacks();
+    clear_segment_callbacks();
 
     /* Set event callbacks */
     ruler.set_event_callbacks();
@@ -44,9 +59,13 @@ export function draw_ui() {
     for (const layer of layers) {
         layer.set_event_callbacks();
     }
+
+    on_blocks_changed(draw_ui);
 }
 
-// Initialize UI with default data.
+/**
+ * Initialize UI with default data.
+ */
 function init_default() {
     layers = [];
     for (var i = 0; i < 10; i++) {
@@ -60,9 +79,6 @@ function init_default() {
  * @param {data} data The data to load.
  */
 export function load_project_data(data) {
-    layers = [];
-
-    clear_segment_callbacks();
     clear_blocks();
     clear_segments();
 
@@ -91,7 +107,9 @@ export function load_project_data(data) {
     }
 }
 
-// Get all data from the UI.
+/**
+ * Get all data from the UI.
+ */
 export function get_play_data() {
     var devices = [];
     for (const layer of layers) {
@@ -105,7 +123,9 @@ export function get_play_data() {
     }
 }
 
-// Get all state that needs to be saved to disk.
+/**
+ * Get all state that needs to be saved to disk.
+ */
 export function get_save_data() {
     return {
         blocks: get_all_blocks(),
@@ -115,6 +135,7 @@ export function get_save_data() {
 
 init_default();
 draw_ui();
+set_callbacks();
 
 // Websocket for interfacing with the backend.
 const socket = io("ws://localhost:1080", {

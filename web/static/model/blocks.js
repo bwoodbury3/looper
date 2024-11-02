@@ -3,6 +3,7 @@
  */
 
 var m_blocks = {};
+var l_callbacks = [];
 
 export class Block {
     /**
@@ -54,4 +55,20 @@ export function update_block(id, block) {
  */
 export function clear_blocks() {
     m_blocks = {};
+}
+
+/**
+ * Clear all callbacks.
+ */
+export function clear_block_callbacks() {
+    l_callbacks = [];
+}
+
+/**
+ * Function to call when a blocks are added, removed, or reordered.
+ *
+ * @param {() => void} callback The callback function to run.
+ */
+export function on_blocks_changed(callback) {
+    l_callbacks.push(callback);
 }

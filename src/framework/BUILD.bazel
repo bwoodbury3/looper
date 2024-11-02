@@ -93,6 +93,15 @@ cc_library(
     ]
 )
 
+cc_library(
+    name = "volume",
+    srcs = ["volume.cc"],
+    hdrs = ["volume.h"],
+    deps = [
+        ":datatypes",
+    ]
+)
+
 # Top level API for interfacing with looper.
 cc_library(
     name = "runner",

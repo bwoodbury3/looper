@@ -2,7 +2,8 @@ import {
     draw_ui,
     get_play_data,
     get_save_data,
-    load_project_data
+    load_project_data,
+    set_callbacks,
 } from "/static/ui/ui.js";
 import {options_list} from "/static/ui/util.js";
 
@@ -106,6 +107,7 @@ function load(e) {
                     .then(content => {
                         load_project_data(content);
                         draw_ui();
+                        set_callbacks();
                         modal.hide();
                     });
             }

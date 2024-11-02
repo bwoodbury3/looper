@@ -2,6 +2,7 @@
 
 #include "src/framework/config.h"
 #include "src/framework/tempo.h"
+#include "src/framework/volume.h"
 #include "src/framework/wav.h"
 
 namespace Looper
@@ -52,6 +53,11 @@ bool Metronome::init()
         ASSERT(read_wav_file(cpath, clip),
                "Could not read clip \"%s\"",
                clip_name.c_str());
+
+        /*
+         * Scale the volume.
+         */
+        scale_volume(clip, volume);
     }
 
     return true;

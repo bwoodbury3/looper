@@ -3,6 +3,7 @@
 #include "src/framework/config.h"
 #include "src/framework/keyboard.h"
 #include "src/framework/tempo.h"
+#include "src/framework/volume.h"
 #include "src/framework/wav.h"
 
 namespace Looper
@@ -15,6 +16,9 @@ bool Instrument::init()
     std::string filename;
     ASSERT(configs.get_string("instrument", filename),
            "virtual_instrument must define an \"instrument\" parameter.");
+
+    float volume = 1.0;
+    QASSERT(configs.get_float_default("volume", volume, volume));
 
     /*
      * Load the instrument file as json.
@@ -39,6 +43,11 @@ bool Instrument::init()
         ASSERT(read_wav_file(cpath, clip),
                "Could not read clip \"%s\"",
                clip_name.c_str());
+
+        /*
+         * Scale the volume.
+         */
+        scale_volume(clip, volume);
 
         /*
          * Index the clip into the clip map.

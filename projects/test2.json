@@ -99,6 +99,7 @@
             "type": "Metronome",
             "sound": "hihat-closed1",
             "output_channels": ["metronome"],
+            "volume": 0.15,
             "segments": [
                 {
                     "type": "output",
