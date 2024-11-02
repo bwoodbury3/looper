@@ -1,7 +1,7 @@
 {
     "config": {
         "tempo": {
-            "bpm": 120,
+            "bpm": 75,
             "beats_per_measure": 4,
             "beat_duration": 4
         }
@@ -11,7 +11,7 @@
             "name": "drums",
             "type": "VirtualInstrument",
             "instrument": "drums1",
-            "volume": 0.15,
+            "volume": 0.10,
             "output_channels": ["drums"],
             "segments": []
         },
@@ -23,53 +23,89 @@
             "output_channels": ["amp"]
         },
         {
-            "name": "metronome",
-            "type": "Metronome",
-            "sound": "kick1",
-            "output_channels": ["metronome"],
+            "name": "amp_toggle",
+            "type": "Toggle",
             "segments": [
                 {
                     "type": "output",
                     "start": 0,
                     "stop": 7
-                }
-            ]
-        },
-        {
-            "name": "drum_loop",
-            "type": "Looper",
-            "segments": [
-                {
-                    "type": "input",
-                    "start": 6,
-                    "stop": 8
                 },
                 {
                     "type": "output",
-                    "start": 8,
-                    "stop": 12
-                }
-            ],
-            "input_channels": ["drums"],
-            "output_channels": ["looped_drums"]
-        },
-        {
-            "name": "rhythm_guitar_loop",
-            "type": "Looper",
-            "segments": [
-                {
-                    "type": "input",
-                    "start": 2,
-                    "stop": 4
-                },
-                {
-                    "type": "output",
-                    "start": 4,
-                    "stop": 12
+                    "start": 15,
+                    "stop": 999
                 }
             ],
             "input_channels": ["amp"],
-            "output_channels": ["rhythm_guitar"]
+            "output_channels": ["amp_toggle"]
+        },
+        {
+            "name": "bass_verse2",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 1,
+                    "stop": 3
+                },
+                {
+                    "type": "output",
+                    "start": 13,
+                    "stop": 15
+                }
+            ],
+            "input_channels": ["amp"],
+            "output_channels": ["bass_verse2"]
+        },
+        {
+            "name": "bass_verse1",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 3,
+                    "stop": 7
+                },
+                {
+                    "type": "output",
+                    "start": 7,
+                    "stop": 13
+                }
+            ],
+            "input_channels": ["amp"],
+            "output_channels": ["bass_verse1"]
+        },
+        {
+            "name": "bass_verse",
+            "type": "Looper",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 7,
+                    "stop": 15
+                },
+                {
+                    "type": "output",
+                    "start": 15,
+                    "stop": 47
+                }
+            ],
+            "input_channels": ["bass_verse1", "bass_verse2"],
+            "output_channels": ["bass_verse"]
+        },
+        {
+            "name": "metronome",
+            "type": "Metronome",
+            "sound": "hihat-closed1",
+            "output_channels": ["metronome"],
+            "segments": [
+                {
+                    "type": "output",
+                    "start": 0,
+                    "stop": 21
+                }
+            ]
         },
         {
             "name": "combiner",
@@ -77,9 +113,11 @@
             "segments": [],
             "input_channels": [
                 "metronome",
-                "amp",
-                "looped_drums",
-                "rhythm_guitar"
+                "amp_toggle",
+                "bass_verse1",
+                "bass_verse2",
+                "bass_verse",
+                "drums"
             ],
             "output_channels": ["audio_out"]
         },

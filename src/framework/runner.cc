@@ -61,6 +61,24 @@ bool Runner::run(const std::string config_str)
     }
 
     /*
+     * Flush the input and output buffers. Otherwise we will read garbage input
+     * which produces a huge audio snap at the beginning.
+     */
+    for (size_t i = 0; i < 5; i++)
+    {
+        for (auto& source : sources)
+        {
+            source->read();
+        }
+
+        for (auto& sink : sinks)
+        {
+            sink->stream->fill(0);
+            sink->write();
+        }
+    }
+
+    /*
      * Run!
      */
     while (true)

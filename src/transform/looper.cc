@@ -15,7 +15,7 @@ bool Loop::init()
     /*
      * Looper can only operate on one input/output stream.
      */
-    ASSERT(input_streams.size() == 1, "Must have exactly one input stream");
+    ASSERT(input_streams.size() >= 1, "Must have at least one input stream");
     ASSERT(output_streams.size() == 1, "Must have exactly one output stream");
 
     /*
@@ -66,7 +66,6 @@ bool Loop::init()
 
 bool Loop::transform()
 {
-    const auto& input_stream = input_streams[0];
     auto& output_stream = output_streams[0];
 
     if (Tempo::in_measure(recording_segment.start, recording_segment.stop))
@@ -77,13 +76,21 @@ bool Loop::transform()
         }
 
         /*
+         * Combine all of the input streams.
+         */
+        stream_t temp;
+        temp.fill(0);
+        for (const pstream_t& stream : input_streams)
+        {
+            temp += *stream;
+        }
+
+        /*
          * Concatenate the recording with the new input stream.
          */
         size_t cur_size = recording->size();
-        recording->resize(cur_size + input_stream->size());
-        std::copy(input_stream->begin(),
-                  input_stream->end(),
-                  recording->begin() + cur_size);
+        recording->resize(cur_size + temp.size());
+        std::copy(temp.begin(), temp.end(), recording->begin() + cur_size);
     }
 
     /*
