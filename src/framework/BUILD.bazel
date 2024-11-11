@@ -1,10 +1,51 @@
 load("//python:pybind.bzl", "pybind_extension")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
+# Top level API for interfacing with looper.
+rust_library(
+    name = "runner",
+    srcs = ["runner.rs"],
+    deps = [
+        "//src/audio:audio",
+        ":block",
+        ":config",
+        ":log",
+        ":stream",
+    ]
+)
+
+rust_library(
+    name = "config",
+    srcs = [
+        "config.rs",
+    ],
+    deps = [
+        "@crate_index//:json",
+        ":log",
+    ]
+)
+
+rust_library(
+    name = "stream",
+    srcs = [
+        "stream.rs",
+    ]
+)
+
+rust_library(
+    name = "block",
+    srcs = [
+        "block.rs",
+    ],
+)
+
+rust_library(
     name = "log",
-    hdrs = ["log.h"],
+    srcs = [
+        "log.rs",
+    ],
 )
 
 cc_library(
@@ -20,27 +61,6 @@ cc_library(
 cc_library(
     name = "datatypes",
     hdrs = ["datatypes.h"],
-)
-
-cc_library(
-    name = "stream",
-    srcs = ["stream.cc"],
-    hdrs = ["stream.h"],
-    deps = [
-        ":datatypes",
-        ":log",
-    ],
-)
-
-cc_library(
-    name = "block",
-    srcs = ["block.cc", "segment.cc"],
-    hdrs = ["block.h", "segment.h"],
-    deps = [
-        ":json",
-        ":log",
-        ":stream",
-    ],
 )
 
 cc_library(
@@ -99,20 +119,6 @@ cc_library(
     hdrs = ["volume.h"],
     deps = [
         ":datatypes",
-    ]
-)
-
-# Top level API for interfacing with looper.
-cc_library(
-    name = "runner",
-    srcs = ["runner.cc"],
-    hdrs = ["runner.h"],
-    deps = [
-        "//src/audio:audio",
-        "//src/framework:log",
-        "//src/framework:keyboard",
-        "//src/framework:tempo",
-        "//src/modules:all",
     ]
 )
 

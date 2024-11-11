@@ -15,6 +15,13 @@
             "output_channel": "drums"
         },
         {
+            "name": "amp",
+            "type": "AudioSource",
+            "device": "Built-in Microphone",
+            "segments": [],
+            "output_channels": ["amp"]
+        },
+        {
             "name": "metronome",
             "type": "Metronome",
             "start_measure": 1,
@@ -45,9 +52,9 @@
         },
         {
             "name": "laptop_speaker",
-            "type": "AudioOutput",
+            "type": "AudioSink",
             "device": "Built-in Output",
-            "input_channel": "audio_out"
+            "input_channels": ["amp"]
         }
     ]
 }

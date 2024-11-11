@@ -1,0 +1,7 @@
+exports_files(["rustfmt.toml"])
+
+alias(
+    name = "rustfmt",
+    actual = "@rules_rust//:rustfmt",
+    visibility = ["//visibility:public"],
+)

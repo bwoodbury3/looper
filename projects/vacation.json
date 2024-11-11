@@ -51,7 +51,7 @@
         },
         {
             "name": "amp",
-            "type": "AudioInput",
+            "type": "AudioSource",
             "device": "Cable Creation",
             "segments": [],
             "output_channels": ["amp"]

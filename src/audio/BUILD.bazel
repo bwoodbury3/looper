@@ -1,11 +1,17 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
+rust_library(
     name = "audio",
-    srcs = ["audio.cc"],
-    hdrs = ["audio.h"],
+    srcs = [
+        "audio.rs",
+    ],
     deps = [
-        "@portaudio//:portaudio",
-        "//src/framework",
+        "@crate_index//:portaudio",
+        "//src/framework:block",
+        "//src/framework:config",
+        "//src/framework:log",
+        "//src/framework:stream",
     ]
 )

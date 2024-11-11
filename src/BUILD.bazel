@@ -1,3 +1,5 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
 cc_binary(
     name = "looper",
     srcs = ["main.cc"],
@@ -7,5 +9,15 @@ cc_binary(
     ],
     data = [
         "//projects:dev_configs",
+    ]
+)
+
+rust_binary(
+    name = "looper_rs",
+    srcs = [
+        "main.rs",
+    ],
+    deps = [
+        "//src/framework:runner",
     ]
 )

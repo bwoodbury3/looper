@@ -1,1 +1,3 @@
 build --action_env=BAZEL_CXXOPTS="-std=c++20"
+
+build --@rules_rust//:rustfmt.toml=//:rustfmt.toml
