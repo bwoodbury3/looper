@@ -53,12 +53,15 @@ crates_repository(
     cargo_lockfile = "//:Cargo.lock",
     lockfile = "//:Cargo.Bazel.lock",
     packages = {
-        "portaudio": crate.spec(
-            version = "0.8.0",
+        "hound": crate.spec(
+            version = "3.5.1",
         ),
         "json": crate.spec(
             version = "0.12.4",
-        )
+        ),
+        "portaudio": crate.spec(
+            version = "0.8.0",
+        ),
     },
     # Setting the default package name to `""` forces the use of the macros defined in this repository
     # to always use the root package when looking for dependencies or aliases. This should be considered

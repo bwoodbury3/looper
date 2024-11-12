@@ -9,10 +9,12 @@ rust_library(
     srcs = ["runner.rs"],
     deps = [
         "//src/audio:audio",
+        "//src/virtual:metronome",
         ":block",
         ":config",
         ":log",
         ":stream",
+        ":tempo",
     ]
 )
 
@@ -39,6 +41,9 @@ rust_library(
     srcs = [
         "block.rs",
     ],
+    deps = [
+        ":tempo",
+    ]
 )
 
 rust_library(
@@ -46,6 +51,35 @@ rust_library(
     srcs = [
         "log.rs",
     ],
+)
+
+rust_library(
+    name = "clip",
+    srcs = [
+        "clip.rs",
+    ]
+)
+
+rust_library(
+    name = "sampler",
+    srcs = [
+        "sampler.rs",
+    ],
+    deps = [
+        ":log",
+        ":stream",
+    ]
+)
+
+rust_library(
+    name = "tempo",
+    srcs = [
+        "tempo.rs",
+    ],
+    deps = [
+        ":config",
+        ":stream",
+    ]
 )
 
 cc_library(
@@ -80,37 +114,6 @@ cc_library(
     srcs = ["keyboard.cc"],
     hdrs = ["keyboard.h"],
     deps = [":log"],
-)
-
-cc_library(
-    name = "sampler",
-    srcs = ["sampler.cc"],
-    hdrs = ["sampler.h"],
-    deps = [
-        ":log",
-        ":stream",
-    ]
-)
-
-cc_library(
-    name = "tempo",
-    srcs = ["tempo.cc"],
-    hdrs = ["tempo.h"],
-    deps = [
-        ":json",
-        ":stream",
-    ],
-)
-
-cc_library(
-    name = "wav",
-    srcs = ["wav.cc"],
-    hdrs = ["wav.h"],
-    deps = [
-        "@audiofile//:audiofile",
-        ":log",
-        ":datatypes",
-    ]
 )
 
 cc_library(

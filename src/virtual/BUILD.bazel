@@ -1,19 +1,19 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
-    name = "virtual",
-    srcs = ["instrument.cc", "metronome.cc"],
-    hdrs = ["instrument.h", "metronome.h"],
-    deps = [
-        "//src/framework:framework",
-        "//src/framework:keyboard",
-        "//src/framework:sampler",
-        "//src/framework:tempo",
-        "//src/framework:volume",
-        "//src/framework:wav",
+rust_library(
+    name = "metronome",
+    srcs = [
+        "metronome.rs",
     ],
-    data = [
-        "//assets/clips",
-        "//assets/instruments",
+    deps = [
+        "//src/audio:wav",
+        "//src/framework:block",
+        "//src/framework:config",
+        "//src/framework:log",
+        "//src/framework:sampler",
+        "//src/framework:stream",
+        "//src/framework:tempo",
     ]
 )

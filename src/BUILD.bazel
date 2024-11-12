@@ -1,23 +1,15 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
-cc_binary(
-    name = "looper",
-    srcs = ["main.cc"],
-    deps = [
-        "//src/framework:runner",
-        "//src/modules:all",
-    ],
-    data = [
-        "//projects:dev_configs",
-    ]
-)
-
 rust_binary(
-    name = "looper_rs",
+    name = "looper",
     srcs = [
         "main.rs",
     ],
     deps = [
         "//src/framework:runner",
+    ],
+    data = [
+        "//assets/clips:clips",
+        "//assets/instruments:instruments",
     ]
 )

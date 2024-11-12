@@ -1,16 +1,52 @@
+//! Looper config parsing crate.
+//!
+//! Initialize a new project with:
+//! ```
+//! let project = ProjectConfig::new("my_project.json");
+//! ```
+//!
+//! Blocks typically require a BlockConfig as a configuration input, from which they can read in
+//! their runtime configuration. This includes things like input/output streams, Segments for when
+//! the block is active, and more.
+//!
+//! BlockConfig uses generic type-safe key/value accessors to retrieve config parameters. Blocks
+//! should read in all config values in their initialization function (::new) like so:
+//! ```
+//! extern crate config;
+//!
+//! impl MyBlock {
+//!     pub fn new(
+//!         config: &config::BlockConfig,
+//!         stream_catalog: &mut stream::StreamCatalog
+//!     ) -> Result<Self, ()> {
+//!         let int_param = config.get_int("int_param")?;
+//!         let str_param = config.get_str("str_param")?;
+//!         ...
+//!     }
+//! }
+//! ```
+
 extern crate json;
 extern crate log;
 
-/// Block configuration.
+/// Configuration for a single Block.
 pub struct BlockConfig {
+    /// The name of the block. This name is completely arbitrary and is only used as an identifier.
     pub name: String,
+
+    /// The type of block. This is used by framework code to determine which Block to instantiate.
     pub block_type: String,
-    pub root: json::JsonValue,
+
+    /// The root json config object.
+    root: json::JsonValue,
 }
 
 /// Top level config.
 pub struct ProjectConfig {
+    /// Global configuration parameters.
     pub global_config: json::JsonValue,
+
+    /// The list of blocks.
     pub blocks: Vec<BlockConfig>,
 }
 
@@ -59,10 +95,15 @@ macro_rules! abort_config {
     };
 }
 
+/// Get the path of an audio clip.
+pub fn clip_path(clip_name: &str) -> String {
+    return format!("assets/clips/{}.wav", clip_name);
+}
+
 impl BlockConfig {
     /// Get a JsonValue from a key. Returns an error if the value is not present.
     /// i.e. obj.is_null() returns true.
-    pub fn get_value(&self, key: &str) -> Result<&json::JsonValue, ()> {
+    fn get_value(&self, key: &str) -> Result<&json::JsonValue, ()> {
         let value = &self.root[key];
         abort_config!(value.is_null(), self.name, key, "Missing required parameter");
         Ok(value)
@@ -75,9 +116,29 @@ impl BlockConfig {
         Ok(value.as_str().ok_or(())?)
     }
 
+    /// Get an optional string value from config with a default.
+    pub fn get_str_opt<'a>(&'a self, key: &str, default: &'a str) -> Result<&str, ()> {
+        let value = &self.root[key];
+        if value.is_null() {
+            return Ok(default);
+        }
+        abort_config!(!value.is_string(), self.name, key, "Expected a string value");
+        Ok(value.as_str().ok_or(())?)
+    }
+
     /// Get an int value from config.
-    pub fn get_int(&self, key: &str) -> Result<i32, ()> {
+    pub fn get_i32(&self, key: &str) -> Result<i32, ()> {
         let value = self.get_value(key)?;
+        abort_config!(!value.is_number(), self.name, key, "Expected a number");
+        Ok(value.as_i32().ok_or(())?)
+    }
+
+    /// Get an optional string value from config with a default.
+    pub fn get_i32_opt(&self, key: &str, default: &i32) -> Result<i32, ()> {
+        let value = &self.root[key];
+        if value.is_null() {
+            return Ok(*default);
+        }
         abort_config!(!value.is_number(), self.name, key, "Expected a number");
         Ok(value.as_i32().ok_or(())?)
     }
@@ -85,17 +146,11 @@ impl BlockConfig {
     /// Get a list of output channels
     pub fn get_str_list(&self, key: &str) -> Result<Vec<&str>, ()> {
         let list = self.get_value(key)?;
-        if !list.is_array() {
-            println!("{}[\"{}\"] must be an array!", self.name, key);
-            return Err(());
-        }
+        abort_config!(!list.is_array(), self.name, key, "Expected a list of strings");
 
         let mut str_list: Vec<&str> = Vec::new();
         for member in list.members() {
-            if !member.is_string() {
-                println!("All list items of {}[\"{}\"] must be strings", self.name, key);
-                return Err(());
-            }
+            abort_config!(!member.is_string(), self.name, key, "Expected a list of strings");
             str_list.push(member.as_str().ok_or(())?);
         }
 

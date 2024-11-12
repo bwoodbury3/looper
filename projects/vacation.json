@@ -54,7 +54,7 @@
             "type": "AudioSource",
             "device": "Cable Creation",
             "segments": [],
-            "output_channels": ["amp"]
+            "output_channel": "amp"
         },
         {
             "name": "metronome",
@@ -211,7 +211,7 @@
             "type": "AudioOutput",
             "device": "Built-in Output",
             "segments": [],
-            "input_channels": ["audio_out"]
+            "input_channel": "audio_out"
         }
     ]
 }

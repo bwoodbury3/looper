@@ -1,8 +1,27 @@
+//! Audio I/O Blocks.
+//!
+//! AudioSource [Source]:
+//!     Required parameters:
+//!         name: Anything
+//!         type: "AudioSource"
+//!         device: The name of the audio device on your computer. Leave empty and the resulting
+//!                 error message will print a list of available devices.
+//!         output_channel: The output channel.
+//!
+//! AudioSink [Sink]:
+//!     Required parameters:
+//!         name: Anything
+//!         type: "AudioSink"
+//!         device: The name of the audio device on your computer. Leave empty and the resulting
+//!                 error message will print a list of available devices.
+//!         input_channel: The output channel.
+
 extern crate portaudio;
 
 extern crate block;
 extern crate config;
 extern crate stream;
+extern crate tempo;
 
 use portaudio::{stream_flags::Flags, Blocking, DeviceIndex, DeviceInfo, Flow, PortAudio};
 
@@ -56,7 +75,8 @@ fn get_device_index<'a>(
 
 // Audio Blocks
 
-/// An audio source.
+/// A valid Source Block which derives input from system audio hardware. This could be an external
+/// USB microphone, an audio jack, or a built-in microphone.
 pub struct AudioSource {
     /// The block name.
     name: String,
@@ -68,7 +88,7 @@ pub struct AudioSource {
     stream: stream::Stream,
 }
 
-/// An audio sink.
+/// A valid Sink Block which writes a stream to a hardware speaker.
 pub struct AudioSink {
     /// The block name.
     name: String,
@@ -80,8 +100,6 @@ pub struct AudioSink {
     stream: stream::Stream,
 }
 
-/// A valid Source Block which derives input from system audio hardware. This could be an external
-/// USB microphone, an audio jack, or a built-in microphone.
 impl AudioSource {
     /// Initialize a PortAudio AudioSource block.
     pub fn new(
@@ -89,13 +107,12 @@ impl AudioSource {
         stream_catalog: &mut stream::StreamCatalog,
         pa: &PortAudio,
     ) -> Result<Self, ()> {
-        // Read in args.
-        let output_streams = config.get_str_list("output_channels")?;
+        // Read in parameters.
+        let output_stream = config.get_str("output_channel")?;
         let device_name = config.get_str("device")?;
 
         // Load streams.
-        log::abort_if_msg!(output_streams.len() != 1, "AudioSource must have one output channel");
-        let stream = stream_catalog.create_source(output_streams[0])?;
+        let stream = stream_catalog.create_source(output_stream)?;
 
         // PortAudio wizardry follows...
 
@@ -122,7 +139,7 @@ impl AudioSource {
             pa.open_blocking_stream(settings),
             format!("Error opening audio channel \"{}\"", device_name)
         );
-        pa_stream.start();
+        log::unwrap_abort!(pa_stream.start());
 
         Ok(AudioSource {
             name: config.name.to_owned(),
@@ -149,7 +166,6 @@ impl AudioSource {
     }
 }
 
-/// A valid Sink Block which writes a stream to a hardware speaker.
 impl AudioSink {
     /// Initialize a PortAudio AudioSink block.
     pub fn new(
@@ -157,13 +173,12 @@ impl AudioSink {
         stream_catalog: &mut stream::StreamCatalog,
         pa: &PortAudio,
     ) -> Result<Self, ()> {
-        // Read in args.
-        let input_streams = config.get_str_list("input_channels")?;
+        // Read in parameters.
+        let input_stream = config.get_str("input_channel")?;
         let device_name = config.get_str("device")?;
 
         // Load streams.
-        log::abort_if_msg!(input_streams.len() != 1, "AudioSink must have one input channel");
-        let stream = stream_catalog.bind_sink(input_streams[0])?;
+        let stream = stream_catalog.bind_sink(input_stream)?;
 
         // PortAudio wizardry follows...
 
@@ -190,7 +205,7 @@ impl AudioSink {
             pa.open_blocking_stream(settings),
             format!("Error opening audio channel \"{}\"", device_name)
         );
-        pa_stream.start();
+        log::unwrap_abort!(pa_stream.start());
 
         Ok(AudioSink {
             name: config.name.to_owned(),
@@ -218,7 +233,7 @@ impl AudioSink {
 }
 
 impl block::Source for AudioSource {
-    fn read(&mut self) {
+    fn read(&mut self, _: &tempo::Tempo) {
         let mut stream = (*self.stream).borrow_mut();
 
         let mut index: usize = 0;
@@ -246,7 +261,7 @@ impl block::Source for AudioSource {
 }
 
 impl block::Sink for AudioSink {
-    fn write(&mut self) {
+    fn write(&mut self, _: &tempo::Tempo) {
         let stream = (*self.stream).borrow();
 
         let mut index: usize = 0;

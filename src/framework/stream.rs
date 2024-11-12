@@ -1,3 +1,15 @@
+//! Trivial streaming library
+//!
+//! A Stream is a Rc<RefCell<?>> wrapper around a Sample array with runtime checks for
+//! simultaneous borrows between blocks.
+//!
+//! Streams should be queried at Block initialization (::new) with a reference saved off for use
+//! at runtime.
+//!
+//! All output/source streams are considered read/write and must be *created* using create_source()
+//! while input/sink streams should only use bind_sink(). This assumption is baked into the runtime
+//! control flow and if not followed will cause projects to fail to load.
+
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -14,7 +26,11 @@ pub const SAMPLES_PER_BUFFER: usize = 256;
 pub const SAMPLE_RATE: i32 = 44100;
 
 /// Stream type shorthand.
-pub type Stream = Rc<RefCell<[Sample; SAMPLES_PER_BUFFER]>>;
+pub type RawStream = [Sample; SAMPLES_PER_BUFFER];
+pub type Stream = Rc<RefCell<RawStream>>;
+
+/// A variable-sized audio clip.
+pub type Clip = Rc<RefCell<Vec<Sample>>>;
 
 /// A catalog of streams.
 pub struct StreamCatalog {

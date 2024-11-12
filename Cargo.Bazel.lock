@@ -1,5 +1,5 @@
 {
-  "checksum": "4b6f067943aa81e1724ec80480cd1db28f6eb1cc6b7b0b12675d08785a018327",
+  "checksum": "d34834642c37a0a5960b5f25b4afc2235fe25daf4c4b420f51e3ce50ffe90bac",
   "crates": {
     "autocfg 1.4.0": {
       "name": "autocfg",
@@ -106,6 +106,10 @@
         "deps": {
           "common": [
             {
+              "id": "hound 3.5.1",
+              "target": "hound"
+            },
+            {
               "id": "json 0.12.4",
               "target": "json"
             },
@@ -122,6 +126,44 @@
       "license": null,
       "license_ids": [],
       "license_file": null
+    },
+    "hound 3.5.1": {
+      "name": "hound",
+      "version": "3.5.1",
+      "package_url": "https://github.com/ruuda/hound",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/hound/3.5.1/download",
+          "sha256": "62adaabb884c94955b19907d60019f4e145d091c75345379e70d1ee696f7854f"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "hound",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "hound",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "3.5.1"
+      },
+      "license": "Apache-2.0",
+      "license_ids": [
+        "Apache-2.0"
+      ],
+      "license_file": "license"
     },
     "json 0.12.4": {
       "name": "json",
@@ -926,6 +968,7 @@
     ]
   },
   "direct_deps": [
+    "hound 3.5.1",
     "json 0.12.4",
     "portaudio 0.8.0"
   ],

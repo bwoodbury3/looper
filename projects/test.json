@@ -19,14 +19,11 @@
             "type": "AudioSource",
             "device": "Built-in Microphone",
             "segments": [],
-            "output_channels": ["amp"]
+            "output_channel": "amp"
         },
         {
             "name": "metronome",
             "type": "Metronome",
-            "start_measure": 1,
-            "stop_measure": 4,
-            "freq": 440.0,
             "output_channel": "metronome"
         },
         {
@@ -54,7 +51,7 @@
             "name": "laptop_speaker",
             "type": "AudioSink",
             "device": "Built-in Output",
-            "input_channels": ["amp"]
+            "input_channel": "metronome"
         }
     ]
 }

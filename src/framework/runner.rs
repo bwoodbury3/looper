@@ -1,10 +1,24 @@
+//! The main control loop for running Looper.
+//!
+//! ```
+//! let runner = Runner::new("my_project.json")?;
+//! let _ = runner.run();
+//! ```
+
 extern crate audio;
 extern crate block;
 extern crate config;
 extern crate log;
+extern crate metronome;
+extern crate tempo;
 
+/// Top level looper runner.
 pub struct Runner {
+    /// The project configuration.
     project: config::ProjectConfig,
+
+    /// The tempo state.
+    tempo: tempo::Tempo,
 }
 
 impl Runner {
@@ -12,13 +26,14 @@ impl Runner {
     pub fn new(filename: &str) -> Result<Self, String> {
         // Read in configuration
         let project = config::ProjectConfig::new(filename)?;
+        let tempo = log::unwrap_abort_str!(tempo::Tempo::new(&project));
 
         // Initialize the runner.
-        Ok(Runner { project: project })
+        Ok(Runner { project: project, tempo: tempo })
     }
 
     /// Run!
-    pub fn run(&self) -> Result<(), ()> {
+    pub fn run(&mut self) -> Result<(), ()> {
         // Initialize portaudio.
         let pa = log::unwrap_abort!(audio::pa_get());
 
@@ -36,6 +51,10 @@ impl Runner {
                 // SOURCES
                 "AudioSource" => {
                     let source = audio::AudioSource::new(block_config, &mut stream_catalog, &pa)?;
+                    sources.push(Box::new(source));
+                }
+                "Metronome" => {
+                    let source = metronome::Metronome::new(block_config, &mut stream_catalog)?;
                     sources.push(Box::new(source));
                 }
 
@@ -56,21 +75,23 @@ impl Runner {
         // Flush all of the input buffers.
         for _ in 0..3 {
             for source in &mut sources {
-                source.read();
+                source.read(&self.tempo);
             }
         }
 
         // Run all of the blocks.
         loop {
             for source in &mut sources {
-                source.read();
+                source.read(&self.tempo);
             }
             for transformer in &mut transformers {
-                transformer.transform();
+                transformer.transform(&self.tempo);
             }
             for sink in &mut sinks {
-                sink.write();
+                sink.write(&self.tempo);
             }
+
+            self.tempo.step();
         }
     }
 }

@@ -13,5 +13,18 @@ rust_library(
         "//src/framework:config",
         "//src/framework:log",
         "//src/framework:stream",
+        "//src/framework:tempo",
+    ]
+)
+
+rust_library(
+    name = "wav",
+    srcs = [
+        "wav.rs",
+    ],
+    deps = [
+        "@crate_index//:hound",
+        "//src/framework:log",
+        "//src/framework:stream",
     ]
 )
