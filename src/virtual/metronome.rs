@@ -1,4 +1,4 @@
-//! Metronome Blocks.
+//! Metronome Block.
 //!
 //! Metronome [Source]:
 //!     Required parameters:

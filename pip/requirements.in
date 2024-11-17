@@ -1,5 +1,0 @@
-# This file is the input list of requirements. Run the following command after
-# any changes:
-#     $ bazel run //pip:requirements.update
-flask>=3.0.3
-flask-socketio>=5.3.6

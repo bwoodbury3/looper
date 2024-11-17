@@ -1,22 +1,6 @@
 workspace(name = "looper")
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-http_archive(
-    name = "json",
-    url = "https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.zip",
-    integrity = "sha256-BAIrBdgG61/3MCPCgLaGl9Erk+G3JnoLIqGjnsdXgGk=",
-    strip_prefix = "json-3.11.3",
-)
-
-http_archive(
-    name = "audiofile",
-    url = "https://github.com/adamstark/AudioFile/archive/refs/tags/1.1.1.zip",
-    integrity = "sha256-0xvupTILmd5q3vgmk2TH09hnDnba3rcJ2U89htMcW0Y=",
-    strip_prefix = "AudioFile-1.1.1",
-    build_file = "@//external/audiofile:BUILD.bazel",
-)
 
 # rules_rust + transitive dependencies.
 
@@ -38,6 +22,10 @@ rust_register_toolchains(
         "1.76.0"
     ],
 )
+
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+
+rust_analyzer_dependencies()
 
 # External crates
 # https://bazelbuild.github.io/rules_rust/crate_universe.html
@@ -74,63 +62,3 @@ crates_repository(
 load("@crate_index//:defs.bzl", "crate_repositories")
 
 crate_repositories()
-
-# rules_python + transitive dependencies.
-http_archive(
-    name = "rules_python",
-    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.33.2.zip",
-    integrity = "sha256-b+dHxDBl0XFnw+ag5ec6YzUpfKTcJkiAyxFF7G9K3JA=",
-    strip_prefix = "rules_python-0.33.2",
-)
-
-load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
-py_repositories()
-python_register_toolchains(
-    name = "python_3_11",
-    python_version = "3.11",
-)
-register_toolchains("@python_3_11//:all")
-
-# pip repositories
-load("@python_3_11//:defs.bzl", "interpreter")
-load("@rules_python//python:pip.bzl", "package_annotation", "pip_parse")
-pip_parse(
-    name = "pip_deps",
-    python_interpreter_target = interpreter,
-    requirements_lock = "//pip:requirements_lock.txt",
-)
-
-load("@pip_deps//:requirements.bzl", install_pip_deps = "install_deps")
-install_pip_deps()
-
-http_archive(
-  name = "pybind11",
-  url = "https://github.com/pybind/pybind11/archive/v2.12.0.zip",
-  integrity = "sha256-QR93OAxDeYUGs57FlPx/K1MqE8TbZ0/PKxyjRO+u+2g=",
-  strip_prefix = "pybind11-2.12.0",
-  build_file_content = """
-cc_library(
-    name = "pybind11",
-    hdrs = glob(
-        include = [
-            "include/pybind11/**/*.h",
-        ],
-        exclude = [
-            # Deprecated file that just emits a warning
-            "include/pybind11/common.h",
-        ],
-    ),
-    copts = [
-        "-fexceptions",
-        # Useless warnings
-        "-Xclang-only=-Wno-undefined-inline",
-        "-Xclang-only=-Wno-pragma-once-outside-header",
-        "-Xgcc-only=-Wno-error",  # no way to just disable the pragma-once warning in gcc
-    ],
-    includes = ["include"],
-    visibility = ["//visibility:public"],
-    deps = ["@python_3_11//:python_headers"]
-)
-"""
-)
-

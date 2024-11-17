@@ -17,22 +17,3 @@ rust_library(
         "//src/framework:tempo",
     ],
 )
-
-cc_library(
-    name = "combiner",
-    srcs = ["combiner.cc"],
-    hdrs = ["combiner.h"],
-    deps = [
-        "//src/framework:block",
-    ],
-)
-
-cc_library(
-    name = "toggle",
-    srcs = ["toggle.cc"],
-    hdrs = ["toggle.h"],
-    deps = [
-        "//src/framework:block",
-        "//src/framework:tempo",
-    ],
-)

@@ -136,6 +136,7 @@ impl block::Transformer for Looper {
         }
 
         // If we're not playing and we should be, start the sampler. Otherwise turn it off.
+        let mut output_stream = self.output_stream.borrow_mut();
         if should_play {
             if !self.sampler.is_playing() {
                 println!("Playing loop: {}", self.name);
@@ -143,10 +144,9 @@ impl block::Transformer for Looper {
             }
         } else {
             self.sampler.stop();
+            output_stream.fill(0.0);
         }
 
-        let mut output_stream = self.output_stream.borrow_mut();
-        output_stream.fill(0.0);
         self.sampler.next(&mut output_stream);
     }
 }

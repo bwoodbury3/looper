@@ -85,19 +85,3 @@ rust_library(
         ":log",
     ]
 )
-
-cc_library(
-    name = "keyboard",
-    srcs = ["keyboard.cc"],
-    hdrs = ["keyboard.h"],
-    deps = [":log"],
-)
-
-cc_library(
-    name = "volume",
-    srcs = ["volume.cc"],
-    hdrs = ["volume.h"],
-    deps = [
-        ":datatypes",
-    ]
-)
