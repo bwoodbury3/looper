@@ -15,13 +15,6 @@
             "output_channel": "drums"
         },
         {
-            "name": "amp",
-            "type": "AudioSource",
-            "device": "Built-in Microphone",
-            "segments": [],
-            "output_channel": "amp"
-        },
-        {
             "name": "metronome",
             "type": "Metronome",
             "output_channel": "metronome",
@@ -32,24 +25,6 @@
                     "type": "output"
                 }
             ]
-        },
-        {
-            "name": "metronome_loop",
-            "type": "Loop",
-            "segments": [
-                {
-                    "start": 1,
-                    "stop": 2,
-                    "type": "input"
-                },
-                {
-                    "start": 2,
-                    "stop": 3,
-                    "type": "output"
-                }
-            ],
-            "input_channels": ["metronome"],
-            "output_channel": "metronome_looped"
         },
         {
             "name": "combiner",

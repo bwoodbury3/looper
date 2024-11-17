@@ -13,24 +13,39 @@ pub fn read_wav_file(filename: &str) -> Result<stream::Clip, ()> {
         hound::WavReader::open(filename),
         format!("Could not load {} as a wav", filename)
     );
-    // Initialize an empty clip.
-    let mut clip: Vec<stream::Sample> = Vec::with_capacity(reader.len() as usize);
 
     // Read in and convert samples.
     let spec = reader.spec();
+    let num_channels = spec.channels as usize;
+    let clip_size = (reader.len() as usize) / num_channels;
+
+    // Initialize an empty clip.
+    let mut clip: Vec<stream::Sample> = Vec::with_capacity(clip_size);
+
     match spec.sample_format {
         hound::SampleFormat::Int => {
             let samples = reader.samples::<i32>();
-            for sample in samples {
-                let val = log::unwrap_abort!(sample);
-                clip.push(SampleConverter::<stream::Sample>::from_int(val, spec.bits_per_sample));
+            for (i, sample) in samples.enumerate() {
+                // TODO: Support multiple channels.
+                // Channels are interleaved, so if we only want channel '0' we need to grab every
+                // nth sample.
+                if i % num_channels == 0 {
+                    let val = log::unwrap_abort!(sample);
+                    clip.push(SampleConverter::<stream::Sample>::from_int(
+                        val,
+                        spec.bits_per_sample,
+                    ));
+                }
             }
         }
         hound::SampleFormat::Float => {
             let samples = reader.samples::<f32>();
-            for sample in samples {
-                let val = log::unwrap_abort!(sample);
-                clip.push(SampleConverter::<stream::Sample>::from_float(val));
+            for (i, sample) in samples.enumerate() {
+                // TODO: Support multiple channels.
+                if i % num_channels == 0 {
+                    let val = log::unwrap_abort!(sample);
+                    clip.push(SampleConverter::<stream::Sample>::from_float(val));
+                }
             }
         }
     }
