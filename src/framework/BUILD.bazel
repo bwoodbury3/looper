@@ -1,4 +1,3 @@
-load("//python:pybind.bzl", "pybind_extension")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -9,6 +8,7 @@ rust_library(
     srcs = ["runner.rs"],
     deps = [
         "//src/audio:audio",
+        "//src/transform:looper",
         "//src/virtual:metronome",
         ":block",
         ":config",
@@ -87,33 +87,6 @@ rust_library(
 )
 
 cc_library(
-    name = "json",
-    srcs = ["json_util.cc"],
-    hdrs = ["json_util.h"],
-    deps = [
-        "@json//:json",
-        ":log",
-    ],
-)
-
-cc_library(
-    name = "datatypes",
-    hdrs = ["datatypes.h"],
-)
-
-cc_library(
-    name = "framework",
-    srcs = ["config.cc"],
-    hdrs = ["config.h", "time.h"],
-    deps = [
-        "@json//:json",
-        ":block",
-        ":log",
-        ":tempo",
-    ],
-)
-
-cc_library(
     name = "keyboard",
     srcs = ["keyboard.cc"],
     hdrs = ["keyboard.h"],
@@ -127,16 +100,4 @@ cc_library(
     deps = [
         ":datatypes",
     ]
-)
-
-pybind_extension(
-    name = "looper",
-    srcs = ["runner_py.cc"],
-    deps = [":runner"],
-)
-
-py_library(
-    name = "looper",
-    data = [":looper.so"],
-    imports = ["."],
 )

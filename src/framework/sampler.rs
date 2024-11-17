@@ -51,7 +51,7 @@ impl Sampler {
     }
 
     /// Play some samples.
-    pub fn playing(&self) -> bool {
+    pub fn is_playing(&self) -> bool {
         return self.is_playing;
     }
 

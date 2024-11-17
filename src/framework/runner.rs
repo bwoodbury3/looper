@@ -9,6 +9,7 @@ extern crate audio;
 extern crate block;
 extern crate config;
 extern crate log;
+extern crate looper;
 extern crate metronome;
 extern crate tempo;
 
@@ -62,6 +63,10 @@ impl Runner {
                 }
 
                 // TRANSFORMERS
+                "Loop" => {
+                    let tform = looper::Looper::new(block_config, &mut stream_catalog)?;
+                    transformers.push(Box::new(tform));
+                }
 
                 // SINKS
                 // Sinks do not get mutable references to StreamCatalog because

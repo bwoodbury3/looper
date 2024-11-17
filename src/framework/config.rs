@@ -195,7 +195,7 @@ impl BlockConfig {
         }
 
         // Read in the segment config list.
-        abort_config!(!list.is_array(), self.name, SEGMENTS_KEY, "segments must be a list");
+        abort_config!(!list.is_array(), self.name, SEGMENTS_KEY, "Segments must be a list");
         for member in list.members() {
             abort_config!(
                 !member.is_object(),
@@ -210,6 +210,13 @@ impl BlockConfig {
                 Some(s) => Some(s.to_owned()),
                 None => None,
             };
+
+            abort_config!(
+                start > stop,
+                self.name,
+                SEGMENTS_KEY,
+                "Segment start must be < segment stop"
+            );
 
             segments.push(segment::Segment {
                 start: start,

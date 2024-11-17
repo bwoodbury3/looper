@@ -34,19 +34,22 @@
             ]
         },
         {
-            "name": "drum_loop",
+            "name": "metronome_loop",
             "type": "Loop",
-            "start_measure": 2,
-            "stop_measure": 3,
-            "replay_intervals": [
+            "segments": [
                 {
-                    "start_measure": 3,
-                    "stop_measure": 6,
-                    "offset": 0
+                    "start": 1,
+                    "stop": 2,
+                    "type": "input"
+                },
+                {
+                    "start": 2,
+                    "stop": 3,
+                    "type": "output"
                 }
             ],
-            "input_channels": ["drums"],
-            "output_channels": ["looped_drums"]
+            "input_channels": ["metronome"],
+            "output_channel": "metronome_looped"
         },
         {
             "name": "combiner",
@@ -58,7 +61,7 @@
             "name": "laptop_speaker",
             "type": "AudioSink",
             "device": "Built-in Output",
-            "input_channel": "metronome"
+            "input_channel": "metronome_looped"
         }
     ]
 }
