@@ -7,7 +7,7 @@
 //!
 //! Blocks typically require a BlockConfig as a configuration input, from which they can read in
 //! their runtime configuration. This includes things like input/output streams, Segments for when
-//! the block is active, and more.
+//! the block is active, and more. Users configure this in the json "devices" list.
 //!
 //! BlockConfig uses generic type-safe key/value accessors to retrieve config parameters. Blocks
 //! should read in all config values in their initialization function (::new) like so:
@@ -25,9 +25,19 @@
 //!     }
 //! }
 //! ```
+//!
+//! Block configuration supports the following generic parameters that can be configured by users.
+//!  - str
+//!  - i32
+//!  - f32
+//!  - Vec<str>
+//!  - Vec<segment::Segment>
 
 extern crate json;
 extern crate log;
+extern crate segment;
+
+const SEGMENTS_KEY: &str = "segments";
 
 /// Configuration for a single Block.
 pub struct BlockConfig {
@@ -133,7 +143,7 @@ impl BlockConfig {
         Ok(value.as_i32().ok_or(())?)
     }
 
-    /// Get an optional string value from config with a default.
+    /// Get an optional int value from config with a default.
     pub fn get_i32_opt(&self, key: &str, default: &i32) -> Result<i32, ()> {
         let value = &self.root[key];
         if value.is_null() {
@@ -143,7 +153,24 @@ impl BlockConfig {
         Ok(value.as_i32().ok_or(())?)
     }
 
-    /// Get a list of output channels
+    /// Get a float value from config.
+    pub fn get_f32(&self, key: &str) -> Result<f32, ()> {
+        let value = self.get_value(key)?;
+        abort_config!(!value.is_number(), self.name, key, "Expected a number");
+        Ok(value.as_f32().ok_or(())?)
+    }
+
+    /// Get an optional float value from config with a default.
+    pub fn get_f32_opt(&self, key: &str, default: &f32) -> Result<f32, ()> {
+        let value = &self.root[key];
+        if value.is_null() {
+            return Ok(*default);
+        }
+        abort_config!(!value.is_number(), self.name, key, "Expected a number");
+        Ok(value.as_f32().ok_or(())?)
+    }
+
+    /// Get a list of output channels.
     pub fn get_str_list(&self, key: &str) -> Result<Vec<&str>, ()> {
         let list = self.get_value(key)?;
         abort_config!(!list.is_array(), self.name, key, "Expected a list of strings");
@@ -155,5 +182,43 @@ impl BlockConfig {
         }
 
         Ok(str_list)
+    }
+
+    /// Get the segments.
+    pub fn get_segments(&self) -> Result<Vec<segment::Segment>, ()> {
+        let mut segments: Vec<segment::Segment> = Vec::new();
+
+        // segments is not required. Return empty list if it's missing.
+        let list = &self.root[SEGMENTS_KEY];
+        if list.is_null() {
+            return Ok(segments);
+        }
+
+        // Read in the segment config list.
+        abort_config!(!list.is_array(), self.name, SEGMENTS_KEY, "segments must be a list");
+        for member in list.members() {
+            abort_config!(
+                !member.is_object(),
+                self.name,
+                SEGMENTS_KEY,
+                "Each segment must be an object"
+            );
+            let start = log::unwrap_abort!(member["start"].as_f32().ok_or(()));
+            let stop = log::unwrap_abort!(member["stop"].as_f32().ok_or(()));
+            let type_str = log::unwrap_abort!(member["type"].as_str().ok_or(()));
+            let name = match member["name"].as_str() {
+                Some(s) => Some(s.to_owned()),
+                None => None,
+            };
+
+            segments.push(segment::Segment {
+                start: start,
+                stop: stop,
+                segment_type: segment::SegmentType::from(type_str),
+                name: name,
+            })
+        }
+
+        Ok(segments)
     }
 }

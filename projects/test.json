@@ -24,7 +24,14 @@
         {
             "name": "metronome",
             "type": "Metronome",
-            "output_channel": "metronome"
+            "output_channel": "metronome",
+            "segments": [
+                {
+                    "start": 1,
+                    "stop": 2,
+                    "type": "output"
+                }
+            ]
         },
         {
             "name": "drum_loop",

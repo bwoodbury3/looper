@@ -29,7 +29,10 @@ impl Runner {
         let tempo = log::unwrap_abort_str!(tempo::Tempo::new(&project));
 
         // Initialize the runner.
-        Ok(Runner { project: project, tempo: tempo })
+        Ok(Runner {
+            project: project,
+            tempo: tempo,
+        })
     }
 
     /// Run!
@@ -61,8 +64,10 @@ impl Runner {
                 // TRANSFORMERS
 
                 // SINKS
+                // Sinks do not get mutable references to StreamCatalog because
+                // they should not be allowed to create streams.
                 "AudioSink" => {
-                    let sink = audio::AudioSink::new(block_config, &mut stream_catalog, &pa)?;
+                    let sink = audio::AudioSink::new(block_config, &stream_catalog, &pa)?;
                     sinks.push(Box::new(sink));
                 }
 

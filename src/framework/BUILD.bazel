@@ -26,6 +26,7 @@ rust_library(
     deps = [
         "@crate_index//:json",
         ":log",
+        ":segment",
     ]
 )
 
@@ -54,13 +55,6 @@ rust_library(
 )
 
 rust_library(
-    name = "clip",
-    srcs = [
-        "clip.rs",
-    ]
-)
-
-rust_library(
     name = "sampler",
     srcs = [
         "sampler.rs",
@@ -79,6 +73,16 @@ rust_library(
     deps = [
         ":config",
         ":stream",
+    ]
+)
+
+rust_library(
+    name = "segment",
+    srcs = [
+        "segment.rs",
+    ],
+    deps = [
+        ":log",
     ]
 )
 

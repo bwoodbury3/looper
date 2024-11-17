@@ -170,7 +170,7 @@ impl AudioSink {
     /// Initialize a PortAudio AudioSink block.
     pub fn new(
         config: &config::BlockConfig,
-        stream_catalog: &mut stream::StreamCatalog,
+        stream_catalog: &stream::StreamCatalog,
         pa: &PortAudio,
     ) -> Result<Self, ()> {
         // Read in parameters.

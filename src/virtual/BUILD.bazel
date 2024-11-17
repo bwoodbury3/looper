@@ -13,6 +13,7 @@ rust_library(
         "//src/framework:config",
         "//src/framework:log",
         "//src/framework:sampler",
+        "//src/framework:segment",
         "//src/framework:stream",
         "//src/framework:tempo",
     ]

@@ -24,7 +24,7 @@ impl Sampler {
             clip: None,
             clip_index: 0,
             is_playing: false,
-            is_loop: false
+            is_loop: false,
         }
     }
 
@@ -41,7 +41,9 @@ impl Sampler {
     pub fn skip(&mut self, num_samples: usize) {
         let clip_rc = match &self.clip {
             Some(v) => v,
-            None => { return; }
+            None => {
+                return;
+            }
         };
         let clip = clip_rc.borrow();
 
@@ -73,7 +75,9 @@ impl Sampler {
         {
             let clip_rc = match &(self.clip) {
                 Some(v) => v,
-                None => { panic!("Sampler was playing without a valid Clip"); }
+                None => {
+                    panic!("Sampler was playing without a valid Clip");
+                }
             };
             let clip = clip_rc.borrow();
 

@@ -13,15 +13,13 @@ extern crate block;
 extern crate config;
 extern crate log;
 extern crate sampler;
+extern crate segment;
 extern crate stream;
 extern crate tempo;
 extern crate wav;
 
 /// Metronome Source block.
 pub struct Metronome {
-    /// The block name.
-    name: String,
-
     /// The output stream buffer.
     stream: stream::Stream,
 
@@ -30,15 +28,21 @@ pub struct Metronome {
 
     /// The sampler.
     sampler: sampler::Sampler,
+
+    /// The active segments.
+    segments: Vec<segment::Segment>,
 }
 
 impl Metronome {
     /// Construct a new Metronome block.
-    pub fn new(config: &config::BlockConfig, stream_catalog: &mut stream::StreamCatalog) -> Result<Self, ()> {
+    pub fn new(
+        config: &config::BlockConfig,
+        stream_catalog: &mut stream::StreamCatalog,
+    ) -> Result<Self, ()> {
         // Read in parameters.
         let output_stream = config.get_str("output_channel")?;
-        // TODO: Segments here
         let sound = config.get_str_opt("sound", "hihat-closed1")?;
+        let segments = config.get_segments()?;
 
         // Load streams.
         let stream = stream_catalog.create_source(output_stream)?;
@@ -53,11 +57,19 @@ impl Metronome {
         // Load the sampler.
         let sampler = sampler::Sampler::new();
 
+        // Validate the segments.
+        for segment in &segments {
+            log::abort_if_msg!(
+                segment.segment_type == segment::SegmentType::Input,
+                "Metronome only supports Output segment types."
+            );
+        }
+
         Ok(Metronome {
-            name: config.name.to_owned(),
             stream: stream,
             clip: clip,
-            sampler: sampler
+            sampler: sampler,
+            segments: segments,
         })
     }
 }
@@ -68,9 +80,21 @@ impl block::Source for Metronome {
 
         stream.fill(0.0);
 
-        // TODO segments.
-        if tempo.on_beat(0.0) {
-            self.sampler.play(&self.clip, false);
+        if self.segments.is_empty() {
+            // If no segments are present, assume the metronome is always on.
+            if tempo.on_beat(0.0) {
+                self.sampler.play(&self.clip, false);
+            }
+        } else {
+            // Otherwise, play the metronome only in an active segment.
+            for segment in &self.segments {
+                if tempo.in_measure(segment.start, segment.stop, 0.0) {
+                    if tempo.on_beat(0.0) {
+                        self.sampler.play(&self.clip, false);
+                        break;
+                    }
+                }
+            }
         }
 
         self.sampler.next(&mut stream);

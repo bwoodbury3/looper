@@ -2,12 +2,10 @@
 /// Logs a trace with println!
 #[macro_export]
 macro_rules! abort_msg {
-    ( $msg:expr ) => {
-        {
-            println!("{}:{} abort(): {}", file!(), line!(), $msg);
-            return Err(());
-        }
-    };
+    ( $msg:expr ) => {{
+        println!("{}:{} abort(): {}", file!(), line!(), $msg);
+        return Err(());
+    }};
 }
 
 /// Abort with Err(()) if the expression evaluates to true.

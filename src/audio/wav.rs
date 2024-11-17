@@ -25,15 +25,14 @@ pub fn read_wav_file(filename: &str) -> Result<stream::Clip, ()> {
                 let val = log::unwrap_abort!(sample);
                 clip.push(SampleConverter::<stream::Sample>::from_int(val, spec.bits_per_sample));
             }
-        },
+        }
         hound::SampleFormat::Float => {
             let samples = reader.samples::<f32>();
             for sample in samples {
                 let val = log::unwrap_abort!(sample);
                 clip.push(SampleConverter::<stream::Sample>::from_float(val));
             }
-        },
-        _ => { log::abort_msg!("Unrecognized wav format type"); }
+        }
     }
 
     Ok(stream::Clip::new(clip.into()))
@@ -41,14 +40,18 @@ pub fn read_wav_file(filename: &str) -> Result<stream::Clip, ()> {
 
 //=====================================
 
+// Dead code here to allow changing of the Sample alias.
+
+#[allow(dead_code)]
 struct SampleConverter<T> {
-    phantom: PhantomData<T>
+    phantom: PhantomData<T>,
 }
 
+#[allow(dead_code)]
 impl SampleConverter<f32> {
     fn from_int(num: i32, depth: u16) -> f32 {
         let max = (1 << (depth - 1) - 1) as f32;
-        out = num as f32 / max
+        num as f32 / max
     }
 
     fn from_float(num: f32) -> f32 {
@@ -56,8 +59,9 @@ impl SampleConverter<f32> {
     }
 }
 
+#[allow(dead_code)]
 impl SampleConverter<i32> {
-    fn from_int(num: i32, depth: u16) -> i32 {
+    fn from_int(num: i32, _depth: u16) -> i32 {
         num
     }
 
