@@ -8,6 +8,8 @@
 extern crate audio;
 extern crate block;
 extern crate config;
+extern crate instrument;
+extern crate keyboard;
 extern crate log;
 extern crate looper;
 extern crate metronome;
@@ -20,6 +22,9 @@ pub struct Runner {
 
     /// The tempo state.
     tempo: tempo::Tempo,
+
+    /// Keyboard I/O.
+    keyboard: keyboard::Keyboard,
 }
 
 impl Runner {
@@ -28,11 +33,13 @@ impl Runner {
         // Read in configuration
         let project = config::ProjectConfig::new(filename)?;
         let tempo = log::unwrap_abort_str!(tempo::Tempo::new(&project));
+        let keyboard = log::unwrap_abort_str!(keyboard::Keyboard::new());
 
         // Initialize the runner.
         Ok(Runner {
             project: project,
             tempo: tempo,
+            keyboard: keyboard,
         })
     }
 
@@ -55,6 +62,11 @@ impl Runner {
                 // SOURCES
                 "AudioSource" => {
                     let source = audio::AudioSource::new(block_config, &mut stream_catalog, &pa)?;
+                    sources.push(Box::new(source));
+                }
+                "VirtualInstrument" => {
+                    let source =
+                        instrument::VirtualInstrument::new(block_config, &mut stream_catalog)?;
                     sources.push(Box::new(source));
                 }
                 "Metronome" => {
@@ -84,24 +96,37 @@ impl Runner {
 
         // Flush all of the input buffers.
         for _ in 0..3 {
+            let state = block::PlaybackState {
+                tempo: &self.tempo,
+                keyboard: &self.keyboard,
+            };
+
             for source in &mut sources {
-                source.read(&self.tempo);
+                source.read(&state);
             }
         }
 
         // Run all of the blocks.
         loop {
-            for source in &mut sources {
-                source.read(&self.tempo);
-            }
-            for transformer in &mut transformers {
-                transformer.transform(&self.tempo);
-            }
-            for sink in &mut sinks {
-                sink.write(&self.tempo);
+            {
+                let state = block::PlaybackState {
+                    tempo: &self.tempo,
+                    keyboard: &self.keyboard,
+                };
+
+                for source in &mut sources {
+                    source.read(&state);
+                }
+                for transformer in &mut transformers {
+                    transformer.transform(&state);
+                }
+                for sink in &mut sinks {
+                    sink.write(&state);
+                }
             }
 
             self.tempo.step();
+            self.keyboard.reset();
         }
     }
 }

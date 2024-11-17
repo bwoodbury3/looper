@@ -27,7 +27,7 @@
             "output_channel": "metronome",
             "segments": [
                 {
-                    "start": 1,
+                    "start": 0,
                     "stop": 2,
                     "type": "output"
                 }
@@ -61,7 +61,7 @@
             "name": "laptop_speaker",
             "type": "AudioSink",
             "device": "Built-in Output",
-            "input_channel": "metronome_looped"
+            "input_channel": "drums"
         }
     ]
 }

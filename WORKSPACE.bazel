@@ -41,6 +41,9 @@ crates_repository(
     cargo_lockfile = "//:Cargo.lock",
     lockfile = "//:Cargo.Bazel.lock",
     packages = {
+        "filedescriptor": crate.spec(
+            version = "0.8.2",
+        ),
         "hound": crate.spec(
             version = "3.5.1",
         ),
@@ -49,6 +52,9 @@ crates_repository(
         ),
         "portaudio": crate.spec(
             version = "0.8.0",
+        ),
+        "termios": crate.spec(
+            version = "0.3.3",
         ),
     },
     # Setting the default package name to `""` forces the use of the macros defined in this repository

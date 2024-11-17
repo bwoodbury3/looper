@@ -105,7 +105,9 @@ impl Looper {
 }
 
 impl block::Transformer for Looper {
-    fn transform(&mut self, tempo: &tempo::Tempo) {
+    fn transform(&mut self, state: &block::PlaybackState) {
+        let tempo = state.tempo;
+
         // Record the input samples if we're in the recording segment.
         if tempo.in_measure(self.recording_segment.start, self.recording_segment.stop, 0.0) {
             let mut recording = self.recording.borrow_mut();

@@ -33,11 +33,30 @@
 //!  - Vec<str>
 //!  - Vec<segment::Segment>
 
+use json::JsonValue;
+
 extern crate json;
 extern crate log;
 extern crate segment;
 
 const SEGMENTS_KEY: &str = "segments";
+
+/// Load a file in as json.
+pub fn read_json_file(filename: &str) -> Result<JsonValue, String> {
+    let contents = log::unwrap_abort_str!(std::fs::read_to_string(filename));
+    let root = log::unwrap_abort_str!(json::parse(&contents));
+    return Ok(root);
+}
+
+/// Get the path of an audio clip.
+pub fn clip_path(clip_name: &str) -> String {
+    return format!("assets/clips/{}.wav", clip_name);
+}
+
+/// Get the path of an instrument.
+pub fn instrument_path(instrument_name: &str) -> String {
+    return format!("assets/instruments/{}.json", instrument_name);
+}
 
 /// Configuration for a single Block.
 pub struct BlockConfig {
@@ -63,8 +82,7 @@ pub struct ProjectConfig {
 impl ProjectConfig {
     /// Initialze a new project config.
     pub fn new(filename: &str) -> Result<ProjectConfig, String> {
-        let contents = log::unwrap_abort_str!(std::fs::read_to_string(filename));
-        let root = log::unwrap_abort_str!(json::parse(&contents));
+        let root = log::unwrap_abort_str!(read_json_file(filename));
 
         // Read in the global and block configs.
         let global_config = &root["config"];
@@ -103,11 +121,6 @@ macro_rules! abort_config {
     ( $e:expr, $name:expr, $key:expr, $msg:expr ) => {
         log::abort_if_msg!($e, format!("device=\"{}\" -> key=\"{}\": {}", $name, $key, $msg));
     };
-}
-
-/// Get the path of an audio clip.
-pub fn clip_path(clip_name: &str) -> String {
-    return format!("assets/clips/{}.wav", clip_name);
 }
 
 impl BlockConfig {

@@ -3,6 +3,23 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
+    name = "instrument",
+    srcs = [
+        "instrument.rs",
+    ],
+    deps = [
+        "//src/audio:wav",
+        "//src/framework:block",
+        "//src/framework:config",
+        "//src/framework:log",
+        "//src/framework:sampler",
+        "//src/framework:segment",
+        "//src/framework:stream",
+        "//src/framework:tempo",
+    ]
+)
+
+rust_library(
     name = "metronome",
     srcs = [
         "metronome.rs",

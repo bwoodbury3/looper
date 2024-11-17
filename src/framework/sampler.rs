@@ -63,6 +63,8 @@ impl Sampler {
     }
 
     /// Get the next bunch of samples.
+    ///
+    /// Sampler will *add* the playback to the current stream instead of overwriting the stream.
     pub fn next(&mut self, stream: &mut stream::RawStream) {
         // Not playing, nothing to do.
         if !self.is_playing {
@@ -87,7 +89,7 @@ impl Sampler {
 
             // Copy the clip slice to the output stream.
             for i in start_index..stop_index {
-                stream[i - start_index] = clip[i];
+                stream[i - start_index] += clip[i];
             }
 
             self.clip_index = stop_index;

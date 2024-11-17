@@ -75,10 +75,8 @@ impl Metronome {
 }
 
 impl block::Source for Metronome {
-    fn read(&mut self, tempo: &tempo::Tempo) {
-        let mut stream = self.stream.borrow_mut();
-
-        stream.fill(0.0);
+    fn read(&mut self, state: &block::PlaybackState) {
+        let tempo = state.tempo;
 
         if self.segments.is_empty() {
             // If no segments are present, assume the metronome is always on.
@@ -97,6 +95,8 @@ impl block::Source for Metronome {
             }
         }
 
+        let mut stream = self.stream.borrow_mut();
+        stream.fill(0 as stream::Sample);
         self.sampler.next(&mut stream);
     }
 }

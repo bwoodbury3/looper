@@ -10,8 +10,10 @@ rust_library(
         "//src/audio:audio",
         "//src/transform:looper",
         "//src/virtual:metronome",
+        "//src/virtual:instrument",
         ":block",
         ":config",
+        ":keyboard",
         ":log",
         ":stream",
         ":tempo",
@@ -43,6 +45,7 @@ rust_library(
         "block.rs",
     ],
     deps = [
+        ":keyboard",
         ":tempo",
     ]
 )
@@ -82,6 +85,18 @@ rust_library(
         "segment.rs",
     ],
     deps = [
+        ":log",
+    ]
+)
+
+rust_library(
+    name = "keyboard",
+    srcs = [
+        "keyboard.rs",
+    ],
+    deps = [
+        "@crate_index//:filedescriptor",
+        "@crate_index//:termios",
         ":log",
     ]
 )

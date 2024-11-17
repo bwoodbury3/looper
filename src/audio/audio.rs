@@ -233,7 +233,7 @@ impl AudioSink {
 }
 
 impl block::Source for AudioSource {
-    fn read(&mut self, _: &tempo::Tempo) {
+    fn read(&mut self, _: &block::PlaybackState) {
         let mut stream = (*self.stream).borrow_mut();
 
         let mut index: usize = 0;
@@ -261,7 +261,7 @@ impl block::Source for AudioSource {
 }
 
 impl block::Sink for AudioSink {
-    fn write(&mut self, _: &tempo::Tempo) {
+    fn write(&mut self, _: &block::PlaybackState) {
         let stream = (*self.stream).borrow();
 
         let mut index: usize = 0;
