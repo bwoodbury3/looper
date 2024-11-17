@@ -7,6 +7,7 @@
 
 extern crate audio;
 extern crate block;
+extern crate combiner;
 extern crate config;
 extern crate instrument;
 extern crate keyboard;
@@ -77,6 +78,10 @@ impl Runner {
                 // TRANSFORMERS
                 "Loop" => {
                     let tform = looper::Looper::new(block_config, &mut stream_catalog)?;
+                    transformers.push(Box::new(tform));
+                }
+                "Combiner" => {
+                    let tform = combiner::Combiner::new(block_config, &mut stream_catalog)?;
                     transformers.push(Box::new(tform));
                 }
 

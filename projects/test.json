@@ -15,6 +15,24 @@
             "output_channel": "drums"
         },
         {
+            "name": "drumloop",
+            "type": "Loop",
+            "input_channels": ["drums"],
+            "output_channel": "drumloop",
+            "segments": [
+                {
+                    "start": 1,
+                    "stop": 2,
+                    "type": "input"
+                },
+                {
+                    "start": 2,
+                    "stop": 4,
+                    "type": "output"
+                }
+            ]
+        },
+        {
             "name": "metronome",
             "type": "Metronome",
             "output_channel": "metronome",
@@ -29,14 +47,14 @@
         {
             "name": "combiner",
             "type": "Combiner",
-            "input_channels": ["drums", "metronome", "looped_drums"],
-            "output_channels": ["audio_out"]
+            "input_channels": ["drums", "drumloop", "metronome"],
+            "output_channel": "audio_out"
         },
         {
             "name": "laptop_speaker",
             "type": "AudioSink",
             "device": "Built-in Output",
-            "input_channel": "drums"
+            "input_channel": "audio_out"
         }
     ]
 }

@@ -1,3 +1,13 @@
+//! VirtualInstrument Block.
+//!
+//! VirtualInstrument [Source]:
+//!     Required parameters:
+//!         name: Anything
+//!         type: "VirtualInstrument"
+//!         instrument: The name of the instrument without the json suffix (see assets/instruments)
+//!     Optional parameters:
+//!         volume: The volume of the instrument.
+
 extern crate block;
 extern crate config;
 extern crate log;

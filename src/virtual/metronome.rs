@@ -6,6 +6,7 @@
 //!         type: "Metronome"
 //!         segments: A list of output segments for which the metronome is active. If none are
 //!                   specified, the metronome will be active forever.
+//!         output_channel: The output channel name
 //!     Optional parameters:
 //!         sound: The sound to play. Defaults to "hihat-closed1".
 

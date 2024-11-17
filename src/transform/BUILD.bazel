@@ -3,6 +3,19 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
+    name = "combiner",
+    srcs = [
+        "combiner.rs",
+    ],
+    deps = [
+        "//src/framework:block",
+        "//src/framework:config",
+        "//src/framework:log",
+        "//src/framework:stream",
+    ]
+)
+
+rust_library(
     name = "looper",
     srcs = [
         "looper.rs",
@@ -14,6 +27,5 @@ rust_library(
         "//src/framework:sampler",
         "//src/framework:segment",
         "//src/framework:stream",
-        "//src/framework:tempo",
     ],
 )

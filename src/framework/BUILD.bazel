@@ -8,6 +8,7 @@ rust_library(
     srcs = ["runner.rs"],
     deps = [
         "//src/audio:audio",
+        "//src/transform:combiner",
         "//src/transform:looper",
         "//src/virtual:metronome",
         "//src/virtual:instrument",

@@ -9,6 +9,8 @@
 //!         name: Anything
 //!         type: "Loop"
 //!         segments: One input segment followed by 0+ output segments.
+//!         input_channel: The input channel names.
+//!         output_channel: The output channel name.
 
 extern crate block;
 extern crate config;
@@ -16,7 +18,6 @@ extern crate log;
 extern crate sampler;
 extern crate segment;
 extern crate stream;
-extern crate tempo;
 
 /// Looper Transformer block.
 pub struct Looper {
@@ -141,14 +142,14 @@ impl block::Transformer for Looper {
         let mut output_stream = self.output_stream.borrow_mut();
         if should_play {
             if !self.sampler.is_playing() {
-                println!("Playing loop: {}", self.name);
+                println!("Playing loop: {}, len={}", self.name, self.recording.borrow().len() / stream::SAMPLES_PER_BUFFER);
                 self.sampler.play(&self.recording, true);
             }
         } else {
             self.sampler.stop();
-            output_stream.fill(0.0);
         }
 
+        output_stream.fill(0 as stream::Sample);
         self.sampler.next(&mut output_stream);
     }
 }
