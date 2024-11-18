@@ -1,9 +1,9 @@
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("//tools/rust:rust.bzl", "looper_library")
 
 package(default_visibility = ["//visibility:public"])
 
 # Top level API for interfacing with looper.
-rust_library(
+looper_library(
     name = "runner",
     srcs = ["runner.rs"],
     deps = [
@@ -22,7 +22,7 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "config",
     srcs = [
         "config.rs",
@@ -31,17 +31,20 @@ rust_library(
         "@crate_index//:json",
         ":log",
         ":segment",
+    ],
+    test_data = [
+        "//dat/config:data",
     ]
 )
 
-rust_library(
+looper_library(
     name = "stream",
     srcs = [
         "stream.rs",
     ]
 )
 
-rust_library(
+looper_library(
     name = "block",
     srcs = [
         "block.rs",
@@ -52,14 +55,14 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "log",
     srcs = [
         "log.rs",
     ],
 )
 
-rust_library(
+looper_library(
     name = "sampler",
     srcs = [
         "sampler.rs",
@@ -70,7 +73,7 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "tempo",
     srcs = [
         "tempo.rs",
@@ -81,7 +84,7 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "segment",
     srcs = [
         "segment.rs",
@@ -91,7 +94,7 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "keyboard",
     srcs = [
         "keyboard.rs",

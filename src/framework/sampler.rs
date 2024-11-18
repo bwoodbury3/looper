@@ -1,4 +1,21 @@
 //! A simple module that can play an arbitrary audio clip into a stream.
+//!
+//! Sampler is dormant by default until told to play something. When it is not playing, next() will
+//! do nothing. When it is playing, next() will fill the provided stream with the next set of
+//! samples that need to be played.
+//!
+//! Initialization:
+//! ```
+//! sampler = Sampler::new();
+//! ```
+//!
+//! At runtime, in block code:
+//! ```
+//! if (should_play) {
+//!     sampler.play(clip, false);
+//! }
+//! sampler.next(self.stream.borrow_mut());
+//! ```
 
 extern crate log;
 extern crate stream;
@@ -105,3 +122,6 @@ impl Sampler {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {}

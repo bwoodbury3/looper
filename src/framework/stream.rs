@@ -96,3 +96,79 @@ impl StreamCatalog {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_stream_catalog() {
+        let mut sc = StreamCatalog::new();
+
+        // Create a new stream, bind to it, and verify that the two streams point to the same thing
+        let name = "stream";
+        let stream_create = sc.create_source(name).unwrap();
+        let stream_bind = sc.bind_sink(name).unwrap();
+        stream_create.borrow_mut()[7] = 12 as Sample;
+        assert_eq!(stream_bind.borrow()[0], ZERO);
+        assert_eq!(stream_bind.borrow()[7], 12 as Sample);
+    }
+
+    #[test]
+    fn test_bind_without_create() {
+        let sc = StreamCatalog::new();
+
+        // Verify that binding to a stream that doesn't exist raises an Err
+        let name = "stream";
+        match sc.bind_sink(name) {
+            Ok(_) => {
+                panic!("Stream bind should have failed.")
+            }
+            Err(_) => {}
+        };
+    }
+
+    #[test]
+    fn test_double_create() {
+        let mut sc = StreamCatalog::new();
+
+        // Verify that binding to a stream that doesn't exist raises an Err
+        let name = "stream";
+        sc.create_source(name).unwrap();
+        match sc.create_source(name) {
+            Ok(_) => {
+                panic!("Stream should not have been created twice.")
+            }
+            Err(_) => {}
+        };
+    }
+
+    #[test]
+    fn test_scale_stream() {
+        let mut stream: RawStream = [ZERO; SAMPLES_PER_BUFFER];
+        for i in 0..SAMPLES_PER_BUFFER {
+            stream[i] = i as Sample;
+        }
+        stream.scale(0.5);
+
+        // Assert all the values are twice as big now.
+        for i in 0..SAMPLES_PER_BUFFER {
+            assert_eq!(stream[i], i as Sample * 0.5);
+        }
+    }
+
+    #[test]
+    fn test_scale_clip() {
+        let clip_size = 20;
+        let mut clip: RawClip = RawClip::with_capacity(clip_size);
+        for i in 0..clip_size {
+            clip.push(i as Sample);
+        }
+        clip.scale(0.5);
+
+        // Assert all the values are twice as big now.
+        for i in 0..clip_size {
+            assert_eq!(clip[i], i as Sample * 0.5);
+        }
+    }
+}

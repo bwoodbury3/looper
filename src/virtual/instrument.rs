@@ -143,7 +143,9 @@ mod tests {
     fn test_load_instrument_fail() {
         // This should not unwrap.
         match load_instrument("invalid", 1.0) {
-            Ok(_) => { panic!("Instrument should be invalid"); }
+            Ok(_) => {
+                panic!("Instrument should be invalid");
+            }
             Err(_) => {}
         };
     }
@@ -162,7 +164,9 @@ mod tests {
         let project = config::ProjectConfig::new("dat/instrument/no_instrument.json").unwrap();
         let mut stream_catalog = stream::StreamCatalog::new();
         match VirtualInstrument::new(&project.blocks[0], &mut stream_catalog) {
-            Ok(_) => { panic!("Instrument should be invalid"); }
+            Ok(_) => {
+                panic!("Instrument should be invalid");
+            }
             Err(_) => {}
         };
     }

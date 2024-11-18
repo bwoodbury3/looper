@@ -50,7 +50,7 @@ pub struct Segment {
     /// The type of segment.
     pub segment_type: SegmentType,
 
-    /// The name of the segment [optional].
+    /// The name of the segment (optional).
     pub name: Option<String>,
 }
 

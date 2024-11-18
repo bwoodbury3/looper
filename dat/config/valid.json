@@ -1,0 +1,35 @@
+{
+    "config": {
+        "tempo": {
+            "bpm": 101,
+            "beats_per_measure": 3,
+            "beat_duration": 4
+        }
+    },
+    "devices": [
+        {
+            "name": "drums",
+            "type": "VirtualInstrument",
+            "instrument": "drums1",
+            "volume": 0.2,
+            "segments": [
+                {
+                    "start": 1,
+                    "stop": 2,
+                    "type": "input"
+                },
+                {
+                    "start": 3,
+                    "stop": 4,
+                    "type": "output"
+                }
+            ]
+        },
+        {
+            "name": "combiner",
+            "type": "Combiner",
+            "param_str_list": ["val1", "val2"],
+            "param_i32": 12
+        }
+    ]
+}

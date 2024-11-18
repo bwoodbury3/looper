@@ -27,11 +27,11 @@
 //! ```
 //!
 //! Block configuration supports the following generic parameters that can be configured by users.
-//!  - str
-//!  - i32
-//!  - f32
-//!  - Vec<str>
-//!  - Vec<segment::Segment>
+//!  - `str`
+//!  - `i32`
+//!  - `f32`
+//!  - `Vec<str>`
+//!  - `Vec<segment::Segment>`
 
 use json::JsonValue;
 
@@ -240,5 +240,73 @@ impl BlockConfig {
         }
 
         Ok(segments)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_valid_config() {
+        // This should load with no problems.
+        let project = ProjectConfig::new("dat/config/valid.json").unwrap();
+
+        // Test the top level config
+        let tempo_config = &project.global_config["tempo"];
+        assert_eq!(tempo_config["bpm"].as_i32().unwrap(), 101);
+        assert_eq!(tempo_config["beats_per_measure"].as_i32().unwrap(), 3);
+        assert_eq!(tempo_config["beat_duration"].as_i32().unwrap(), 4);
+
+        // Test the block getters.
+        let blocks = &project.blocks;
+        {
+            let block = &blocks[0];
+            assert_eq!(block.name, "drums");
+            assert_eq!(block.block_type, "VirtualInstrument");
+            assert_eq!(block.get_str("instrument").unwrap(), "drums1");
+            assert_eq!(block.get_f32("volume").unwrap(), 0.2);
+            assert_eq!(block.get_f32_opt("optional_param", &2.3).unwrap(), 2.3);
+
+            let segments = block.get_segments().unwrap();
+            let segment0 = &segments[0];
+            assert_eq!(segment0.start, 1.0);
+            assert_eq!(segment0.stop, 2.0);
+            assert!(segment0.segment_type == segment::SegmentType::Input);
+            let segment1 = &segments[1];
+            assert_eq!(segment1.start, 3.0);
+            assert_eq!(segment1.stop, 4.0);
+            assert!(segment1.segment_type == segment::SegmentType::Output);
+        }
+        {
+            let block = &blocks[1];
+            assert_eq!(block.name, "combiner");
+            assert_eq!(block.block_type, "Combiner");
+            assert_eq!(block.get_str_list("param_str_list").unwrap(), vec!["val1", "val2"]);
+            assert_eq!(block.get_i32("param_i32").unwrap(), 12);
+            assert_eq!(block.get_i32_opt("opt_param_i32", &13).unwrap(), 13);
+        }
+    }
+
+    #[test]
+    fn test_missing_devices() {
+        // Expect an Err result because the devices config is missing.
+        match ProjectConfig::new("dat/config/missing_devices.json") {
+            Ok(_) => {
+                panic!("Config should have failed to load");
+            }
+            Err(_) => {}
+        };
+    }
+
+    #[test]
+    fn test_missing_device_type() {
+        // Expect an Err result because the "type" field on a device is missing.
+        match ProjectConfig::new("dat/config/missing_device_type.json") {
+            Ok(_) => {
+                panic!("Config should have failed to load");
+            }
+            Err(_) => {}
+        };
     }
 }
