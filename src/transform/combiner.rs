@@ -40,7 +40,7 @@ impl Combiner {
 
         Ok(Combiner {
             input_streams: input_streams,
-            output_stream: output_stream
+            output_stream: output_stream,
         })
     }
 }

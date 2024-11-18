@@ -9,6 +9,7 @@
 //!         output_channel: The output channel name
 //!     Optional parameters:
 //!         sound: The sound to play. Defaults to "hihat-closed1".
+//!         volume: The volume of the metronome tick as a floating point multiplier.
 
 extern crate block;
 extern crate config;
@@ -18,6 +19,8 @@ extern crate segment;
 extern crate stream;
 extern crate tempo;
 extern crate wav;
+
+use stream::Scalable;
 
 /// Metronome Source block.
 pub struct Metronome {
@@ -43,6 +46,7 @@ impl Metronome {
         // Read in parameters.
         let output_stream = config.get_str("output_channel")?;
         let sound = config.get_str_opt("sound", "hihat-closed1")?;
+        let volume = config.get_f32_opt("volume", &1.0)?;
         let segments = config.get_segments()?;
 
         // Load streams.
@@ -54,6 +58,7 @@ impl Metronome {
             wav::read_wav_file(&filename),
             format!("Failed to find clip {} at {}", sound, filename)
         );
+        clip.borrow_mut().scale(volume);
 
         // Load the sampler.
         let sampler = sampler::Sampler::new();

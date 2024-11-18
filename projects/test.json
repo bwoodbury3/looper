@@ -47,7 +47,7 @@
         {
             "name": "combiner",
             "type": "Combiner",
-            "input_channels": ["drums", "drumloop", "metronome"],
+            "input_channels": ["drums", "drumloop"],
             "output_channel": "audio_out"
         },
         {

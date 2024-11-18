@@ -142,7 +142,6 @@ impl block::Transformer for Looper {
         let mut output_stream = self.output_stream.borrow_mut();
         if should_play {
             if !self.sampler.is_playing() {
-                println!("Playing loop: {}, len={}", self.name, self.recording.borrow().len() / stream::SAMPLES_PER_BUFFER);
                 self.sampler.play(&self.recording, true);
             }
         } else {

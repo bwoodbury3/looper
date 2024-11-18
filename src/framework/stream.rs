@@ -30,9 +30,35 @@ pub type RawStream = [Sample; SAMPLES_PER_BUFFER];
 pub type Stream = Rc<RefCell<RawStream>>;
 
 /// A variable-sized audio clip.
-pub type Clip = Rc<RefCell<Vec<Sample>>>;
+pub type RawClip = Vec<Sample>;
+pub type Clip = Rc<RefCell<RawClip>>;
 
-/// A catalog of streams.
+pub trait Scalable {
+    /// Scale the volume of an audio unit.
+    fn scale(&mut self, volume: f32);
+}
+
+impl Scalable for RawStream {
+    fn scale(&mut self, volume: f32) {
+        for i in 0..self.len() {
+            self[i] *= volume;
+        }
+    }
+}
+
+impl Scalable for RawClip {
+    fn scale(&mut self, volume: f32) {
+        for i in 0..self.len() {
+            self[i] *= volume;
+        }
+    }
+}
+
+/// A catalog of streams. Blocks use this at creation to create or bind to output or input streams
+/// respectively. Streams must only be borrowed by blocks at runtime and cleaned up before their
+/// relevant read()/write()/transform() is returned. Saving off a mutable reference at runtime is
+/// prohibited, as a mutable stream reference will cause other blocks which depend on the stream to
+/// panic.
 pub struct StreamCatalog {
     streams: HashMap<String, Stream>,
 }
