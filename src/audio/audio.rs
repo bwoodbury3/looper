@@ -7,7 +7,7 @@
 //!
 //! An AudioSink writes audio output to computer speakers or external sources over bluetooth/USB.
 //!
-//! AudioSource [Source]:
+//! AudioSource \[Source\]:
 //!     Required parameters:
 //!         name: Anything
 //!         type: "AudioSource"
@@ -15,7 +15,7 @@
 //!                 error message will print a list of available devices.
 //!         output_channel: The output channel.
 //!
-//! AudioSink [Sink]:
+//! AudioSink \[Sink\]:
 //!     Required parameters:
 //!         name: Anything
 //!         type: "AudioSink"

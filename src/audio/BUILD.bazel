@@ -1,8 +1,8 @@
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("//tools/rust:rust.bzl", "looper_library")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+looper_library(
     name = "audio",
     srcs = [
         "audio.rs",
@@ -17,7 +17,7 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "recorder",
     srcs = [
         "recorder.rs",
@@ -34,7 +34,7 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "wav",
     srcs = [
         "wav.rs",

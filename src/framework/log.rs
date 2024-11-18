@@ -89,3 +89,15 @@ macro_rules! unwrap_abort_str {
         }
     };
 }
+
+// Unit test macros
+
+// Super cheap approximation for floating point equality.
+#[macro_export]
+macro_rules! assert_approx_eq {
+    ( $x:expr, $y:expr, $z:expr ) => {
+        if ($x - $y).abs() > $z {
+            panic!("Numbers were not equal: {} != {}", $x, $y);
+        }
+    };
+}
