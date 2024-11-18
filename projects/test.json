@@ -51,10 +51,28 @@
             "output_channel": "audio_out"
         },
         {
+            "name": "toggle",
+            "type": "Toggle",
+            "input_channel": "audio_out",
+            "output_channel": "audio_out_toggle",
+            "segments": [
+                {
+                    "start": 0,
+                    "stop": 1.5,
+                    "type": "output"
+                },
+                {
+                    "start": 2.0,
+                    "stop": 4.0,
+                    "type": "output"
+                }
+            ]
+        },
+        {
             "name": "laptop_speaker",
             "type": "AudioSink",
             "device": "Built-in Output",
-            "input_channel": "audio_out"
+            "input_channel": "audio_out_toggle"
         }
     ]
 }

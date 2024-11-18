@@ -71,7 +71,7 @@ impl Sampler {
             return;
         }
 
-        let mut should_stop: bool = false;
+        let should_stop: bool;
 
         // Play the current clip.
         {

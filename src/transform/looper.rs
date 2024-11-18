@@ -118,7 +118,7 @@ impl block::Transformer for Looper {
 
             // Resize the recording clip.
             let start_index = recording.len();
-            recording.resize(start_index + stream::SAMPLES_PER_BUFFER, 0 as stream::Sample);
+            recording.resize(start_index + stream::SAMPLES_PER_BUFFER, stream::ZERO);
 
             // Add the input streams to the new extended portion of the recording.
             for input_stream in &self.input_streams {
@@ -148,7 +148,7 @@ impl block::Transformer for Looper {
             self.sampler.stop();
         }
 
-        output_stream.fill(0 as stream::Sample);
+        output_stream.fill(stream::ZERO);
         self.sampler.next(&mut output_stream);
     }
 }

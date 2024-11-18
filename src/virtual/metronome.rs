@@ -1,5 +1,7 @@
 //! Metronome Block.
 //!
+//! The metronome provides a steady tick on every beat. The 'tick' sound is configurable.
+//!
 //! Metronome [Source]:
 //!     Required parameters:
 //!         name: Anything
@@ -8,7 +10,7 @@
 //!                   specified, the metronome will be active forever.
 //!         output_channel: The output channel name
 //!     Optional parameters:
-//!         sound: The sound to play. Defaults to "hihat-closed1".
+//!         sound: The sound to play on each beat. Defaults to "hihat-closed1".
 //!         volume: The volume of the metronome tick as a floating point multiplier.
 
 extern crate block;
@@ -102,7 +104,7 @@ impl block::Source for Metronome {
         }
 
         let mut stream = self.stream.borrow_mut();
-        stream.fill(0 as stream::Sample);
+        stream.fill(stream::ZERO);
         self.sampler.next(&mut stream);
     }
 }

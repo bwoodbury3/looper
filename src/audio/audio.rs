@@ -1,5 +1,12 @@
 //! Audio I/O Blocks.
 //!
+//! Audio blocks hook up directly to the computer's audio drivers.
+//!
+//! An AudioSource reads in audio directly from the computer's microphones, bluetooth devices and
+//! USB devices, etc. Anything that's available to your computer as an Audio device.
+//!
+//! An AudioSink writes audio output to computer speakers or external sources over bluetooth/USB.
+//!
 //! AudioSource [Source]:
 //!     Required parameters:
 //!         name: Anything

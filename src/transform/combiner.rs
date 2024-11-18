@@ -1,5 +1,9 @@
 //! Combiner Block.
 //!
+//! A combiner takes multiple streams of audio and sums them together into a single output. You
+//! will always find a place for a Combiner somewhere if you have more than one instrument in your
+//! project.
+//!
 //! Combiner [Transformer]:
 //!     Required parameters:
 //!         name: Anything
@@ -9,7 +13,6 @@
 
 extern crate block;
 extern crate config;
-extern crate log;
 extern crate stream;
 
 /// The Combiner Block.
@@ -17,7 +20,7 @@ pub struct Combiner {
     /// The input streams to combine.
     input_streams: Vec<stream::Stream>,
 
-    /// The output streams.
+    /// The output stream.
     output_stream: stream::Stream,
 }
 
@@ -48,7 +51,7 @@ impl Combiner {
 impl block::Transformer for Combiner {
     fn transform(&mut self, _: &block::PlaybackState) {
         let mut output_stream = self.output_stream.borrow_mut();
-        output_stream.fill(0 as stream::Sample);
+        output_stream.fill(stream::ZERO);
 
         for stream in &self.input_streams {
             let input_stream = stream.borrow();

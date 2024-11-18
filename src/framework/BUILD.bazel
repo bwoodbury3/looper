@@ -10,6 +10,7 @@ rust_library(
         "//src/audio:audio",
         "//src/transform:combiner",
         "//src/transform:looper",
+        "//src/transform:toggle",
         "//src/virtual:metronome",
         "//src/virtual:instrument",
         ":block",

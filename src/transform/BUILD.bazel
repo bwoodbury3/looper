@@ -29,3 +29,17 @@ rust_library(
         "//src/framework:stream",
     ],
 )
+
+rust_library(
+    name = "toggle",
+    srcs = [
+        "toggle.rs",
+    ],
+    deps = [
+        "//src/framework:block",
+        "//src/framework:config",
+        "//src/framework:log",
+        "//src/framework:segment",
+        "//src/framework:stream",
+    ]
+)

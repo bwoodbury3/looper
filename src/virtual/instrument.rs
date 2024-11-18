@@ -114,7 +114,7 @@ impl block::Source for VirtualInstrument {
 
         // Read off all of the streams.
         let mut stream = self.stream.borrow_mut();
-        stream.fill(0 as stream::Sample);
+        stream.fill(stream::ZERO);
         for clip in self.clips.values_mut() {
             clip.sampler.next(&mut stream);
         }

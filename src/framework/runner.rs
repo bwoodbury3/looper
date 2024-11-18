@@ -15,6 +15,7 @@ extern crate log;
 extern crate looper;
 extern crate metronome;
 extern crate tempo;
+extern crate toggle;
 
 /// Top level looper runner.
 pub struct Runner {
@@ -82,6 +83,10 @@ impl Runner {
                 }
                 "Combiner" => {
                     let tform = combiner::Combiner::new(block_config, &mut stream_catalog)?;
+                    transformers.push(Box::new(tform));
+                }
+                "Toggle" => {
+                    let tform = toggle::Toggle::new(block_config, &mut stream_catalog)?;
                     transformers.push(Box::new(tform));
                 }
 

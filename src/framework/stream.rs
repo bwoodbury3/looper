@@ -18,6 +18,9 @@ use std::string::String;
 /// The root sample type.
 pub type Sample = f32;
 
+/// Zero constant of type Sample.
+pub const ZERO: Sample = 0 as Sample;
+
 /// The number of samples in a buffer. This is the number of samples sent to
 /// sink blocks, and also the number of samples expected from source blocks.
 pub const SAMPLES_PER_BUFFER: usize = 256;
@@ -72,7 +75,7 @@ impl StreamCatalog {
 
     /// Create a new stream source.
     pub fn create_source(&mut self, name: &str) -> Result<Stream, ()> {
-        let stream: Stream = Rc::new(RefCell::new([0 as Sample; SAMPLES_PER_BUFFER]));
+        let stream: Stream = Rc::new(RefCell::new([ZERO; SAMPLES_PER_BUFFER]));
         match self.streams.insert(name.to_string(), stream.clone()) {
             None => Ok(stream.clone()),
             Some(_) => {
