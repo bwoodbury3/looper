@@ -12,6 +12,8 @@
 //!     Optional parameters:
 //!         sound: The sound to play on each beat. Defaults to "hihat-closed1".
 //!         volume: The volume of the metronome tick as a floating point multiplier.
+//!         segments: A list of "output" segments for which the metronome is active. If this
+//!                   parameter is not supplied, the metronome will default to always-on.
 
 extern crate block;
 extern crate config;

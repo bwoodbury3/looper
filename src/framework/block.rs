@@ -14,16 +14,25 @@ pub struct PlaybackState<'a> {
 pub trait Source {
     /// Read data from the source into the output stream.
     fn read(&mut self, state: &PlaybackState);
+
+    /// Optional code to be run when the playback is complete.
+    fn cleanup(&mut self) {}
 }
 
 /// Block which ingests audio data and outputs it to I/O.
 pub trait Sink {
     /// Write data from the input stream to the sink.
     fn write(&mut self, state: &PlaybackState);
+
+    /// Optional code to be run when the playback is complete.
+    fn cleanup(&mut self) {}
 }
 
 /// Block which takes an input data source and produces a transformed output.
 pub trait Transformer {
     /// Transform input streams into their associated output streams.
     fn transform(&mut self, state: &PlaybackState);
+
+    /// Optional code to be run when the playback is complete.
+    fn cleanup(&mut self) {}
 }

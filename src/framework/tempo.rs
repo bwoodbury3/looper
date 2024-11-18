@@ -58,7 +58,7 @@ pub struct Tempo {
 impl Tempo {
     /// Initialize a new tempo and reset the state to 0.
     pub fn new(project: &config::ProjectConfig) -> Result<Self, String> {
-        let tempo = &project.global_config["tempo"];
+        let tempo = &project.tempo_config;
         let bpm = match tempo["bpm"].as_i32() {
             Some(v) => v,
             None => {
@@ -112,10 +112,16 @@ impl Tempo {
     ///
     /// DANGER: This should only be called by framework code, not by any blocks.
     /// Blocks should not have a mutable reference to tempo, so this shouldn't be possible.
-    pub fn step(&mut self) {
-        self.current_chunk += 1;
-        self.current_time_s += self.seconds_per_step;
-        self.current_beat += self.beats_per_step;
+    pub fn step(&mut self, num_chunks: i32) {
+        self.current_chunk += num_chunks as usize;
+        self.current_time_s += num_chunks as f32 * self.seconds_per_step;
+        self.current_beat += num_chunks as f32 * self.beats_per_step;
+    }
+
+    /// Skip a number of measures forward.
+    pub fn skip(&mut self, num_measures: f32) {
+        let num_chunks = num_measures / self.measures_per_step;
+        self.step(num_chunks.round() as i32);
     }
 
     /// The current measure.

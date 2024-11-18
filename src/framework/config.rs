@@ -73,7 +73,13 @@ pub struct BlockConfig {
 /// Top level config.
 pub struct ProjectConfig {
     /// Global configuration parameters.
-    pub global_config: json::JsonValue,
+    pub tempo_config: json::JsonValue,
+
+    /// The start measure.
+    pub start_measure: f32,
+
+    /// The stop measure.
+    pub stop_measure: f32,
 
     /// The list of blocks.
     pub blocks: Vec<BlockConfig>,
@@ -86,11 +92,20 @@ impl ProjectConfig {
 
         // Read in the global and block configs.
         let global_config = &root["config"];
-        let block_config = &root["devices"];
         log::abort_if_msg_str!(!global_config.is_object(), "Missing top-level \"config\" key");
-        log::abort_if_msg_str!(!block_config.is_array(), "Missing top-level \"devices\" key");
+
+        let start_measure = match global_config["start_measure"].as_f32() {
+            Some(v) => v,
+            None => 0.0,
+        };
+        let stop_measure = match global_config["stop_measure"].as_f32() {
+            Some(v) => v,
+            None => -1.0,
+        };
 
         // Populate all of the blocks.
+        let block_config = &root["devices"];
+        log::abort_if_msg_str!(!block_config.is_array(), "Missing top-level \"devices\" key");
         let mut blocks: Vec<BlockConfig> = Vec::new();
         for block in block_config.members() {
             let name = &block["name"];
@@ -110,7 +125,9 @@ impl ProjectConfig {
         }
 
         Ok(ProjectConfig {
-            global_config: global_config.clone(),
+            tempo_config: global_config["tempo"].clone(),
+            start_measure: start_measure,
+            stop_measure: stop_measure,
             blocks: blocks,
         })
     }
@@ -253,10 +270,13 @@ mod tests {
         let project = ProjectConfig::new("dat/config/valid.json").unwrap();
 
         // Test the top level config
-        let tempo_config = &project.global_config["tempo"];
+        let tempo_config = &project.tempo_config;
         assert_eq!(tempo_config["bpm"].as_i32().unwrap(), 101);
         assert_eq!(tempo_config["beats_per_measure"].as_i32().unwrap(), 3);
         assert_eq!(tempo_config["beat_duration"].as_i32().unwrap(), 4);
+
+        assert_eq!(project.start_measure, 0.0);
+        assert_eq!(project.stop_measure, 20.0);
 
         // Test the block getters.
         let blocks = &project.blocks;

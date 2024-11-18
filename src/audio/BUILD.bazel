@@ -18,6 +18,23 @@ rust_library(
 )
 
 rust_library(
+    name = "recorder",
+    srcs = [
+        "recorder.rs",
+    ],
+    deps = [
+        "@crate_index//:hound",
+        "//src/framework:block",
+        "//src/framework:config",
+        "//src/framework:log",
+        "//src/framework:segment",
+        "//src/framework:stream",
+        "//src/framework:tempo",
+        ":wav",
+    ]
+)
+
+rust_library(
     name = "wav",
     srcs = [
         "wav.rs",

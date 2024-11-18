@@ -4,7 +4,9 @@
             "bpm": 100,
             "beats_per_measure": 4,
             "beat_duration": 4
-        }
+        },
+        "start_measure": 0,
+        "stop_measure": 4
     },
     "devices": [
         {
@@ -35,6 +37,7 @@
         {
             "name": "metronome",
             "type": "Metronome",
+            "volume": 0.2,
             "output_channel": "metronome",
             "segments": [
                 {
@@ -47,24 +50,19 @@
         {
             "name": "combiner",
             "type": "Combiner",
-            "input_channels": ["drums", "drumloop"],
+            "input_channels": ["drums", "drumloop", "metronome"],
             "output_channel": "audio_out"
         },
         {
-            "name": "toggle",
-            "type": "Toggle",
-            "input_channel": "audio_out",
-            "output_channel": "audio_out_toggle",
+            "name": "drums_recording",
+            "type": "Recorder",
+            "directory": "/tmp/looper",
+            "input_channel": "drums",
             "segments": [
                 {
-                    "start": 0,
-                    "stop": 1.5,
-                    "type": "output"
-                },
-                {
-                    "start": 2.0,
-                    "stop": 4.0,
-                    "type": "output"
+                    "start": 1,
+                    "stop": 2,
+                    "type": "input"
                 }
             ]
         },
@@ -72,7 +70,7 @@
             "name": "laptop_speaker",
             "type": "AudioSink",
             "device": "Built-in Output",
-            "input_channel": "audio_out_toggle"
+            "input_channel": "audio_out"
         }
     ]
 }

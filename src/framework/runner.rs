@@ -14,6 +14,7 @@ extern crate keyboard;
 extern crate log;
 extern crate looper;
 extern crate metronome;
+extern crate recorder;
 extern crate tempo;
 extern crate toggle;
 
@@ -97,6 +98,10 @@ impl Runner {
                     let sink = audio::AudioSink::new(block_config, &stream_catalog, &pa)?;
                     sinks.push(Box::new(sink));
                 }
+                "Recorder" => {
+                    let sink = recorder::Recorder::new(block_config, &stream_catalog)?;
+                    sinks.push(Box::new(sink));
+                }
 
                 _ => {
                     println!("TODO REMOVE: Unknown block: {}", block_config.block_type);
@@ -115,6 +120,9 @@ impl Runner {
                 source.read(&state);
             }
         }
+
+        // Skip the tempo forward to the start measure.
+        self.tempo.skip(self.project.start_measure);
 
         // Run all of the blocks.
         loop {
@@ -135,8 +143,28 @@ impl Runner {
                 }
             }
 
-            self.tempo.step();
+            self.tempo.step(1);
             self.keyboard.reset();
+
+            if self.project.stop_measure >= 0.0
+                && self.tempo.current_measure() >= self.project.stop_measure
+            {
+                println!("Looper is done looping.");
+                break;
+            }
         }
+
+        // Run the optional cleanup for all blocks.
+        for source in &mut sources {
+            source.cleanup();
+        }
+        for transformer in &mut transformers {
+            transformer.cleanup();
+        }
+        for sink in &mut sinks {
+            sink.cleanup();
+        }
+
+        Ok(())
     }
 }

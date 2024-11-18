@@ -8,6 +8,7 @@ looper_library(
     srcs = ["runner.rs"],
     deps = [
         "//src/audio:audio",
+        "//src/audio:recorder",
         "//src/transform:combiner",
         "//src/transform:looper",
         "//src/transform:toggle",

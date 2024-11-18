@@ -90,7 +90,7 @@ impl Looper {
         }
 
         // Create the clip/sampler.
-        let recording = stream::Clip::new(Vec::<stream::Sample>::new().into());
+        let recording = stream::Clip::new(stream::RawClip::new().into());
         let sampler = sampler::Sampler::new();
 
         Ok(Looper {
@@ -113,7 +113,7 @@ impl block::Transformer for Looper {
         if tempo.in_measure(self.recording_segment.start, self.recording_segment.stop, 0.0) {
             let mut recording = self.recording.borrow_mut();
             if recording.is_empty() {
-                println!("Loop started: {}", self.name);
+                println!("Loop recording started: {}", self.name);
             }
 
             // Resize the recording clip.
@@ -142,6 +142,7 @@ impl block::Transformer for Looper {
         let mut output_stream = self.output_stream.borrow_mut();
         if should_play {
             if !self.sampler.is_playing() {
+                println!("Playing loop: {}", self.name);
                 self.sampler.play(&self.recording, true);
             }
         } else {

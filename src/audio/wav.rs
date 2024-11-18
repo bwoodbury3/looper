@@ -5,7 +5,9 @@ extern crate hound;
 extern crate log;
 extern crate stream;
 
-use std::marker::PhantomData;
+use std::{i64, marker::PhantomData, os::macos::raw};
+
+use stream::SAMPLE_RATE;
 
 /// Read in a wav file as an audio clip.
 pub fn read_wav_file(filename: &str) -> Result<stream::Clip, ()> {
@@ -53,9 +55,43 @@ pub fn read_wav_file(filename: &str) -> Result<stream::Clip, ()> {
     Ok(stream::Clip::new(clip.into()))
 }
 
+/// Write a Clip to a file using the wav audio format.
+pub fn write_wav_file(clip: &stream::Clip, filename: &str) -> Result<(), ()> {
+    let depth: u16 = 16;
+    let spec = hound::WavSpec {
+        channels: 1,
+        sample_rate: SAMPLE_RATE as u32,
+        bits_per_sample: depth,
+        sample_format: hound::SampleFormat::Int,
+    };
+    let mut writer = log::unwrap_abort_msg!(
+        hound::WavWriter::create(filename, spec),
+        "Failed to initialize the WavWriter"
+    );
+
+    let raw_clip = clip.borrow();
+    for i in 0..raw_clip.len() {
+        log::unwrap_abort_msg!(
+            writer.write_sample(SampleConverter::<stream::Sample>::to_int(raw_clip[i], depth)),
+            "Failed to write wav sample to WavWriter"
+        );
+    }
+
+    Ok(())
+}
+
 //=====================================
 
 // Dead code here to allow changing of the Sample alias.
+
+/// Get the maximum value that an be stored with this many bits (signed).
+fn int_max(depth: u16) -> i64 {
+    i64::MAX >> (64 - depth)
+}
+
+fn int_min(depth: u16) -> i64 {
+    -1 * (1 << (depth - 1))
+}
 
 #[allow(dead_code)]
 struct SampleConverter<T> {
@@ -65,12 +101,24 @@ struct SampleConverter<T> {
 #[allow(dead_code)]
 impl SampleConverter<f32> {
     fn from_int(num: i32, depth: u16) -> f32 {
-        let max = (1 << (depth - 1) - 1) as f32;
+        let max = int_max(depth) as f32;
         num as f32 / max
     }
 
     fn from_float(num: f32) -> f32 {
         num
+    }
+
+    fn to_int(num: f32, depth: u16) -> i32 {
+        let max = int_max(depth) as i32;
+        let min = int_min(depth) as i32;
+        if num >= 1.0 {
+            return max;
+        } else if num <= -1.0 {
+            return min;
+        }
+
+        (num * (max as f32)) as i32
     }
 }
 
@@ -80,13 +128,19 @@ impl SampleConverter<i32> {
         num
     }
 
-    fn from_float(num: f32) -> i32 {
+    fn from_float(num: f32, depth: u16) -> i32 {
+        let max = int_max(depth) as i32;
+        let min = int_min(depth) as i32;
         if num >= 1.0 {
-            return i32::MAX;
+            return max;
         } else if num <= -1.0 {
-            return i32::MIN + 1;
+            return min;
         }
 
-        (num * (i32::MAX as f32)) as i32
+        (num * (max as f32)) as i32
+    }
+
+    fn to_int(num: i32) -> i32 {
+        num
     }
 }

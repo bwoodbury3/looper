@@ -10,6 +10,15 @@ Live audio streaming software
 
 ## Configuration
 
+### Top-Level Configuration
+
+* **tempo** - Nested configuration of timekeeping information:
+  * **bpm**: The tempo of the song in units of beats per minute.
+  * **beats_per_measure**: The top number in the time signature.
+  * **beat_duration**: The bottom number in the time signature.
+* **start_measure**: Begin playing at this measure.
+* **stop_measures**: Stop playing at this measure.
+
 ### Blocks
 
 Looper is configured using a list of devices called Blocks. Blocks come in three varieties:
