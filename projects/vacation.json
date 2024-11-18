@@ -1,4 +1,8 @@
 {
+    "comment": [
+        "This song is called 'Vacation' by Hippo Campus",
+        "https://www.youtube.com/watch?v=A28eTlC7GTg"
+    ],
     "config": {
         "tempo": {
             "bpm": 82,
@@ -24,7 +28,7 @@
             "instrument": "drums1",
             "volume": 0.15,
             "segments": [],
-            "output_channels": ["drums"]
+            "output_channel": "drums"
         },
         {
             "name": "drums_toggle",
@@ -46,8 +50,8 @@
                     "stop": 134
                 }
             ],
-            "input_channels": ["drums"],
-            "output_channels": ["drums_toggle"]
+            "input_channel": "drums",
+            "output_channel": "drums_toggle"
         },
         {
             "name": "amp",
@@ -100,7 +104,7 @@
                 }
             ],
             "input_channels": ["drums"],
-            "output_channels": ["verse_drums"]
+            "output_channel": "verse_drums"
         },
         {
             "name": "chorus_drum_loop_fill",
@@ -133,7 +137,7 @@
                 }
             ],
             "input_channels": ["drums"],
-            "output_channels": ["chorus_drums_fill"]
+            "output_channel": "chorus_drums_fill"
         },
         {
             "name": "bridge_drum_loop",
@@ -151,7 +155,7 @@
                 }
             ],
             "input_channels": ["drums"],
-            "output_channels": ["bridge_drums"]
+            "output_channel": "bridge_drums"
         },
         {
             "name": "rhythm_guitar_loop",
@@ -189,7 +193,7 @@
                 }
             ],
             "input_channels": ["amp"],
-            "output_channels": ["rhythm_guitar"]
+            "output_channel": "rhythm_guitar"
         },
         {
             "name": "combiner",
@@ -204,7 +208,7 @@
                 "bridge_drums",
                 "rhythm_guitar"
             ],
-            "output_channels": ["audio_out"]
+            "output_channel": "audio_out"
         },
         {
             "name": "laptop_speaker",

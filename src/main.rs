@@ -19,7 +19,6 @@ fn main() {
             println!("Looper success");
         }
         Err(e) => {
-            println!("Failed with error:");
             println!("{}", e.to_string());
         }
     };
