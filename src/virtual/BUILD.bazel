@@ -1,8 +1,8 @@
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("//tools/rust:rust.bzl", "looper_library")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+looper_library(
     name = "instrument",
     srcs = [
         "instrument.rs",
@@ -16,10 +16,17 @@ rust_library(
         "//src/framework:segment",
         "//src/framework:stream",
         "//src/framework:tempo",
-    ]
+    ],
+    data = [
+        "//assets/clips",
+        "//assets/instruments",
+    ],
+    test_data = [
+        "//dat/instrument:data",
+    ],
 )
 
-rust_library(
+looper_library(
     name = "metronome",
     srcs = [
         "metronome.rs",
@@ -33,5 +40,8 @@ rust_library(
         "//src/framework:segment",
         "//src/framework:stream",
         "//src/framework:tempo",
+    ],
+    data = [
+        "//assets/clips",
     ]
 )

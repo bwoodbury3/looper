@@ -2,7 +2,7 @@
 //!
 //! The metronome provides a steady tick on every beat. The 'tick' sound is configurable.
 //!
-//! Metronome [Source]:
+//! Metronome \[Source\]:
 //!     Required parameters:
 //!         name: Anything
 //!         type: "Metronome"

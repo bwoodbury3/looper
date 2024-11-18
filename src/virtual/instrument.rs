@@ -1,6 +1,6 @@
 //! VirtualInstrument Block.
 //!
-//! VirtualInstrument [Source]:
+//! VirtualInstrument \[Source\]:
 //!     Required parameters:
 //!         name: Anything
 //!         type: "VirtualInstrument"
@@ -118,5 +118,52 @@ impl block::Source for VirtualInstrument {
         for clip in self.clips.values_mut() {
             clip.sampler.next(&mut stream);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_load_instrument() {
+        // This should unwrap.
+        let clips = load_instrument("drums1", 1.0).unwrap();
+
+        // Grab all of the keys/clips.
+        for key in ['a', 's', 'd', 'f', 'g'] {
+            assert!(clips.contains_key(&key));
+
+            let clip = clips.get(&key).unwrap();
+            assert!(clip.clip.borrow().len() > 0);
+        }
+    }
+
+    #[test]
+    fn test_load_instrument_fail() {
+        // This should not unwrap.
+        match load_instrument("invalid", 1.0) {
+            Ok(_) => { panic!("Instrument should be invalid"); }
+            Err(_) => {}
+        };
+    }
+
+    #[test]
+    fn test_virtual_instrument() {
+        // This should build with no problems.
+        let project = config::ProjectConfig::new("dat/instrument/valid.json").unwrap();
+        let mut stream_catalog = stream::StreamCatalog::new();
+        VirtualInstrument::new(&project.blocks[0], &mut stream_catalog).unwrap();
+    }
+
+    #[test]
+    fn test_no_instrument() {
+        // This should build with no problems.
+        let project = config::ProjectConfig::new("dat/instrument/no_instrument.json").unwrap();
+        let mut stream_catalog = stream::StreamCatalog::new();
+        match VirtualInstrument::new(&project.blocks[0], &mut stream_catalog) {
+            Ok(_) => { panic!("Instrument should be invalid"); }
+            Err(_) => {}
+        };
     }
 }
