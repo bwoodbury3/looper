@@ -31,7 +31,8 @@
             "name": "combiner",
             "type": "Combiner",
             "param_str_list": ["val1", "val2"],
-            "param_i32": 12
+            "param_i32": 12,
+            "param_bool": true
         }
     ]
 }

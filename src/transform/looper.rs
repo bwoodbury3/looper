@@ -11,6 +11,10 @@
 //!         segments: One input segment followed by 0+ output segments.
 //!         input_channel: The input channel names.
 //!         output_channel: The output channel name.
+//!     Optional parameters:
+//!         clip_override: A wav file that can be swapped for the input channel. This is useful for
+//!                        when you want to practice one section of a song without playing all of
+//!                        the other sections.
 
 extern crate block;
 extern crate config;
@@ -18,6 +22,7 @@ extern crate log;
 extern crate sampler;
 extern crate segment;
 extern crate stream;
+extern crate wav;
 
 /// Looper Transformer block.
 pub struct Looper {
@@ -41,6 +46,9 @@ pub struct Looper {
 
     /// The playback segments.
     playback_segments: Vec<segment::Segment>,
+
+    /// Whether or not the recording is complete.
+    recording_complete: bool,
 }
 
 impl Looper {
@@ -53,6 +61,7 @@ impl Looper {
         let input_channels = config.get_str_list("input_channels")?;
         let output_channel = config.get_str("output_channel")?;
         let segments = config.get_segments()?;
+        let clip_override = config.get_str_opt("clip_override", "")?;
 
         // Load streams. Load inputs first so that we don't accidentally bind to ourself.
         let mut input_streams = Vec::<stream::Stream>::with_capacity(input_channels.len());
@@ -77,7 +86,7 @@ impl Looper {
         }
         log::abort_if_msg!(
             recording_segment_opt.is_none(),
-            "Looper must have one \"output\" [recording] segment"
+            "Looper blocks may only have one input segment"
         );
         let recording_segment = recording_segment_opt.unwrap();
 
@@ -90,8 +99,18 @@ impl Looper {
         }
 
         // Create the clip/sampler.
-        let recording = stream::Clip::new(stream::RawClip::new().into());
+        let recording: stream::Clip;
+        if clip_override != "" {
+            recording = wav::read_wav_file(clip_override)?;
+        } else {
+            recording = stream::empty_clip();
+        }
         let sampler = sampler::Sampler::new();
+
+        // If clip_override is provided, treat the input segment as an output segment.
+        if clip_override != "" {
+            playback_segments.push(recording_segment.clone());
+        }
 
         Ok(Looper {
             name: config.name.to_owned(),
@@ -101,6 +120,7 @@ impl Looper {
             sampler: sampler,
             recording_segment: recording_segment,
             playback_segments: playback_segments,
+            recording_complete: clip_override != "",
         })
     }
 }
@@ -110,22 +130,30 @@ impl block::Transformer for Looper {
         let tempo = state.tempo;
 
         // Record the input samples if we're in the recording segment.
-        if tempo.in_measure(self.recording_segment.start, self.recording_segment.stop, 0.0) {
-            let mut recording = self.recording.borrow_mut();
-            if recording.is_empty() {
-                println!("Loop recording started: {}", self.name);
+        if !self.recording_complete {
+            if tempo.in_measure(self.recording_segment.start, self.recording_segment.stop, 0.0) {
+                let mut recording = self.recording.borrow_mut();
+                if recording.is_empty() {
+                    println!("Loop recording started: {}", self.name);
+                }
+
+                // Resize the recording clip.
+                let start_index = recording.len();
+                recording.resize(start_index + stream::SAMPLES_PER_BUFFER, stream::ZERO);
+
+                // Add the input streams to the new extended portion of the recording.
+                for input_stream in &self.input_streams {
+                    let stream = input_stream.borrow();
+                    for i in 0..stream::SAMPLES_PER_BUFFER {
+                        recording[start_index + i] += stream[i];
+                    }
+                }
             }
 
-            // Resize the recording clip.
-            let start_index = recording.len();
-            recording.resize(start_index + stream::SAMPLES_PER_BUFFER, stream::ZERO);
-
-            // Add the input streams to the new extended portion of the recording.
-            for input_stream in &self.input_streams {
-                let stream = input_stream.borrow();
-                for i in 0..stream::SAMPLES_PER_BUFFER {
-                    recording[start_index + i] += stream[i];
-                }
+            // Mark the recording complete if we're past the recording interval.
+            if tempo.current_measure() >= self.recording_segment.stop {
+                println!("Loop recording complete: {}", self.name);
+                self.recording_complete = true;
             }
         }
 

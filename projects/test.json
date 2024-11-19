@@ -19,6 +19,7 @@
         {
             "name": "drumloop",
             "type": "Loop",
+            "clip_override": "/tmp/looper/drums_recording.wav",
             "input_channels": ["drums"],
             "output_channel": "drumloop",
             "segments": [
@@ -29,7 +30,12 @@
                 },
                 {
                     "start": 2,
-                    "stop": 4,
+                    "stop": 2.5,
+                    "type": "output"
+                },
+                {
+                    "start": 3,
+                    "stop": 3.5,
                     "type": "output"
                 }
             ]
@@ -52,19 +58,6 @@
             "type": "Combiner",
             "input_channels": ["drums", "drumloop", "metronome"],
             "output_channel": "audio_out"
-        },
-        {
-            "name": "drums_recording",
-            "type": "Recorder",
-            "directory": "/tmp/looper",
-            "input_channel": "drums",
-            "segments": [
-                {
-                    "start": 1,
-                    "stop": 2,
-                    "type": "input"
-                }
-            ]
         },
         {
             "name": "laptop_speaker",

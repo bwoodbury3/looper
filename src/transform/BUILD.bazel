@@ -21,6 +21,7 @@ rust_library(
         "looper.rs",
     ],
     deps = [
+        "//src/audio:wav",
         "//src/framework:block",
         "//src/framework:config",
         "//src/framework:log",

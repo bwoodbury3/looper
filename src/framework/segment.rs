@@ -27,7 +27,7 @@ extern crate log;
 use std::convert::From;
 
 /// The type of segment
-#[derive(PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SegmentType {
     /// Input Segment
     Input,
@@ -40,6 +40,7 @@ pub enum SegmentType {
 }
 
 /// A segment of data
+#[derive(Clone, Debug)]
 pub struct Segment {
     /// The beginning measure of the segment.
     pub start: f32,

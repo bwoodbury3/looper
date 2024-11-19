@@ -34,6 +34,7 @@ Available blocks:
 * [Looper](https://github.com/bwoodbury3/looper/blob/main/src/transform/looper.rs): Loops an input stream over a series of outputs.
 * [Combiner](https://github.com/bwoodbury3/looper/blob/main/src/transform/combiner.rs): Combines multiple input streams into one output stream.
 * [Toggle](https://github.com/bwoodbury3/looper/blob/main/src/transform/toggle.rs): Toggles an input stream on an off.
+* [Recorder](https://github.com/bwoodbury3/looper/blob/main/src/audio/recorder.rs): Records a partial stream and writes it to a file.
 
 ### Streams and Channels
 

@@ -149,6 +149,23 @@ impl BlockConfig {
         Ok(value)
     }
 
+    /// Get a boolean value from config.
+    pub fn get_bool(&self, key: &str) -> Result<bool, ()> {
+        let value = self.get_value(key)?;
+        abort_config!(!value.is_boolean(), self.name, key, "Expected a boolean value");
+        Ok(value.as_bool().ok_or(())?)
+    }
+
+    /// Get an optional bool value from config with a default.
+    pub fn get_bool_opt<'a>(&'a self, key: &str, default: bool) -> Result<bool, ()> {
+        let value = &self.root[key];
+        if value.is_null() {
+            return Ok(default);
+        }
+        abort_config!(!value.is_boolean(), self.name, key, "Expected a boolean value");
+        Ok(value.as_bool().ok_or(())?)
+    }
+
     /// Get a string value from config.
     pub fn get_str(&self, key: &str) -> Result<&str, ()> {
         let value = self.get_value(key)?;
@@ -305,6 +322,8 @@ mod tests {
             assert_eq!(block.get_str_list("param_str_list").unwrap(), vec!["val1", "val2"]);
             assert_eq!(block.get_i32("param_i32").unwrap(), 12);
             assert_eq!(block.get_i32_opt("opt_param_i32", &13).unwrap(), 13);
+            assert_eq!(block.get_bool("param_bool").unwrap(), true);
+            assert_eq!(block.get_bool_opt("opt_param_bool", false).unwrap(), false);
         }
     }
 

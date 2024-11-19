@@ -36,6 +36,11 @@ pub type Stream = Rc<RefCell<RawStream>>;
 pub type RawClip = Vec<Sample>;
 pub type Clip = Rc<RefCell<RawClip>>;
 
+/// Create an empty clip.
+pub fn empty_clip() -> Clip {
+    Clip::new(RawClip::new().into())
+}
+
 pub trait Scalable {
     /// Scale the volume of an audio unit.
     fn scale(&mut self, volume: f32);

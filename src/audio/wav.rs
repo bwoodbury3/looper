@@ -117,6 +117,7 @@ impl SampleConverter<f32> {
     }
 }
 
+#[allow(dead_code)] // This code is dead because Sample == f32
 impl SampleConverter<i32> {
     // Scales a wav fixed-point sample at the provided depth up to 32-bit fixed-point.
     fn from_int(num: i32, depth: u16) -> i32 {
