@@ -9,7 +9,7 @@
 //!         name: Anything
 //!         type: "Loop"
 //!         segments: One input segment followed by 0+ output segments.
-//!         input_channel: The input channel names.
+//!         input_channels: The input channel names.
 //!         output_channel: The output channel name.
 //!     Optional parameters:
 //!         clip_override: A wav file that can be swapped for the input channel. This is useful for

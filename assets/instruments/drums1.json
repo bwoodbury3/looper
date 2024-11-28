@@ -19,6 +19,10 @@
         {
             "key": "g",
             "file": "crash-cymbal1"
+        },
+        {
+            "key": "w",
+            "file": "tom-mid1"
         }
     ]
 }

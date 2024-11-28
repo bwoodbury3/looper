@@ -1,0 +1,13 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "wav_tool",
+    srcs = [
+        "wav_tool.rs",
+    ],
+    deps = [
+        "//src/audio:wav",
+        "//src/framework:log",
+        "//src/framework:stream",
+    ]
+)

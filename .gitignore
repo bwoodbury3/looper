@@ -1,6 +1,12 @@
+# Build assets
 bazel-*
 rust-project.json
 
+# IDE
 .vscode
 
+# Python
 *venv*
+
+# Projects
+sandbox
