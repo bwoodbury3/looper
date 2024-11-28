@@ -1,0 +1,35 @@
+{
+    "config": {
+        "tempo": {}
+    },
+    "devices": [
+        {
+            "name": "drums",
+            "type": "VirtualInstrument",
+            "sounds": [
+                {
+                    "key": "a",
+                    "file": "kick1"
+                },
+                {
+                    "key": "s",
+                    "file": "snare1"
+                },
+                {
+                    "key": "d",
+                    "file": "hihat-closed1"
+                },
+                {
+                    "key": "f",
+                    "file": "hihat-open1"
+                },
+                {
+                    "key": "g",
+                    "file": "crash-cymbal1"
+                }
+            ],
+            "volume": 0.2,
+            "output_channel": "drums"
+        }
+    ]
+}

@@ -17,7 +17,7 @@ Live audio streaming software
   * **beats_per_measure**: The top number in the time signature.
   * **beat_duration**: The bottom number in the time signature.
 * **start_measure**: Begin playing at this measure.
-* **stop_measures**: Stop playing at this measure.
+* **stop_measure**: Stop playing at this measure.
 
 ### Blocks
 
@@ -27,8 +27,8 @@ Looper is configured using a list of devices called Blocks. Blocks come in three
 * **Transformer**: A block that has both inputs and outputs and applies some sort of transformation in the middle. Transformers hail from the planet Cybertron, created by the ancient god Primus.
 
 Available blocks:
-* [AudioSource](https://github.com/bwoodbury3/looper/blob/main/src/audio/audio.rs): Audio input from the computer.
-* [AudioSink](https://github.com/bwoodbury3/looper/blob/main/src/audio/audio.rs): Audio output to the computer.
+* [AudioSource](https://github.com/bwoodbury3/looper/blob/main/src/audio/audio.rs): External audio input (an amplifier or a USB microphone).
+* [AudioSink](https://github.com/bwoodbury3/looper/blob/main/src/audio/audio.rs): Audio output from the program (a speaker or a file).
 * [VirtualInstrument](https://github.com/bwoodbury3/looper/blob/main/src/virtual/instrument.rs): Virtual instrument that you play with your computer keyboard.
 * [Metronome](https://github.com/bwoodbury3/looper/blob/main/src/virtual/metronme.rs): Ticking sound to keep time.
 * [Looper](https://github.com/bwoodbury3/looper/blob/main/src/transform/looper.rs): Loops an input stream over a series of outputs.

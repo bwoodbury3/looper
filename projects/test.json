@@ -12,14 +12,26 @@
         {
             "name": "drums",
             "type": "VirtualInstrument",
-            "instrument": "drums1",
+            "sounds": [
+                {
+                    "key": "a",
+                    "file": "kick1"
+                },
+                {
+                    "key": "s",
+                    "file": "kick1"
+                },
+                {
+                    "key": "d",
+                    "file": "snare1"
+                }
+            ],
             "volume": 0.2,
             "output_channel": "drums"
         },
         {
             "name": "drumloop",
             "type": "Loop",
-            "clip_override": "/tmp/looper/drums_recording.wav",
             "input_channels": ["drums"],
             "output_channel": "drumloop",
             "segments": [

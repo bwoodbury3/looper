@@ -9,6 +9,7 @@
             "beats_per_measure": 2,
             "beat_duration": 4
         },
+        "start_measure": 56,
         "NOTES": [
             "Intro is 0-26",
             "Verse 1 is 26-58",
@@ -26,7 +27,7 @@
             "name": "drums",
             "type": "VirtualInstrument",
             "instrument": "drums1",
-            "volume": 0.15,
+            "volume": 0.8,
             "segments": [],
             "output_channel": "drums"
         },
@@ -36,7 +37,7 @@
             "segments": [
                 {
                     "type": "output",
-                    "start": 9,
+                    "start": 0,
                     "stop": 14
                 },
                 {
@@ -64,7 +65,7 @@
             "name": "metronome",
             "type": "Metronome",
             "sound": "hihat-closed1",
-            "output_channels": ["metronome"],
+            "output_channel": "metronome",
             "segments": [
                 {
                     "type": "output",
@@ -75,7 +76,7 @@
         },
         {
             "name": "verse_drum_loop",
-            "type": "Looper",
+            "type": "Loop",
             "segments": [
                 {
                     "type": "input",
@@ -108,7 +109,7 @@
         },
         {
             "name": "chorus_drum_loop_fill",
-            "type": "Looper",
+            "type": "Loop",
             "segments": [
                 {
                     "type": "input",
@@ -141,7 +142,7 @@
         },
         {
             "name": "bridge_drum_loop",
-            "type": "Looper",
+            "type": "Loop",
             "segments": [
                 {
                     "type": "input",
@@ -159,7 +160,8 @@
         },
         {
             "name": "rhythm_guitar_loop",
-            "type": "Looper",
+            "type": "Loop",
+            "clip_override": "/tmp/looper/rhythm_guitar_recording.wav",
             "segments": [
                 {
                     "type": "input",
@@ -212,7 +214,7 @@
         },
         {
             "name": "laptop_speaker",
-            "type": "AudioOutput",
+            "type": "AudioSink",
             "device": "Built-in Output",
             "segments": [],
             "input_channel": "audio_out"

@@ -143,7 +143,7 @@ macro_rules! abort_config {
 impl BlockConfig {
     /// Get a JsonValue from a key. Returns an error if the value is not present.
     /// i.e. obj.is_null() returns true.
-    fn get_value(&self, key: &str) -> Result<&json::JsonValue, ()> {
+    pub fn get_value(&self, key: &str) -> Result<&json::JsonValue, ()> {
         let value = &self.root[key];
         abort_config!(value.is_null(), self.name, key, "Missing required parameter");
         Ok(value)

@@ -8,6 +8,7 @@ looper_library(
         "instrument.rs",
     ],
     deps = [
+        "@crate_index//:json",
         "//src/audio:wav",
         "//src/framework:block",
         "//src/framework:config",

@@ -4,13 +4,33 @@
 //!     Required parameters:
 //!         name: Anything
 //!         type: "VirtualInstrument"
-//!         instrument: The name of the instrument without the json suffix (see assets/instruments)
+//!         one of (see assets/instruments for examples):
+//!             instrument: The name of the instrument without the json suffix.
+//!                 OR
+//!             sounds: A list of key/file pairs for the instrument. See Instrument Configuration
+//!                     below.
 //!     Optional parameters:
 //!         volume: The volume of the instrument as a floating point multiplier.
+//!
+//! Instrument Configuration
+//!
+//! Instruments are configured a list of key/file pairs, where a key is a key on the keyboard and
+//! the file is a wav file that is triggered (with the .wav suffix omitted). Example:
+//!     "sounds": [
+//!         {
+//!             "key": "a",
+//!             "file": "kick_drum"
+//!         },
+//!         {
+//!             "key": "s",
+//!             "file": "snare_drum"
+//!         },
+//!     ]
 
 extern crate block;
 extern crate config;
 extern crate log;
+extern crate json;
 extern crate sampler;
 extern crate segment;
 extern crate stream;
@@ -37,7 +57,7 @@ pub struct VirtualInstrument {
 }
 
 /// Loads the instrument JSON file in as a map of clips.
-fn load_instrument(
+fn load_instrument_from_file(
     instrument_type: &str,
     volume: f32,
 ) -> Result<HashMap<char, ClipSamplerPair>, ()> {
@@ -49,6 +69,11 @@ fn load_instrument(
     log::abort_if!(config.is_null());
 
     let sounds = &config["sounds"];
+    load_instrument(sounds, volume)
+}
+
+/// Load an instrument from JsonValue as a map of clips.
+fn load_instrument(sounds: &json::JsonValue, volume: f32) -> Result<HashMap<char, ClipSamplerPair>, ()> {
     log::abort_if!(!sounds.is_array());
 
     // Load the audio clips into memory.
@@ -83,14 +108,23 @@ impl VirtualInstrument {
     ) -> Result<Self, ()> {
         // Read in config parameters
         let output_channel = config.get_str("output_channel")?;
-        let instrument_type = config.get_str("instrument")?;
+        let instrument_type = config.get_str_opt("instrument", "")?;
         let volume = config.get_f32_opt("volume", &1.0)?;
 
         // Load the stream.
         let stream = stream_catalog.create_source(output_channel)?;
 
         // Load the instrument configuration.
-        let clips = load_instrument(instrument_type, volume)?;
+        let clips = match instrument_type {
+            "" => {
+                let sounds = log::unwrap_abort_msg!(
+                    config.get_value("sounds"),
+                    "Must specify either \"instrument\" or \"sounds\""
+                );
+                load_instrument(sounds, volume)?
+            }
+            name => load_instrument_from_file(name, volume)?,
+        };
 
         Ok(VirtualInstrument {
             stream: stream,
@@ -128,7 +162,7 @@ mod tests {
     #[test]
     fn test_load_instrument() {
         // This should unwrap.
-        let clips = load_instrument("drums1", 1.0).unwrap();
+        let clips = load_instrument_from_file("drums1", 1.0).unwrap();
 
         // Grab all of the keys/clips.
         for key in ['a', 's', 'd', 'f', 'g'] {
@@ -142,7 +176,7 @@ mod tests {
     #[test]
     fn test_load_instrument_fail() {
         // This should not unwrap.
-        match load_instrument("invalid", 1.0) {
+        match load_instrument_from_file("invalid", 1.0) {
             Ok(_) => {
                 panic!("Instrument should be invalid");
             }
@@ -155,7 +189,33 @@ mod tests {
         // This should build with no problems.
         let project = config::ProjectConfig::new("dat/instrument/valid.json").unwrap();
         let mut stream_catalog = stream::StreamCatalog::new();
-        VirtualInstrument::new(&project.blocks[0], &mut stream_catalog).unwrap();
+        let instrument = VirtualInstrument::new(&project.blocks[0], &mut stream_catalog).unwrap();
+
+        // Validate all of the keys/clips.
+        let clips = instrument.clips;
+        for key in ['a', 's', 'd', 'f', 'g'] {
+            assert!(clips.contains_key(&key));
+
+            let clip = clips.get(&key).unwrap();
+            assert!(clip.clip.borrow().len() > 0);
+        }
+    }
+
+    #[test]
+    fn test_virtual_instrument_inline() {
+        // This should build with no problems.
+        let project = config::ProjectConfig::new("dat/instrument/inline.json").unwrap();
+        let mut stream_catalog = stream::StreamCatalog::new();
+        let instrument = VirtualInstrument::new(&project.blocks[0], &mut stream_catalog).unwrap();
+
+        // Validate all of the keys/clips.
+        let clips = instrument.clips;
+        for key in ['a', 's', 'd', 'f', 'g'] {
+            assert!(clips.contains_key(&key));
+
+            let clip = clips.get(&key).unwrap();
+            assert!(clip.clip.borrow().len() > 0);
+        }
     }
 
     #[test]

@@ -104,7 +104,7 @@ impl Runner {
                 }
 
                 _ => {
-                    println!("TODO REMOVE: Unknown block: {}", block_config.block_type);
+                    log::abort_msg!(format!("Unknown block: {}", block_config.block_type));
                 }
             }
         }
