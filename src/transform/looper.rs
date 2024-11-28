@@ -97,9 +97,6 @@ impl Looper {
         );
         let recording_segment = recording_segment_opt.unwrap();
 
-        // Sort the segments to build the state machine.
-        playback_segments.sort_by(|a, b| a.start.total_cmp(&b.start));
-
         // Sanity check that the replay intervals come after the recording interval.
         for segment in &playback_segments {
             log::abort_if_msg!(
@@ -121,6 +118,9 @@ impl Looper {
         if clip_override != "" {
             playback_segments.push(recording_segment.clone());
         }
+
+        // Sort the segments to build the state machine.
+        playback_segments.sort_by(|a, b| a.start.total_cmp(&b.start));
 
         Ok(Looper {
             name: config.name.to_owned(),
