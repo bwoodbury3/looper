@@ -29,8 +29,8 @@
 
 extern crate block;
 extern crate config;
-extern crate log;
 extern crate json;
+extern crate log;
 extern crate sampler;
 extern crate segment;
 extern crate stream;
@@ -73,7 +73,10 @@ fn load_instrument_from_file(
 }
 
 /// Load an instrument from JsonValue as a map of clips.
-fn load_instrument(sounds: &json::JsonValue, volume: f32) -> Result<HashMap<char, ClipSamplerPair>, ()> {
+fn load_instrument(
+    sounds: &json::JsonValue,
+    volume: f32,
+) -> Result<HashMap<char, ClipSamplerPair>, ()> {
     log::abort_if!(!sounds.is_array());
 
     // Load the audio clips into memory.

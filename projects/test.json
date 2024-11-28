@@ -6,34 +6,147 @@
             "beat_duration": 4
         },
         "start_measure": 0,
-        "stop_measure": 4
+        "stop_measure": 8
     },
     "devices": [
         {
-            "name": "drums",
+            "name": "kick",
             "type": "VirtualInstrument",
             "sounds": [
                 {
                     "key": "a",
                     "file": "kick1"
-                },
+                }
+            ],
+            "volume": 0.2,
+            "output_channel": "kick"
+        },
+        {
+            "name": "snare",
+            "type": "VirtualInstrument",
+            "sounds": [
                 {
                     "key": "s",
-                    "file": "kick1"
-                },
-                {
-                    "key": "d",
                     "file": "snare1"
                 }
             ],
             "volume": 0.2,
-            "output_channel": "drums"
+            "output_channel": "snare"
         },
         {
-            "name": "drumloop",
+            "name": "hihat-closed",
+            "type": "VirtualInstrument",
+            "sounds": [
+                {
+                    "key": "d",
+                    "file": "hihat-closed1"
+                }
+            ],
+            "volume": 0.2,
+            "output_channel": "hihat-closed"
+        },
+        {
+            "name": "kickloop",
             "type": "Loop",
-            "input_channels": ["drums"],
-            "output_channel": "drumloop",
+            "input_channels": ["kick"],
+            "output_channel": "kickloop",
+            "segments": [
+                {
+                    "start": 1,
+                    "stop": 2,
+                    "type": "input"
+                },
+
+                {
+                    "start": 3,
+                    "stop": 3.125,
+                    "type": "output"
+                },
+                {
+                    "start": 3.125,
+                    "stop": 3.250,
+                    "type": "output"
+                },
+                {
+                    "start": 3.375,
+                    "stop": 3.5,
+                    "type": "output"
+                },
+
+                {
+                    "start": 3.5,
+                    "stop": 3.625,
+                    "type": "output"
+                },
+                {
+                    "start": 3.625,
+                    "stop": 3.750,
+                    "type": "output"
+                },
+                {
+                    "start": 3.875,
+                    "stop": 4,
+                    "type": "output"
+                }
+            ]
+        },
+        {
+            "name": "snareloop",
+            "type": "Loop",
+            "input_channels": ["snare"],
+            "output_channel": "snareloop",
+            "segments": [
+                {
+                    "start": 1.25,
+                    "stop": 1.5,
+                    "type": "input"
+                },
+
+                {
+                    "start": 3.250,
+                    "stop": 3.375,
+                    "type": "output"
+                },
+
+                {
+                    "start": 3.625,
+                    "stop": 3.750,
+                    "type": "output"
+                },
+                {
+                    "start": 3.750,
+                    "stop": 3.875,
+                    "type": "output"
+                }
+            ]
+        },
+        {
+            "name": "hihat-loop",
+            "type": "Loop",
+            "input_channels": ["hihat-closed"],
+            "output_channel": "hihat-loop",
+            "segments": [
+                {
+                    "start": 1,
+                    "stop": 2,
+                    "type": "input"
+                },
+                {
+                    "start": 3,
+                    "stop": 4,
+                    "type": "output"
+                }
+            ]
+        },
+        {
+            "name": "drumloop_original",
+            "type": "Loop",
+            "input_channels": [
+                "kick",
+                "snare",
+                "hihat-closed"
+            ],
+            "output_channel": "drumloop_original",
             "segments": [
                 {
                     "start": 1,
@@ -42,12 +155,29 @@
                 },
                 {
                     "start": 2,
-                    "stop": 2.5,
+                    "stop": 3,
                     "type": "output"
-                },
+                }
+            ]
+        },
+        {
+            "name": "drumloop_remix",
+            "type": "Loop",
+            "input_channels": [
+                "kickloop",
+                "snareloop",
+                "hihat-loop"
+            ],
+            "output_channel": "drumloop_remix",
+            "segments": [
                 {
                     "start": 3,
-                    "stop": 3.5,
+                    "stop": 4,
+                    "type": "input"
+                },
+                {
+                    "start": 4,
+                    "stop": 8,
                     "type": "output"
                 }
             ]
@@ -68,7 +198,17 @@
         {
             "name": "combiner",
             "type": "Combiner",
-            "input_channels": ["drums", "drumloop", "metronome"],
+            "input_channels": [
+                "kick",
+                "kickloop",
+                "snare",
+                "snareloop",
+                "hihat-closed",
+                "hihat-loop",
+                "drumloop_original",
+                "drumloop_remix",
+                "metronome"
+            ],
             "output_channel": "audio_out"
         },
         {

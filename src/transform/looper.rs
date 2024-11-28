@@ -49,6 +49,12 @@ pub struct Looper {
 
     /// Whether or not the recording is complete.
     recording_complete: bool,
+
+    /// The current interval index.
+    cur_interval: usize,
+
+    /// Whether we are currently playing something.
+    is_playing: bool,
 }
 
 impl Looper {
@@ -69,6 +75,7 @@ impl Looper {
             input_streams.push(stream_catalog.bind_sink(channel)?);
         }
         let output_stream = stream_catalog.create_source(output_channel)?;
+        output_stream.borrow_mut().fill(stream::ZERO);
 
         // Load segments and sort into their respective buckets.
         let mut recording_segment_opt: Option<segment::Segment> = None;
@@ -89,6 +96,9 @@ impl Looper {
             "Looper blocks may only have one input segment"
         );
         let recording_segment = recording_segment_opt.unwrap();
+
+        // Sort the segments to build the state machine.
+        playback_segments.sort_by(|a, b| a.start.total_cmp(&b.start));
 
         // Sanity check that the replay intervals come after the recording interval.
         for segment in &playback_segments {
@@ -121,6 +131,8 @@ impl Looper {
             recording_segment: recording_segment,
             playback_segments: playback_segments,
             recording_complete: clip_override != "",
+            cur_interval: 0,
+            is_playing: false,
         })
     }
 }
@@ -128,10 +140,14 @@ impl Looper {
 impl block::Transformer for Looper {
     fn transform(&mut self, state: &block::PlaybackState) {
         let tempo = state.tempo;
+        let cur_measure = tempo.current_measure();
 
-        // Record the input samples if we're in the recording segment.
+        //  -- RECORDING PHASE -- //
         if !self.recording_complete {
-            if tempo.in_measure(self.recording_segment.start, self.recording_segment.stop, 0.0) {
+            // Determine whether we're in the recording interval.
+            if self.recording_segment.start <= cur_measure
+                && cur_measure < self.recording_segment.stop
+            {
                 let mut recording = self.recording.borrow_mut();
                 if recording.is_empty() {
                     println!("Loop recording started: {}", self.name);
@@ -151,33 +167,55 @@ impl block::Transformer for Looper {
             }
 
             // Mark the recording complete if we're past the recording interval.
-            if tempo.current_measure() >= self.recording_segment.stop {
+            if cur_measure >= self.recording_segment.stop {
                 println!("Loop recording complete: {}", self.name);
                 self.recording_complete = true;
             }
         }
 
-        // Detect whether we need to playback in this interval.
-        let mut should_play = false;
-        for segment in &self.playback_segments {
-            if tempo.in_measure(segment.start, segment.stop, 1.0) {
-                should_play = true;
-                break;
-            }
-        }
+        //  -- PLAYBACK PHASE -- //
+        if self.recording_complete {
+            let mut should_play = false;
+            let mut next_interval = self.cur_interval;
+            while next_interval < self.playback_segments.len() {
+                let segment = &self.playback_segments[next_interval];
 
-        // If we're not playing and we should be, start the sampler. Otherwise turn it off.
-        let mut output_stream = self.output_stream.borrow_mut();
-        if should_play {
-            if !self.sampler.is_playing() {
+                // We're waiting for the next segment. Break without playing.
+                if cur_measure < segment.start {
+                    break;
+                }
+
+                // We're in the current segment. Break and play.
+                if cur_measure < segment.stop {
+                    should_play = true;
+                    break;
+                }
+
+                // Otherwise, check the next segment.
+                next_interval += 1;
+            }
+
+            // We have entered a new interval. Start the sample from the beginning.
+            if should_play && (next_interval != self.cur_interval || !self.is_playing) {
                 println!("Playing loop: {}", self.name);
                 self.sampler.play(&self.recording, true);
             }
-        } else {
-            self.sampler.stop();
-        }
+            // If we shouldn't play at all, stop the sampler.
+            else if !should_play {
+                self.sampler.stop();
+            }
 
-        output_stream.fill(stream::ZERO);
-        self.sampler.next(&mut output_stream);
+            let mut output_stream = self.output_stream.borrow_mut();
+
+            // If we were playing something on the previous cycle, zero out the output stream.
+            if self.is_playing {
+                output_stream.fill(stream::ZERO);
+            }
+            self.sampler.next(&mut output_stream);
+
+            // Save off internal state.
+            self.cur_interval = next_interval;
+            self.is_playing = should_play;
+        }
     }
 }
