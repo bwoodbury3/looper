@@ -9,23 +9,28 @@
             "sounds": [
                 {
                     "key": "a",
-                    "file": "kick1"
+                    "file": "kick1",
+                    "group": 1
                 },
                 {
                     "key": "s",
-                    "file": "snare1"
+                    "file": "snare1",
+                    "group": 2
                 },
                 {
                     "key": "d",
-                    "file": "hihat-closed1"
+                    "file": "hihat-closed1",
+                    "group": 3
                 },
                 {
                     "key": "f",
-                    "file": "hihat-open1"
+                    "file": "hihat-open1",
+                    "group": 3
                 },
                 {
                     "key": "g",
-                    "file": "crash-cymbal1"
+                    "file": "crash-cymbal1",
+                    "group": 4
                 }
             ],
             "volume": 0.2,

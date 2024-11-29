@@ -14,16 +14,22 @@
 //!
 //! Instrument Configuration
 //!
-//! Instruments are configured a list of key/file pairs, where a key is a key on the keyboard and
-//! the file is a wav file that is triggered (with the .wav suffix omitted). Example:
+//! Instruments are configured a list of sounds. Each sound has:
+//!     - Key: the key to press on the keyboard.
+//!     - File: The wav file sound to play when the key is pressed.
+//!     - Group: The sound group. Sounds in different groups can be played independently.
+//!
+//! Example configuration:
 //!     "sounds": [
 //!         {
 //!             "key": "a",
 //!             "file": "kick_drum"
+//!             "group": 1
 //!         },
 //!         {
 //!             "key": "s",
-//!             "file": "snare_drum"
+//!             "file": "snare_drum",
+//!             "group": 2
 //!         },
 //!     ]
 
@@ -42,9 +48,12 @@ use std::collections::HashMap;
 use stream::Scalable;
 
 /// A clip paired to its sampler.
-struct ClipSamplerPair {
+struct Sound {
+    /// The clip.
     clip: stream::Clip,
-    sampler: sampler::Sampler,
+
+    /// The sampler group.
+    sampler_group: i32,
 }
 
 /// A virtual instrument that can be played using the keyboard.
@@ -52,15 +61,18 @@ pub struct VirtualInstrument {
     /// The output stream buffer.
     stream: stream::Stream,
 
-    /// A mapping of keyboard keys to audio clips.
-    clips: HashMap<char, ClipSamplerPair>,
+    /// A mapping of keyboard keys to sounds.
+    clips: HashMap<char, Sound>,
+
+    /// The samplers.
+    samplers: HashMap<i32, sampler::Sampler>,
 }
 
 /// Loads the instrument JSON file in as a map of clips.
 fn load_instrument_from_file(
     instrument_type: &str,
     volume: f32,
-) -> Result<HashMap<char, ClipSamplerPair>, ()> {
+) -> Result<HashMap<char, Sound>, ()> {
     let filename = config::instrument_path(instrument_type);
     let config = log::unwrap_abort_msg!(
         config::read_json_file(filename.as_str()),
@@ -73,17 +85,15 @@ fn load_instrument_from_file(
 }
 
 /// Load an instrument from JsonValue as a map of clips.
-fn load_instrument(
-    sounds: &json::JsonValue,
-    volume: f32,
-) -> Result<HashMap<char, ClipSamplerPair>, ()> {
+fn load_instrument(sounds: &json::JsonValue, volume: f32) -> Result<HashMap<char, Sound>, ()> {
     log::abort_if!(!sounds.is_array());
 
     // Load the audio clips into memory.
-    let mut clips = HashMap::<char, ClipSamplerPair>::new();
+    let mut clips = HashMap::<char, Sound>::new();
     for sound in sounds.members() {
         let key = log::unwrap_abort!(sound["key"].as_str().ok_or(()));
         let clip_name = log::unwrap_abort!(sound["file"].as_str().ok_or(()));
+        let sampler_group = log::unwrap_abort!(sound["group"].as_i32().ok_or(()));
 
         // Read in the key that plays this clip.
         log::abort_if_msg!(key.len() != 1, "Invalid instrument \"key\", must be of type char");
@@ -92,12 +102,17 @@ fn load_instrument(
         // Load the clip and the sampler.
         let clip_path = config::clip_path(clip_name);
         let clip = log::unwrap_abort!(wav::read_wav_file(clip_path.as_str()));
-        let sampler = sampler::Sampler::new();
 
         // Scale the volume of the clip.
         clip.borrow_mut().scale(volume);
 
-        clips.insert(key_char, ClipSamplerPair { clip, sampler });
+        clips.insert(
+            key_char,
+            Sound {
+                clip,
+                sampler_group,
+            },
+        );
     }
 
     Ok(clips)
@@ -129,9 +144,18 @@ impl VirtualInstrument {
             name => load_instrument_from_file(name, volume)?,
         };
 
+        // Load the sampler groups.
+        let mut samplers = HashMap::<i32, sampler::Sampler>::new();
+        for clip in clips.values() {
+            if !samplers.contains_key(&clip.sampler_group) {
+                samplers.insert(clip.sampler_group, sampler::Sampler::new());
+            }
+        }
+
         Ok(VirtualInstrument {
             stream: stream,
             clips: clips,
+            samplers: samplers,
         })
     }
 }
@@ -143,7 +167,10 @@ impl block::Source for VirtualInstrument {
         for key in keys {
             match self.clips.get_mut(key) {
                 Some(clip) => {
-                    clip.sampler.play(&clip.clip, false);
+                    self.samplers
+                        .get_mut(&clip.sampler_group)
+                        .unwrap()
+                        .play(&clip.clip, false);
                 }
                 None => {}
             }
@@ -152,8 +179,8 @@ impl block::Source for VirtualInstrument {
         // Read off all of the streams.
         let mut stream = self.stream.borrow_mut();
         stream.fill(stream::ZERO);
-        for clip in self.clips.values_mut() {
-            clip.sampler.next(&mut stream);
+        for sampler in self.samplers.values_mut() {
+            sampler.next(&mut stream);
         }
     }
 }

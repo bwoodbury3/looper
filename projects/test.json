@@ -15,7 +15,8 @@
             "sounds": [
                 {
                     "key": "a",
-                    "file": "kick1"
+                    "file": "kick1",
+                    "group": 1
                 }
             ],
             "volume": 0.2,
@@ -27,7 +28,8 @@
             "sounds": [
                 {
                     "key": "s",
-                    "file": "snare1"
+                    "file": "snare1",
+                    "group": 1
                 }
             ],
             "volume": 0.2,
@@ -39,7 +41,8 @@
             "sounds": [
                 {
                     "key": "d",
-                    "file": "hihat-closed1"
+                    "file": "hihat-closed1",
+                    "group": 1
                 }
             ],
             "volume": 0.2,

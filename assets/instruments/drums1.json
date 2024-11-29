@@ -2,31 +2,38 @@
     "sounds": [
         {
             "key": "a",
-            "file": "kick2"
+            "file": "kick2",
+            "group": 1
         },
         {
             "key": "s",
-            "file": "snare1"
+            "file": "snare1",
+            "group": 2
         },
         {
             "key": "d",
-            "file": "hihat-closed1"
+            "file": "hihat-closed1",
+            "group": 3
         },
         {
             "key": "f",
-            "file": "hihat-open1"
+            "file": "hihat-open1",
+            "group": 3
         },
         {
             "key": "r",
-            "file": "ride1"
+            "file": "ride1",
+            "group": 4
         },
         {
             "key": "g",
-            "file": "crash-cymbal1"
+            "file": "crash-cymbal1",
+            "group": 5
         },
         {
             "key": "w",
-            "file": "tom-mid1"
+            "file": "tom-mid1",
+            "group": 6
         }
     ]
 }
