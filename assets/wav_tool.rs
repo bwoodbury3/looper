@@ -17,6 +17,7 @@ fn help() -> process::ExitCode {
     println!("available commands:");
     println!("    trim <duration>      Trim the wav file to the specified duration");
     println!("    volume <amplitude>   Change the volume of the input file");
+    println!("    fade <duration>      Apply a linear fade-out effect on the audio");
 
     return process::ExitCode::FAILURE;
 }
@@ -34,6 +35,21 @@ fn scale(rc_clip: stream::Clip, volume: f32) -> stream::Clip {
         let mut clip = rc_clip.borrow_mut();
         for i in 0..clip.len() {
             clip[i] *= volume;
+        }
+    }
+    rc_clip
+}
+
+fn fade(rc_clip: stream::Clip, duration: f32) -> stream::Clip {
+    let fade_len = (duration * stream::SAMPLE_RATE as f32) as usize;
+    {
+        let mut clip = rc_clip.borrow_mut();
+        assert!(fade_len < clip.len(), "The specified fade duration is longer than the clip");
+
+        let begin = clip.len() - fade_len;
+        for i in 0..fade_len {
+            let ratio = (fade_len - i) as f32 / fade_len as f32;
+            clip[begin + i] *= ratio;
         }
     }
     rc_clip
@@ -59,6 +75,10 @@ fn main() -> process::ExitCode {
         "volume" => {
             let amplitude = f32::from_str(&args[4]).expect("volume must be a float");
             scale(input_samples, amplitude)
+        }
+        "fade" => {
+            let duration = f32::from_str(&args[4]).expect("duration must be a float");
+            fade(input_samples, duration)
         }
         unknown_cmd => {
             println!("Command not recognized: {}", unknown_cmd);

@@ -2,7 +2,7 @@
     "sounds": [
         {
             "key": "a",
-            "file": "kick1"
+            "file": "kick2"
         },
         {
             "key": "s",
@@ -15,6 +15,10 @@
         {
             "key": "f",
             "file": "hihat-open1"
+        },
+        {
+            "key": "r",
+            "file": "ride1"
         },
         {
             "key": "g",
