@@ -2,7 +2,7 @@
 //!
 //! Toggle takes an input stream and toggles it on during the provided segments.
 //!
-//! Toggle [Transformer]:
+//! Toggle \[Transformer\]:
 //!     Required parameters:
 //!         name: Anything
 //!         type: "Toggle"

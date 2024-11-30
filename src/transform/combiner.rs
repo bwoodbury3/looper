@@ -4,7 +4,7 @@
 //! will always find a place for a Combiner somewhere if you have more than one instrument in your
 //! project.
 //!
-//! Combiner [Transformer]:
+//! Combiner \[Transformer\]:
 //!     Required parameters:
 //!         name: Anything
 //!         type: "Combiner"

@@ -1,8 +1,8 @@
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("//tools/rust:rust.bzl", "looper_library")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+looper_library(
     name = "combiner",
     srcs = [
         "combiner.rs",
@@ -15,7 +15,7 @@ rust_library(
     ]
 )
 
-rust_library(
+looper_library(
     name = "looper",
     srcs = [
         "looper.rs",
@@ -31,7 +31,7 @@ rust_library(
     ],
 )
 
-rust_library(
+looper_library(
     name = "toggle",
     srcs = [
         "toggle.rs",

@@ -4,7 +4,7 @@
 //! subsequent output segments. If multiple input streams are provided, this block implicitly
 //! combines them into the recording.
 //!
-//! Loop [Transformer]:
+//! Loop \[Transformer\]:
 //!     Required parameters:
 //!         name: Anything
 //!         type: "Loop"

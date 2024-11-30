@@ -1,0 +1,29 @@
+{
+    "config": {
+        "tempo": {
+            "bpm": 65,
+            "beats_per_measure": 3,
+            "beat_duration": 4
+        }
+    },
+    "devices": [
+        {
+            "name": "loop",
+            "type": "Loop",
+            "input_channels": ["empty"],
+            "output_channel": "out",
+            "segments": [
+                {
+                    "type": "input",
+                    "start": 1,
+                    "stop": 2
+                },
+                {
+                    "type": "output",
+                    "start": 3,
+                    "stop": 4
+                }
+            ]
+        }
+    ]
+}

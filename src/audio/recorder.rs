@@ -42,6 +42,9 @@ pub struct Recorder {
 
     /// Whether the stream is finished recording.
     complete: bool,
+
+    /// WHether the stream is disabled.
+    disabled: bool,
 }
 
 impl Recorder {
@@ -52,6 +55,7 @@ impl Recorder {
         // Read in parameters.
         let input_channel = config.get_str("input_channel")?;
         let directory = config.get_str("directory")?;
+        let disabled = config.get_bool_opt("disabled", false)?;
         let mut segments = config.get_segments()?;
 
         // Load stream.
@@ -89,6 +93,7 @@ impl Recorder {
             filename: path.to_owned(),
             clip: clip,
             complete: false,
+            disabled: disabled,
         })
     }
 }
@@ -98,7 +103,7 @@ impl block::Sink for Recorder {
         let tempo = state.tempo;
 
         // We've already recorded. Nothing to do.
-        if self.complete {
+        if self.complete || self.disabled {
             return;
         }
 
@@ -127,6 +132,10 @@ impl block::Sink for Recorder {
     fn cleanup(&mut self) {
         if !self.complete {
             println!("Abandoning recording \"{}\" because the segment wasn't complete.", self.name);
+            return;
+        }
+        if !self.disabled {
+            println!("Recorder {} is disabled, nothing to do.", self.name);
             return;
         }
 
