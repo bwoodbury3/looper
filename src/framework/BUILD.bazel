@@ -82,7 +82,11 @@ looper_library(
     ],
     deps = [
         ":config",
+        ":log",
         ":stream",
+    ],
+    test_data = [
+        "//dat/tempo:data",
     ]
 )
 

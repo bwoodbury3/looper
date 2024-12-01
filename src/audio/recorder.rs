@@ -108,7 +108,7 @@ impl block::Sink for Recorder {
         }
 
         // Record the input samples if we're in the recording segment.
-        if tempo.in_measure(self.segment.start, self.segment.stop, 0.0) {
+        if tempo.in_measure(self.segment.start, self.segment.stop) {
             let mut clip = self.clip.borrow_mut();
             if clip.is_empty() {
                 println!("Recording started: {}", self.name);

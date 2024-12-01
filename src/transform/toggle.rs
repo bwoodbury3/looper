@@ -65,7 +65,7 @@ impl block::Transformer for Toggle {
 
         let mut output_stream = self.output_stream.borrow_mut();
         for segment in &self.segments {
-            if tempo.in_measure(segment.start, segment.stop, stream::ZERO) {
+            if tempo.in_measure(segment.start, segment.stop) {
                 let input_stream = self.input_stream.borrow();
                 output_stream.clone_from_slice(&input_stream[..]);
                 return;

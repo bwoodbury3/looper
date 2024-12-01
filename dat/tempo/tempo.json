@@ -1,0 +1,12 @@
+{
+    "config": {
+        "tempo": {
+            "bpm": 100,
+            "beats_per_measure": 3,
+            "beat_duration": 4
+        },
+        "start_measure": 0,
+        "stop_measure": 8
+    },
+    "devices": []
+}

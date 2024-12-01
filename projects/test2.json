@@ -12,15 +12,15 @@
             "type": "VirtualInstrument",
             "instrument": "drums1",
             "volume": 0.10,
-            "output_channels": ["drums"],
+            "output_channel": "drums",
             "segments": []
         },
         {
             "name": "amp",
-            "type": "AudioInput",
+            "type": "AudioSource",
             "device": "Cable Creation",
             "segments": [],
-            "output_channels": ["amp"]
+            "output_channel": "amp"
         },
         {
             "name": "amp_toggle",
@@ -37,12 +37,12 @@
                     "stop": 999
                 }
             ],
-            "input_channels": ["amp"],
-            "output_channels": ["amp_toggle"]
+            "input_channel": "amp",
+            "output_channel": "amp_toggle"
         },
         {
             "name": "bass_verse2",
-            "type": "Looper",
+            "type": "Loop",
             "segments": [
                 {
                     "type": "input",
@@ -56,11 +56,11 @@
                 }
             ],
             "input_channels": ["amp"],
-            "output_channels": ["bass_verse2"]
+            "output_channel": "bass_verse2"
         },
         {
             "name": "bass_verse1",
-            "type": "Looper",
+            "type": "Loop",
             "segments": [
                 {
                     "type": "input",
@@ -74,11 +74,11 @@
                 }
             ],
             "input_channels": ["amp"],
-            "output_channels": ["bass_verse1"]
+            "output_channel": "bass_verse1"
         },
         {
             "name": "bass_verse",
-            "type": "Looper",
+            "type": "Loop",
             "segments": [
                 {
                     "type": "input",
@@ -92,13 +92,13 @@
                 }
             ],
             "input_channels": ["bass_verse1", "bass_verse2"],
-            "output_channels": ["bass_verse"]
+            "output_channel": "bass_verse"
         },
         {
             "name": "metronome",
             "type": "Metronome",
             "sound": "hihat-closed1",
-            "output_channels": ["metronome"],
+            "output_channel": "metronome",
             "volume": 0.15,
             "segments": [
                 {
@@ -120,14 +120,14 @@
                 "bass_verse",
                 "drums"
             ],
-            "output_channels": ["audio_out"]
+            "output_channel": "audio_out"
         },
         {
             "name": "laptop_speaker",
-            "type": "AudioOutput",
+            "type": "AudioSink",
             "device": "Built-in Output",
             "segments": [],
-            "input_channels": ["audio_out"]
+            "input_channel": "audio_out"
         }
     ]
 }

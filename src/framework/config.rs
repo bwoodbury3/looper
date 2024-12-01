@@ -76,7 +76,7 @@ pub struct ProjectConfig {
     pub tempo_config: json::JsonValue,
 
     /// The start measure.
-    pub start_measure: f32,
+    pub start_measure: i32,
 
     /// The stop measure.
     pub stop_measure: f32,
@@ -94,9 +94,9 @@ impl ProjectConfig {
         let global_config = &root["config"];
         log::abort_if_msg_str!(!global_config.is_object(), "Missing top-level \"config\" key");
 
-        let start_measure = match global_config["start_measure"].as_f32() {
+        let start_measure = match global_config["start_measure"].as_i32() {
             Some(v) => v,
-            None => 0.0,
+            None => 0,
         };
         let stop_measure = match global_config["stop_measure"].as_f32() {
             Some(v) => v,
@@ -292,7 +292,7 @@ mod tests {
         assert_eq!(tempo_config["beats_per_measure"].as_i32().unwrap(), 3);
         assert_eq!(tempo_config["beat_duration"].as_i32().unwrap(), 4);
 
-        assert_eq!(project.start_measure, 0.0);
+        assert_eq!(project.start_measure, 0);
         assert_eq!(project.stop_measure, 20.0);
 
         // Test the block getters.

@@ -9,10 +9,11 @@ def looper_library(name, srcs, deps = [], data = [], test_deps = [], test_data =
         data = data,
     )
 
-    rust_doc(
-        name = "{}_doc".format(name),
-        crate = ":{}".format(name),
-    )
+    # Not really used right now and slowing tests down.
+    # rust_doc(
+    #     name = "{}_doc".format(name),
+    #     crate = ":{}".format(name),
+    # )
 
     rust_test(
         name = "{}_test".format(name),

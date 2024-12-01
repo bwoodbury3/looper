@@ -90,14 +90,14 @@ impl block::Source for Metronome {
 
         if self.segments.is_empty() {
             // If no segments are present, assume the metronome is always on.
-            if tempo.on_beat(0.0) {
+            if tempo.on_beat(0) {
                 self.sampler.play(&self.clip, false);
             }
         } else {
             // Otherwise, play the metronome only in an active segment.
             for segment in &self.segments {
-                if tempo.in_measure(segment.start, segment.stop, 0.0) {
-                    if tempo.on_beat(0.0) {
+                if tempo.in_measure(segment.start, segment.stop) {
+                    if tempo.on_beat(0) {
                         self.sampler.play(&self.clip, false);
                         break;
                     }
