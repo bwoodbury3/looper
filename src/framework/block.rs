@@ -17,6 +17,11 @@ pub trait Source {
 
     /// Optional code to be run when the playback is complete.
     fn cleanup(&mut self) {}
+
+    /// Optional property for whether the block contains blocking I/O.
+    fn is_blocking_io(&self) -> bool {
+        return false;
+    }
 }
 
 /// Block which ingests audio data and outputs it to I/O.
@@ -26,6 +31,11 @@ pub trait Sink {
 
     /// Optional code to be run when the playback is complete.
     fn cleanup(&mut self) {}
+
+    /// Optional property for whether the block contains blocking I/O.
+    fn is_blocking_io(&self) -> bool {
+        return false;
+    }
 }
 
 /// Block which takes an input data source and produces a transformed output.

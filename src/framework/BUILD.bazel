@@ -20,6 +20,7 @@ looper_library(
         ":log",
         ":stream",
         ":tempo",
+        ":timer",
     ]
 )
 
@@ -104,5 +105,12 @@ looper_library(
         "@crate_index//:filedescriptor",
         "@crate_index//:termios",
         ":log",
+    ]
+)
+
+looper_library(
+    name = "timer",
+    srcs = [
+        "timer.rs",
     ]
 )

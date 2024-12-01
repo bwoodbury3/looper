@@ -16,6 +16,7 @@ extern crate looper;
 extern crate metronome;
 extern crate recorder;
 extern crate tempo;
+extern crate timer;
 extern crate toggle;
 
 /// Top level looper runner.
@@ -125,6 +126,8 @@ impl Runner {
         self.tempo.skip(self.project.start_measure);
 
         // Run all of the blocks.
+        let mut total_timer = timer::Timer::start();
+        let mut compute_timer = timer::Timer::start();
         loop {
             {
                 let state = block::PlaybackState {
@@ -132,14 +135,31 @@ impl Runner {
                     keyboard: &self.keyboard,
                 };
 
+                // Run all of the source blocks.
                 for source in &mut sources {
+                    if source.is_blocking_io() {
+                        compute_timer.pause();
+                    }
                     source.read(&state);
+                    if source.is_blocking_io() {
+                        compute_timer.resume();
+                    }
                 }
+
+                // Run all of the transformer blocks.
                 for transformer in &mut transformers {
                     transformer.transform(&state);
                 }
+
+                // Run all of the sink blocks.
                 for sink in &mut sinks {
+                    if sink.is_blocking_io() {
+                        compute_timer.pause();
+                    }
                     sink.write(&state);
+                    if sink.is_blocking_io() {
+                        compute_timer.resume();
+                    }
                 }
             }
 
@@ -153,6 +173,12 @@ impl Runner {
                 break;
             }
         }
+
+        let total_duration = total_timer.stop();
+        let compute_duration = compute_timer.stop();
+        println!("Total duration:   {}ms", total_duration);
+        println!("Compute duration: {}ms (excludes nonblocking I/O)", compute_duration);
+        println!("I/O duration:     {}ms (only blocking I/O)", total_duration - compute_duration);
 
         // Run the optional cleanup for all blocks.
         for source in &mut sources {

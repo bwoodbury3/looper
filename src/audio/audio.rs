@@ -265,6 +265,10 @@ impl block::Source for AudioSource {
             index += num_samples;
         }
     }
+
+    fn is_blocking_io(&self) -> bool {
+        return true;
+    }
 }
 
 impl block::Sink for AudioSink {
@@ -292,5 +296,9 @@ impl block::Sink for AudioSink {
 
             index += num_samples;
         }
+    }
+
+    fn is_blocking_io(&self) -> bool {
+        return true;
     }
 }
