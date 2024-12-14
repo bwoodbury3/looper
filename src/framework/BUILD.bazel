@@ -30,7 +30,7 @@ looper_library(
         "config.rs",
     ],
     deps = [
-        "@crate_index//:json",
+        "@crate_index//:yaml-rust",
         ":log",
         ":segment",
     ],

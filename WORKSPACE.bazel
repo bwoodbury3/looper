@@ -47,8 +47,8 @@ crates_repository(
         "hound": crate.spec(
             version = "3.5.1",
         ),
-        "json": crate.spec(
-            version = "0.12.4",
+        "yaml-rust": crate.spec(
+            version = "0.4.5",
         ),
         "portaudio": crate.spec(
             version = "0.8.0",

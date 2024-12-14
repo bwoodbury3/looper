@@ -1,0 +1,90 @@
+config:
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 4
+        bpm: 75
+devices:
+-   instrument: drums1
+    name: drums
+    output_channel: drums
+    segments: []
+    type: VirtualInstrument
+    volume: 0.1
+-   device: Cable Creation
+    name: amp
+    output_channel: amp
+    segments: []
+    type: AudioSource
+-   input_channel: amp
+    name: amp_toggle
+    output_channel: amp_toggle
+    segments:
+    -   start: 0
+        stop: 7
+        type: output
+    -   start: 15
+        stop: 999
+        type: output
+    type: Toggle
+-   input_channels:
+    - amp
+    name: bass_verse2
+    output_channel: bass_verse2
+    segments:
+    -   start: 1
+        stop: 3
+        type: input
+    -   start: 13
+        stop: 15
+        type: output
+    type: Loop
+-   input_channels:
+    - amp
+    name: bass_verse1
+    output_channel: bass_verse1
+    segments:
+    -   start: 3
+        stop: 7
+        type: input
+    -   start: 7
+        stop: 13
+        type: output
+    type: Loop
+-   input_channels:
+    - bass_verse1
+    - bass_verse2
+    name: bass_verse
+    output_channel: bass_verse
+    segments:
+    -   start: 7
+        stop: 15
+        type: input
+    -   start: 15
+        stop: 47
+        type: output
+    type: Loop
+-   name: metronome
+    output_channel: metronome
+    segments:
+    -   start: 0
+        stop: 21
+        type: output
+    sound: hihat-closed1
+    type: Metronome
+    volume: 0.15
+-   input_channels:
+    - metronome
+    - amp_toggle
+    - bass_verse1
+    - bass_verse2
+    - bass_verse
+    - drums
+    name: combiner
+    output_channel: audio_out
+    segments: []
+    type: Combiner
+-   device: Built-in Output
+    input_channel: audio_out
+    name: laptop_speaker
+    segments: []
+    type: AudioSink

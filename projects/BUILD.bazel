@@ -2,5 +2,5 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "dev_configs",
-    srcs = glob(["*.json"])
+    srcs = glob(["*.yaml"])
 )

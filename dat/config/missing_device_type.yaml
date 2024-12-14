@@ -1,0 +1,4 @@
+config:
+    tempo: {}
+devices:
+-   name: combiner

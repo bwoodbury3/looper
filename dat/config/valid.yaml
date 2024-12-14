@@ -1,0 +1,26 @@
+config:
+    start_measure: 0
+    stop_measure: 20
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 3
+        bpm: 101
+devices:
+-   instrument: drums1
+    name: drums
+    segments:
+    -   start: 1
+        stop: 2
+        type: input
+    -   start: 3
+        stop: 4
+        type: output
+    type: VirtualInstrument
+    volume: 0.2
+-   name: combiner
+    param_bool: true
+    param_i32: 12
+    param_str_list:
+    - val1
+    - val2
+    type: Combiner

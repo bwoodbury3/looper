@@ -1,0 +1,22 @@
+sounds:
+-   file: kick2
+    group: 1
+    key: a
+-   file: snare1
+    group: 2
+    key: s
+-   file: hihat-closed1
+    group: 3
+    key: d
+-   file: hihat-open1
+    group: 3
+    key: f
+-   file: ride1
+    group: 4
+    key: r
+-   file: crash-cymbal1
+    group: 5
+    key: g
+-   file: tom-mid1
+    group: 6
+    key: w

@@ -1,0 +1,8 @@
+config:
+    start_measure: 0
+    stop_measure: 8
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 3
+        bpm: 100
+devices: []

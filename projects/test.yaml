@@ -1,0 +1,142 @@
+config:
+    start_measure: 0
+    stop_measure: 8
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 4
+        bpm: 100
+devices:
+-   name: kick
+    output_channel: kick
+    sounds:
+    -   file: kick1
+        group: 1
+        key: a
+    type: VirtualInstrument
+    volume: 0.2
+-   name: snare
+    output_channel: snare
+    sounds:
+    -   file: snare1
+        group: 1
+        key: s
+    type: VirtualInstrument
+    volume: 0.2
+-   name: hihat-closed
+    output_channel: hihat-closed
+    sounds:
+    -   file: hihat-closed1
+        group: 1
+        key: d
+    type: VirtualInstrument
+    volume: 0.2
+-   input_channels:
+    - kick
+    name: kickloop
+    output_channel: kickloop
+    segments:
+    -   start: 1
+        stop: 2
+        type: input
+    -   start: 3
+        stop: 3.125
+        type: output
+    -   start: 3.125
+        stop: 3.25
+        type: output
+    -   start: 3.375
+        stop: 3.5
+        type: output
+    -   start: 3.5
+        stop: 3.625
+        type: output
+    -   start: 3.625
+        stop: 3.75
+        type: output
+    -   start: 3.875
+        stop: 4
+        type: output
+    type: Loop
+-   input_channels:
+    - snare
+    name: snareloop
+    output_channel: snareloop
+    segments:
+    -   start: 1.25
+        stop: 1.5
+        type: input
+    -   start: 3.25
+        stop: 3.375
+        type: output
+    -   start: 3.625
+        stop: 3.75
+        type: output
+    -   start: 3.75
+        stop: 3.875
+        type: output
+    type: Loop
+-   input_channels:
+    - hihat-closed
+    name: hihat-loop
+    output_channel: hihat-loop
+    segments:
+    -   start: 1
+        stop: 2
+        type: input
+    -   start: 3
+        stop: 4
+        type: output
+    type: Loop
+-   input_channels:
+    - kick
+    - snare
+    - hihat-closed
+    name: drumloop_original
+    output_channel: drumloop_original
+    segments:
+    -   start: 1
+        stop: 2
+        type: input
+    -   start: 2
+        stop: 3
+        type: output
+    type: Loop
+-   input_channels:
+    - kickloop
+    - snareloop
+    - hihat-loop
+    name: drumloop_remix
+    output_channel: drumloop_remix
+    segments:
+    -   start: 3
+        stop: 4
+        type: input
+    -   start: 4
+        stop: 8
+        type: output
+    type: Loop
+-   name: metronome
+    output_channel: metronome
+    segments:
+    -   start: 0
+        stop: 2
+        type: output
+    type: Metronome
+    volume: 0.2
+-   input_channels:
+    - kick
+    - kickloop
+    - snare
+    - snareloop
+    - hihat-closed
+    - hihat-loop
+    - drumloop_original
+    - drumloop_remix
+    - metronome
+    name: combiner
+    output_channel: audio_out
+    type: Combiner
+-   device: Built-in Output
+    input_channel: audio_out
+    name: laptop_speaker
+    type: AudioSink

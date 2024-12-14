@@ -5,7 +5,7 @@
 //!         name: Anything
 //!         type: "VirtualInstrument"
 //!         one of (see assets/instruments for examples):
-//!             instrument: The name of the instrument without the json suffix.
+//!             instrument: The name of the instrument without the yaml suffix.
 //!                 OR
 //!             sounds: A list of key/file pairs for the instrument. See Instrument Configuration
 //!                     below.
@@ -35,15 +35,16 @@
 
 extern crate block;
 extern crate config;
-extern crate json;
 extern crate log;
 extern crate sampler;
 extern crate segment;
 extern crate stream;
 extern crate tempo;
 extern crate wav;
+extern crate yaml_rust;
 
 use std::collections::HashMap;
+use yaml_rust::Yaml;
 
 use stream::Scalable;
 
@@ -68,32 +69,33 @@ pub struct VirtualInstrument {
     samplers: HashMap<i32, sampler::Sampler>,
 }
 
-/// Loads the instrument JSON file in as a map of clips.
+/// Loads the instrument YAML file in as a map of clips.
 fn load_instrument_from_file(
     instrument_type: &str,
     volume: f32,
 ) -> Result<HashMap<char, Sound>, ()> {
     let filename = config::instrument_path(instrument_type);
-    let config = log::unwrap_abort_msg!(
-        config::read_json_file(filename.as_str()),
+    let config = &log::unwrap_abort_msg!(
+        config::read_yaml_file(filename.as_str()),
         format!("Invalid instrument \"{}\" (tried to load from: {})", instrument_type, filename)
-    );
-    log::abort_if!(config.is_null());
+    )[0];
+    log::abort_if!(config.is_badvalue());
 
     let sounds = &config["sounds"];
     load_instrument(sounds, volume)
 }
 
-/// Load an instrument from JsonValue as a map of clips.
-fn load_instrument(sounds: &json::JsonValue, volume: f32) -> Result<HashMap<char, Sound>, ()> {
+/// Load an instrument from Yaml as a map of clips.
+fn load_instrument(sounds: &Yaml, volume: f32) -> Result<HashMap<char, Sound>, ()> {
     log::abort_if!(!sounds.is_array());
 
     // Load the audio clips into memory.
     let mut clips = HashMap::<char, Sound>::new();
-    for sound in sounds.members() {
-        let key = log::unwrap_abort!(sound["key"].as_str().ok_or(()));
-        let clip_name = log::unwrap_abort!(sound["file"].as_str().ok_or(()));
-        let sampler_group = log::unwrap_abort!(sound["group"].as_i32().ok_or(()));
+    let sound_list = log::opt_abort_msg!(sounds.as_vec(), "Expected a list");
+    for sound in sound_list {
+        let key = log::opt_abort!(sound["key"].as_str());
+        let clip_name = log::opt_abort!(sound["file"].as_str());
+        let sampler_group = log::opt_abort!(sound["group"].as_i64()) as i32;
 
         // Read in the key that plays this clip.
         log::abort_if_msg!(key.len() != 1, "Invalid instrument \"key\", must be of type char");
@@ -217,7 +219,7 @@ mod tests {
     #[test]
     fn test_virtual_instrument() {
         // This should build with no problems.
-        let project = config::ProjectConfig::new("dat/instrument/valid.json").unwrap();
+        let project = config::ProjectConfig::new("dat/instrument/valid.yaml").unwrap();
         let mut stream_catalog = stream::StreamCatalog::new();
         let instrument = VirtualInstrument::new(&project.blocks[0], &mut stream_catalog).unwrap();
 
@@ -234,7 +236,7 @@ mod tests {
     #[test]
     fn test_virtual_instrument_inline() {
         // This should build with no problems.
-        let project = config::ProjectConfig::new("dat/instrument/inline.json").unwrap();
+        let project = config::ProjectConfig::new("dat/instrument/inline.yaml").unwrap();
         let mut stream_catalog = stream::StreamCatalog::new();
         let instrument = VirtualInstrument::new(&project.blocks[0], &mut stream_catalog).unwrap();
 
@@ -251,7 +253,7 @@ mod tests {
     #[test]
     fn test_no_instrument() {
         // This should build with no problems.
-        let project = config::ProjectConfig::new("dat/instrument/no_instrument.json").unwrap();
+        let project = config::ProjectConfig::new("dat/instrument/no_instrument.yaml").unwrap();
         let mut stream_catalog = stream::StreamCatalog::new();
         match VirtualInstrument::new(&project.blocks[0], &mut stream_catalog) {
             Ok(_) => {

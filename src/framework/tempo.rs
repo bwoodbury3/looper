@@ -46,22 +46,22 @@ impl Tempo {
     /// Initialize a new tempo and reset the state to 0.
     pub fn new(project: &config::ProjectConfig) -> Result<Self, String> {
         let tempo = &project.tempo_config;
-        let bpm = match tempo["bpm"].as_i32() {
-            Some(v) => v,
+        let bpm = match tempo["bpm"].as_i64() {
+            Some(v) => v as i32,
             None => {
                 println!("\"bpm\" not specified, using default '120'");
                 120
             }
         };
-        let beats_per_measure = match tempo["beats_per_measure"].as_i32() {
-            Some(v) => v,
+        let beats_per_measure = match tempo["beats_per_measure"].as_i64() {
+            Some(v) => v as i32,
             None => {
                 println!("\"beats_per_measure\" not specified, using default '4'");
                 4
             }
         };
-        let beat_duration = match tempo["beat_duration"].as_i32() {
-            Some(v) => v,
+        let beat_duration = match tempo["beat_duration"].as_i64() {
+            Some(v) => v as i32,
             None => {
                 println!("\"beat_duration\" not specified, using default '4'");
                 4
@@ -102,8 +102,8 @@ impl Tempo {
     }
 
     /// Skip a number of measures forward.
-    pub fn skip(&mut self, num_measures: i32) {
-        let num_chunks = self.steps_per_measure * num_measures;
+    pub fn skip(&mut self, num_measures: f32) {
+        let num_chunks = (self.steps_per_measure as f32 * num_measures) as i32;
         self.step(num_chunks);
     }
 
@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn test_step() {
-        let project = config::ProjectConfig::new("dat/tempo/tempo.json").unwrap();
+        let project = config::ProjectConfig::new("dat/tempo/tempo.yaml").unwrap();
         let mut tempo = Tempo::new(&project).unwrap();
 
         // Check configuration
@@ -178,7 +178,7 @@ mod tests {
 
     #[test]
     fn test_in_measure() {
-        let project = config::ProjectConfig::new("dat/tempo/tempo.json").unwrap();
+        let project = config::ProjectConfig::new("dat/tempo/tempo.yaml").unwrap();
         let mut tempo = Tempo::new(&project).unwrap();
 
         assert!(tempo.current_beat_i32 == 0);
@@ -200,7 +200,7 @@ mod tests {
 
     #[test]
     fn test_on_beat() {
-        let project = config::ProjectConfig::new("dat/tempo/tempo.json").unwrap();
+        let project = config::ProjectConfig::new("dat/tempo/tempo.yaml").unwrap();
         let mut tempo = Tempo::new(&project).unwrap();
 
         // on_beat should fire on the first beat.

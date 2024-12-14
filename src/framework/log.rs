@@ -44,7 +44,7 @@ macro_rules! abort_if_msg_str {
     };
 }
 
-/// Unwrap a Result and return Err(()).
+/// Unwrap a Result or return Err(()).
 /// Log a trace with println!.
 #[macro_export]
 macro_rules! unwrap_abort {
@@ -59,7 +59,7 @@ macro_rules! unwrap_abort {
     };
 }
 
-/// Unwrap a Result and return Err(()).
+/// Unwrap a Result or return Err(()).
 /// Log a trace with println! with a message as context.
 #[macro_export]
 macro_rules! unwrap_abort_msg {
@@ -83,6 +83,51 @@ macro_rules! unwrap_abort_str {
             Err(e) => {
                 let msg =
                     format!("{}:{} abort({}): {}", file!(), line!(), stringify!($e), e.to_string());
+                println!("{}", msg);
+                return Err(msg);
+            }
+        }
+    };
+}
+
+/// Unwrap an Option or return Err(()).
+#[macro_export]
+macro_rules! opt_abort {
+    ( $e:expr ) => {
+        match $e {
+            Some(x) => x,
+            None => {
+                println!("{}:{} abort({})", file!(), line!(), stringify!($e));
+                return Err(());
+            }
+        }
+    };
+}
+
+/// Unwrap an Option or return Err(()).
+/// Log a trace with println! with a message as context.
+#[macro_export]
+macro_rules! opt_abort_msg {
+    ( $e:expr, $msg:expr ) => {
+        match $e {
+            Some(x) => x,
+            None => {
+                println!("{}:{} abort({}): {}", file!(), line!(), stringify!($e), $msg);
+                return Err(());
+            }
+        }
+    };
+}
+
+/// Unwrap an Option and return a message as a string.
+/// Log a trace with println! with a message as context.
+#[macro_export]
+macro_rules! opt_abort_str {
+    ( $e:expr, $msg:expr ) => {
+        match $e {
+            Some(x) => x,
+            None => {
+                let msg = format!("{}:{} abort({}): {}", file!(), line!(), stringify!($e), $msg);
                 println!("{}", msg);
                 return Err(msg);
             }

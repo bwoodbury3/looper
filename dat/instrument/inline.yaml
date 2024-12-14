@@ -1,0 +1,23 @@
+config:
+    tempo: {}
+devices:
+-   name: drums
+    output_channel: drums
+    sounds:
+    -   file: kick1
+        group: 1
+        key: a
+    -   file: snare1
+        group: 2
+        key: s
+    -   file: hihat-closed1
+        group: 3
+        key: d
+    -   file: hihat-open1
+        group: 3
+        key: f
+    -   file: crash-cymbal1
+        group: 4
+        key: g
+    type: VirtualInstrument
+    volume: 0.2

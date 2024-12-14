@@ -1,0 +1,8 @@
+config:
+    tempo: {}
+devices:
+-   instrument: drums1
+    name: drums
+    output_channel: drums
+    type: VirtualInstrument
+    volume: 0.2

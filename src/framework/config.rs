@@ -2,12 +2,12 @@
 //!
 //! Initialize a new project with:
 //! ```
-//! let project = ProjectConfig::new("my_project.json");
+//! let project = ProjectConfig::new("my_project.yaml");
 //! ```
 //!
 //! Blocks typically require a BlockConfig as a configuration input, from which they can read in
 //! their runtime configuration. This includes things like input/output streams, Segments for when
-//! the block is active, and more. Users configure this in the json "devices" list.
+//! the block is active, and more. Users configure this in the yaml "devices" list.
 //!
 //! BlockConfig uses generic type-safe key/value accessors to retrieve config parameters. Blocks
 //! should read in all config values in their initialization function (::new) like so:
@@ -33,19 +33,40 @@
 //!  - `Vec<str>`
 //!  - `Vec<segment::Segment>`
 
-use json::JsonValue;
+use yaml_rust::{Yaml, YamlLoader};
 
-extern crate json;
 extern crate log;
 extern crate segment;
+extern crate yaml_rust;
 
 const SEGMENTS_KEY: &str = "segments";
 
-/// Load a file in as json.
-pub fn read_json_file(filename: &str) -> Result<JsonValue, String> {
+/// Load a file in as yaml.
+pub fn read_yaml_file(filename: &str) -> Result<Vec<Yaml>, String> {
     let contents = log::unwrap_abort_str!(std::fs::read_to_string(filename));
-    let root = log::unwrap_abort_str!(json::parse(&contents));
+    let root = log::unwrap_abort_str!(YamlLoader::load_from_str(&contents));
     return Ok(root);
+}
+
+// Parse a yaml object as an f32. Supports casting if the object is an int.
+pub fn yaml_as_f32(obj: &Yaml) -> Result<f32, ()> {
+    let result = match obj {
+        Yaml::Real(_) => obj.as_f64().unwrap() as f32,
+        Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
+        _ => {
+            log::abort_msg!("Expected a number value");
+        }
+    };
+    Ok(result)
+}
+
+// Parse a yaml object as an f32. Supports casting if the object is an int.
+pub fn yaml_as_f32_opt(obj: &Yaml, default: &f32) -> f32 {
+    match obj {
+        Yaml::Real(_) => obj.as_f64().unwrap() as f32,
+        Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
+        _ => *default,
+    }
 }
 
 /// Get the path of an audio clip.
@@ -55,7 +76,7 @@ pub fn clip_path(clip_name: &str) -> String {
 
 /// Get the path of an instrument.
 pub fn instrument_path(instrument_name: &str) -> String {
-    return format!("assets/instruments/{}.json", instrument_name);
+    return format!("assets/instruments/{}.yaml", instrument_name);
 }
 
 /// Configuration for a single Block.
@@ -66,17 +87,17 @@ pub struct BlockConfig {
     /// The type of block. This is used by framework code to determine which Block to instantiate.
     pub block_type: String,
 
-    /// The root json config object.
-    root: json::JsonValue,
+    /// The root yaml config object.
+    root: Yaml,
 }
 
 /// Top level config.
 pub struct ProjectConfig {
     /// Global configuration parameters.
-    pub tempo_config: json::JsonValue,
+    pub tempo_config: Yaml,
 
     /// The start measure.
-    pub start_measure: i32,
+    pub start_measure: f32,
 
     /// The stop measure.
     pub stop_measure: f32,
@@ -88,46 +109,47 @@ pub struct ProjectConfig {
 impl ProjectConfig {
     /// Initialze a new project config.
     pub fn new(filename: &str) -> Result<ProjectConfig, String> {
-        let root = log::unwrap_abort_str!(read_json_file(filename));
+        let root = &log::unwrap_abort_str!(read_yaml_file(filename))[0];
 
         // Read in the global and block configs.
         let global_config = &root["config"];
-        log::abort_if_msg_str!(!global_config.is_object(), "Missing top-level \"config\" key");
+        log::abort_if_msg_str!(global_config.is_badvalue(), "Missing top-level \"config\" key");
 
-        let start_measure = match global_config["start_measure"].as_i32() {
-            Some(v) => v,
-            None => 0,
-        };
-        let stop_measure = match global_config["stop_measure"].as_f32() {
-            Some(v) => v,
-            None => -1.0,
-        };
+        let mut start_measure = yaml_as_f32_opt(&global_config["start_measure"], &0f32);
+        let mut stop_measure = yaml_as_f32_opt(&global_config["stop_measure"], &-1f32);
+
+        println!("Start measure: {}", start_measure);
+        println!("Stop measure: {}", stop_measure);
 
         // Populate all of the blocks.
-        let block_config = &root["devices"];
-        log::abort_if_msg_str!(!block_config.is_array(), "Missing top-level \"devices\" key");
+        let block_config = match root["devices"].as_vec() {
+            Some(v) => v,
+            None => {
+                return Err("\"devices\" must be a list".to_owned());
+            }
+        };
         let mut blocks: Vec<BlockConfig> = Vec::new();
-        for block in block_config.members() {
-            let name = &block["name"];
-            let block_type = &block["type"];
-
-            log::abort_if_msg_str!(!name.is_string(), "Block did not contain a valid \"name\"");
-            log::abort_if_msg_str!(
-                !block_type.is_string(),
-                format!("Block \"{}\" not contain a valid \"type\"", name)
+        for block in block_config {
+            let name = log::opt_abort_str!(
+                block["name"].as_str(),
+                "Block did not contain a valid \"name\""
+            );
+            let block_type = log::opt_abort_str!(
+                block["type"].as_str(),
+                format!("Block \"{}\" did not contain a valid \"type\"", name)
             );
 
             blocks.push(BlockConfig {
-                name: name.to_string(),
-                block_type: block_type.to_string(),
+                name: name.to_owned(),
+                block_type: block_type.to_owned(),
                 root: block.clone(),
             });
         }
 
         Ok(ProjectConfig {
             tempo_config: global_config["tempo"].clone(),
-            start_measure: start_measure,
-            stop_measure: stop_measure,
+            start_measure: start_measure as f32,
+            stop_measure: stop_measure as f32,
             blocks: blocks,
         })
     }
@@ -140,92 +162,88 @@ macro_rules! abort_config {
     };
 }
 
+/// Shorthand for asserting configuration values are valid with context.
+macro_rules! unwrap_config {
+    ( $e:expr, $name:expr, $key:expr, $msg:expr ) => {
+        log::opt_abort_msg!($e, format!("device=\"{}\" -> key=\"{}\": {}", $name, $key, $msg))
+    };
+}
+
 impl BlockConfig {
-    /// Get a JsonValue from a key. Returns an error if the value is not present.
-    /// i.e. obj.is_null() returns true.
-    pub fn get_value(&self, key: &str) -> Result<&json::JsonValue, ()> {
+    /// Get a Yaml value from a key. Returns an error if the value is not present.
+    /// i.e. obj.is_badvalue() returns true.
+    pub fn get_value(&self, key: &str) -> Result<&Yaml, ()> {
         let value = &self.root[key];
-        abort_config!(value.is_null(), self.name, key, "Missing required parameter");
+        abort_config!(value.is_badvalue(), self.name, key, "Missing required parameter");
         Ok(value)
     }
 
     /// Get a boolean value from config.
     pub fn get_bool(&self, key: &str) -> Result<bool, ()> {
         let value = self.get_value(key)?;
-        abort_config!(!value.is_boolean(), self.name, key, "Expected a boolean value");
-        Ok(value.as_bool().ok_or(())?)
+        Ok(unwrap_config!(value.as_bool(), self.name, key, "Expected a boolean value"))
     }
 
     /// Get an optional bool value from config with a default.
     pub fn get_bool_opt<'a>(&'a self, key: &str, default: bool) -> Result<bool, ()> {
         let value = &self.root[key];
-        if value.is_null() {
+        if value.is_badvalue() {
             return Ok(default);
         }
-        abort_config!(!value.is_boolean(), self.name, key, "Expected a boolean value");
-        Ok(value.as_bool().ok_or(())?)
+        Ok(unwrap_config!(value.as_bool(), self.name, key, "Expected a boolean value"))
     }
 
     /// Get a string value from config.
     pub fn get_str(&self, key: &str) -> Result<&str, ()> {
         let value = self.get_value(key)?;
-        abort_config!(!value.is_string(), self.name, key, "Expected a string value");
-        Ok(value.as_str().ok_or(())?)
+        Ok(unwrap_config!(value.as_str(), self.name, key, "Expected a string value"))
     }
 
     /// Get an optional string value from config with a default.
     pub fn get_str_opt<'a>(&'a self, key: &str, default: &'a str) -> Result<&str, ()> {
         let value = &self.root[key];
-        if value.is_null() {
+        if value.is_badvalue() {
             return Ok(default);
         }
-        abort_config!(!value.is_string(), self.name, key, "Expected a string value");
-        Ok(value.as_str().ok_or(())?)
+        Ok(unwrap_config!(value.as_str(), self.name, key, "Expected a string value"))
     }
 
     /// Get an int value from config.
     pub fn get_i32(&self, key: &str) -> Result<i32, ()> {
         let value = self.get_value(key)?;
-        abort_config!(!value.is_number(), self.name, key, "Expected a number");
-        Ok(value.as_i32().ok_or(())?)
+        Ok(unwrap_config!(value.as_i64(), self.name, key, "Expected an int value") as i32)
     }
 
     /// Get an optional int value from config with a default.
     pub fn get_i32_opt(&self, key: &str, default: &i32) -> Result<i32, ()> {
         let value = &self.root[key];
-        if value.is_null() {
+        if value.is_badvalue() {
             return Ok(*default);
         }
-        abort_config!(!value.is_number(), self.name, key, "Expected a number");
-        Ok(value.as_i32().ok_or(())?)
+        Ok(unwrap_config!(value.as_i64(), self.name, key, "Expected an int value") as i32)
     }
 
     /// Get a float value from config.
     pub fn get_f32(&self, key: &str) -> Result<f32, ()> {
         let value = self.get_value(key)?;
-        abort_config!(!value.is_number(), self.name, key, "Expected a number");
-        Ok(value.as_f32().ok_or(())?)
+        yaml_as_f32(value)
     }
 
     /// Get an optional float value from config with a default.
     pub fn get_f32_opt(&self, key: &str, default: &f32) -> Result<f32, ()> {
         let value = &self.root[key];
-        if value.is_null() {
-            return Ok(*default);
-        }
-        abort_config!(!value.is_number(), self.name, key, "Expected a number");
-        Ok(value.as_f32().ok_or(())?)
+        Ok(yaml_as_f32_opt(value, default))
     }
 
     /// Get a list of output channels.
     pub fn get_str_list(&self, key: &str) -> Result<Vec<&str>, ()> {
-        let list = self.get_value(key)?;
-        abort_config!(!list.is_array(), self.name, key, "Expected a list of strings");
+        let value = self.get_value(key)?;
+        let list_vec = unwrap_config!(value.as_vec(), self.name, key, "Expected a list");
 
         let mut str_list: Vec<&str> = Vec::new();
-        for member in list.members() {
-            abort_config!(!member.is_string(), self.name, key, "Expected a list of strings");
-            str_list.push(member.as_str().ok_or(())?);
+        for member in list_vec {
+            let val = unwrap_config!(member.as_str(), self.name, key, "Expected a string value");
+            str_list.push(val);
         }
 
         Ok(str_list)
@@ -237,22 +255,22 @@ impl BlockConfig {
 
         // segments is not required. Return empty list if it's missing.
         let list = &self.root[SEGMENTS_KEY];
-        if list.is_null() {
+        if list.is_badvalue() {
             return Ok(segments);
         }
 
         // Read in the segment config list.
-        abort_config!(!list.is_array(), self.name, SEGMENTS_KEY, "Segments must be a list");
-        for member in list.members() {
+        let list_vec = unwrap_config!(list.as_vec(), self.name, "segments", "Must be a list");
+        for member in list_vec {
             abort_config!(
-                !member.is_object(),
+                member.is_badvalue(),
                 self.name,
                 SEGMENTS_KEY,
                 "Each segment must be an object"
             );
-            let start = log::unwrap_abort!(member["start"].as_f32().ok_or(()));
-            let stop = log::unwrap_abort!(member["stop"].as_f32().ok_or(()));
-            let type_str = log::unwrap_abort!(member["type"].as_str().ok_or(()));
+            let start = log::unwrap_abort!(yaml_as_f32(&member["start"]));
+            let stop = log::unwrap_abort!(yaml_as_f32(&member["stop"]));
+            let type_str = log::opt_abort!(member["type"].as_str());
             let name = match member["name"].as_str() {
                 Some(s) => Some(s.to_owned()),
                 None => None,
@@ -284,15 +302,15 @@ mod tests {
     #[test]
     fn test_valid_config() {
         // This should load with no problems.
-        let project = ProjectConfig::new("dat/config/valid.json").unwrap();
+        let project = ProjectConfig::new("dat/config/valid.yaml").unwrap();
 
         // Test the top level config
         let tempo_config = &project.tempo_config;
-        assert_eq!(tempo_config["bpm"].as_i32().unwrap(), 101);
-        assert_eq!(tempo_config["beats_per_measure"].as_i32().unwrap(), 3);
-        assert_eq!(tempo_config["beat_duration"].as_i32().unwrap(), 4);
+        assert_eq!(tempo_config["bpm"].as_i64().unwrap(), 101);
+        assert_eq!(tempo_config["beats_per_measure"].as_i64().unwrap(), 3);
+        assert_eq!(tempo_config["beat_duration"].as_i64().unwrap(), 4);
 
-        assert_eq!(project.start_measure, 0);
+        assert_eq!(project.start_measure, 0.0);
         assert_eq!(project.stop_measure, 20.0);
 
         // Test the block getters.
@@ -330,7 +348,7 @@ mod tests {
     #[test]
     fn test_missing_devices() {
         // Expect an Err result because the devices config is missing.
-        match ProjectConfig::new("dat/config/missing_devices.json") {
+        match ProjectConfig::new("dat/config/missing_devices.yaml") {
             Ok(_) => {
                 panic!("Config should have failed to load");
             }
@@ -341,7 +359,7 @@ mod tests {
     #[test]
     fn test_missing_device_type() {
         // Expect an Err result because the "type" field on a device is missing.
-        match ProjectConfig::new("dat/config/missing_device_type.json") {
+        match ProjectConfig::new("dat/config/missing_device_type.yaml") {
             Ok(_) => {
                 panic!("Config should have failed to load");
             }

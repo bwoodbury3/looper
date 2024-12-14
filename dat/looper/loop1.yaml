@@ -1,0 +1,18 @@
+config:
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 3
+        bpm: 65
+devices:
+-   input_channels:
+    - empty
+    name: loop
+    output_channel: out
+    segments:
+    -   start: 1
+        stop: 2
+        type: input
+    -   start: 3
+        stop: 4
+        type: output
+    type: Loop

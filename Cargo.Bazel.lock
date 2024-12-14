@@ -1,5 +1,5 @@
 {
-  "checksum": "ad9ab2e0ce39ea517025dabdee05e5ff41bf43e752f6d591201a88f06282f801",
+  "checksum": "33efc496063087b01c620a869b3bbdbe225a9933f69f884864586111ddfadefb",
   "crates": {
     "autocfg 1.4.0": {
       "name": "autocfg",
@@ -114,16 +114,16 @@
               "target": "hound"
             },
             {
-              "id": "json 0.12.4",
-              "target": "json"
-            },
-            {
               "id": "portaudio 0.8.0",
               "target": "portaudio"
             },
             {
               "id": "termios 0.3.3",
               "target": "termios"
+            },
+            {
+              "id": "yaml-rust 0.4.5",
+              "target": "yaml_rust"
             }
           ],
           "selects": {}
@@ -231,45 +231,6 @@
       ],
       "license_file": "license"
     },
-    "json 0.12.4": {
-      "name": "json",
-      "version": "0.12.4",
-      "package_url": "https://github.com/maciejhirsz/json-rust",
-      "repository": {
-        "Http": {
-          "url": "https://static.crates.io/crates/json/0.12.4/download",
-          "sha256": "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "json",
-            "crate_root": "src/lib.rs",
-            "srcs": {
-              "allow_empty": true,
-              "include": [
-                "**/*.rs"
-              ]
-            }
-          }
-        }
-      ],
-      "library_target_name": "json",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "edition": "2018",
-        "version": "0.12.4"
-      },
-      "license": "MIT/Apache-2.0",
-      "license_ids": [
-        "Apache-2.0",
-        "MIT"
-      ],
-      "license_file": "LICENSE-APACHE"
-    },
     "libc 0.2.162": {
       "name": "libc",
       "version": "0.2.162",
@@ -336,6 +297,45 @@
         ]
       },
       "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
+    "linked-hash-map 0.5.6": {
+      "name": "linked-hash-map",
+      "version": "0.5.6",
+      "package_url": "https://github.com/contain-rs/linked-hash-map",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/linked-hash-map/0.5.6/download",
+          "sha256": "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "linked_hash_map",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "linked_hash_map",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "0.5.6"
+      },
+      "license": "MIT/Apache-2.0",
       "license_ids": [
         "Apache-2.0",
         "MIT"
@@ -1558,6 +1558,54 @@
         "MIT"
       ],
       "license_file": null
+    },
+    "yaml-rust 0.4.5": {
+      "name": "yaml-rust",
+      "version": "0.4.5",
+      "package_url": "https://github.com/chyh1990/yaml-rust",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/yaml-rust/0.4.5/download",
+          "sha256": "56c1936c4cc7a1c9ab21a1ebb602eb942ba868cbd44a99cb7cdc5892335e1c85"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "yaml_rust",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "yaml_rust",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "linked-hash-map 0.5.6",
+              "target": "linked_hash_map"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.4.5"
+      },
+      "license": "MIT/Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
     }
   },
   "binary_crates": [],
@@ -1678,9 +1726,9 @@
   "direct_deps": [
     "filedescriptor 0.8.2",
     "hound 3.5.1",
-    "json 0.12.4",
     "portaudio 0.8.0",
-    "termios 0.3.3"
+    "termios 0.3.3",
+    "yaml-rust 0.4.5"
   ],
   "direct_dev_deps": []
 }
