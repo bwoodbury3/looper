@@ -1,0 +1,15 @@
+py_library(
+    name = "sim",
+    srcs = ["sim.py"],
+)
+
+py_binary(
+    name = "filter_tables",
+    srcs = [
+        "butterworth.py",
+        "filter_tables.py",
+    ],
+    deps = [
+        ":sim",
+    ]
+)

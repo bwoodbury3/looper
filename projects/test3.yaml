@@ -1,0 +1,24 @@
+config:
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 4
+        bpm: 75
+devices:
+
+# Guitar amp input
+-   name: amp
+    type: AudioSource
+    output_channel: amp
+    device: Cable Creation
+
+# Low pass filter
+-   name: filter
+    type: LowPass
+    input_channel: amp
+    output_channel: amp_filtered
+    cutoff: 2000
+
+-   name: output
+    type: AudioSink
+    input_channel: amp_filtered
+    device: Built-in Output

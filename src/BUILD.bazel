@@ -10,6 +10,7 @@ rust_binary(
     ],
     data = [
         "//assets/clips:clips",
+        "//assets/filters:filters",
         "//assets/instruments:instruments",
     ]
 )

@@ -13,6 +13,7 @@ extern crate instrument;
 extern crate keyboard;
 extern crate log;
 extern crate looper;
+extern crate low_pass;
 extern crate metronome;
 extern crate recorder;
 extern crate tempo;
@@ -89,6 +90,10 @@ impl Runner {
                 }
                 "Toggle" => {
                     let tform = toggle::Toggle::new(block_config, &mut stream_catalog)?;
+                    transformers.push(Box::new(tform));
+                }
+                "LowPass" => {
+                    let tform = low_pass::LowPass::new(block_config, &mut stream_catalog)?;
                     transformers.push(Box::new(tform));
                 }
 

@@ -4,17 +4,23 @@ config:
         beats_per_measure: 4
         bpm: 75
 devices:
+
+# Keyboard drumset
 -   instrument: drums1
     name: drums
     output_channel: drums
     segments: []
     type: VirtualInstrument
     volume: 0.1
+
+# Aux/USB adapter input from an amplifier (guitar input)
 -   device: Cable Creation
     name: amp
     output_channel: amp
     segments: []
     type: AudioSource
+
+# Example blocks
 -   input_channel: amp
     name: amp_toggle
     output_channel: amp_toggle
@@ -63,6 +69,8 @@ devices:
         stop: 47
         type: output
     type: Loop
+
+# Metronome
 -   name: metronome
     output_channel: metronome
     segments:
@@ -72,6 +80,8 @@ devices:
     sound: hihat-closed1
     type: Metronome
     volume: 0.15
+
+# Combine and output all channels
 -   input_channels:
     - metronome
     - amp_toggle

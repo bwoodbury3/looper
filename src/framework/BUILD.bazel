@@ -11,6 +11,7 @@ looper_library(
         "//src/audio:recorder",
         "//src/transform:combiner",
         "//src/transform:looper",
+        "//src/transform:low_pass",
         "//src/transform:toggle",
         "//src/virtual:metronome",
         "//src/virtual:instrument",

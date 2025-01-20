@@ -32,6 +32,19 @@ looper_library(
 )
 
 looper_library(
+    name = "low_pass",
+    srcs = [
+        "low_pass.rs",
+    ],
+    deps = [
+        "//src/framework:block",
+        "//src/framework:config",
+        "//src/framework:log",
+        "//src/framework:stream",
+    ]
+)
+
+looper_library(
     name = "toggle",
     srcs = [
         "toggle.rs",
