@@ -1,0 +1,11 @@
+config:
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 4
+        bpm: 100
+devices:
+-   name: filter
+    type: LowPass
+    input_channel: test # This channel is mocked by the test.
+    output_channel: test_filtered
+    cutoff: 500

@@ -3,6 +3,7 @@ Some simulation tools for playing with signals.
 """
 
 import numpy as np
+from numpy.typing import NDArray
 import math
 
 SAMPLE_FREQ = 44100
@@ -12,7 +13,7 @@ def gen_tone(
     freq: float,
     mag: float,
     sample_freq: float = SAMPLE_FREQ,
-) -> np.array:
+) -> NDArray:
     """
     Generate a tone of the provided duration/freq/mag
 
@@ -30,7 +31,7 @@ def gen_noise(
     duration: float,
     std_dev: float = 1.0,
     sample_freq: float = SAMPLE_FREQ,
-) -> np.array:
+) -> NDArray:
     """
     Generate some noise centered around 0.
 
@@ -42,7 +43,17 @@ def gen_noise(
     return np.random.normal(0, std_dev, int(duration * sample_freq))
 
 
-def filter(signal: np.array, a: list[float], b: list[float]) -> np.array:
+def to_f32(sig: NDArray) -> NDArray[np.float32]:
+    """
+    Convert a np.array to float32.
+
+    Args:
+        sig: The signal.
+    """
+    return np.float32(sig)
+
+
+def filter(signal: NDArray, a: list[float], b: list[float]) -> NDArray:
     """
     Filter a signal.
 
@@ -54,9 +65,47 @@ def filter(signal: np.array, a: list[float], b: list[float]) -> np.array:
     Returns the filtered signals.
     """
     filtered = np.zeros(len(signal))
-    for m in range(3, len(signal)):
+    for m in range(len(b), len(signal)):
         filtered[m] = b[0] * signal[m]
         for i in range(1, len(b)):
             filtered[m] += a[i] * filtered[m-i] + b[i] * signal[m - i]
+
+    return filtered
+
+
+def filter2(signal: NDArray, a: list[float], b: list[float], dtype=np.float32) -> NDArray:
+    """
+    Filter a signal.
+
+    Args:
+        signal: The signal to filter.
+        a: The filter denominator coefficients.
+        b: The filter numerator coefficients.
+
+    Returns the filtered signals.
+    """
+    order = len(b)
+
+    # Bootstrap the history ring buffer
+    in_history = np.zeros(order, dtype=dtype)
+    out_history = np.zeros(order, dtype=dtype)
+    ring_index = 0
+
+    filtered = np.zeros(len(signal), dtype=dtype)
+    for m in range(0, len(signal)):
+        # First term
+        filtered[m] = b[0] * signal[m]
+
+        # Next N-1 terms
+        for i in range(1, order):
+            prev = ring_index - i
+            if prev < 0:
+                prev += order
+
+            filtered[m] += a[i] * out_history[prev] + b[i] * in_history[prev]
+
+        in_history[ring_index] = signal[m]
+        out_history[ring_index] = filtered[m]
+        ring_index = (ring_index + 1) % order
 
     return filtered

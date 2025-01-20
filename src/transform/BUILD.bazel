@@ -41,7 +41,11 @@ looper_library(
         "//src/framework:config",
         "//src/framework:log",
         "//src/framework:stream",
-    ]
+    ],
+    test_data = [
+        "//assets/filters:filters",
+        "//dat/low_pass:data",
+    ],
 )
 
 looper_library(

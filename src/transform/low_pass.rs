@@ -108,16 +108,18 @@ impl LowPass {
             ring_index: 0i32,
         })
     }
-}
 
-impl block::Transformer for LowPass {
-    fn transform(&mut self, _state: &block::PlaybackState) {
+    /// Apply the filter.
+    fn filter(&mut self) {
         let input_stream = self.input_stream.borrow();
         let mut output_stream = self.output_stream.borrow_mut();
+        let order = self.numerator.len() as i32;
 
-        let order = self.in_history.len() as i32;
         for m in 0..stream::SAMPLES_PER_BUFFER {
+            // First term
             output_stream[m] = self.numerator[0] * input_stream[m];
+
+            // Next N-1 terms
             for i in 1..order as usize {
                 let prev_index = (self.ring_index - i as i32).rem_euclid(order) as usize;
                 output_stream[m] += self.denominator[i] * self.out_history[prev_index]
@@ -127,8 +129,72 @@ impl block::Transformer for LowPass {
             // Update the historical ring buffer.
             self.in_history[self.ring_index as usize] = input_stream[m];
             self.out_history[self.ring_index as usize] = output_stream[m];
-            self.ring_index += 1;
-            self.ring_index %= order;
+            self.ring_index = (self.ring_index + 1) % order;
+        }
+    }
+}
+
+impl block::Transformer for LowPass {
+    fn transform(&mut self, _state: &block::PlaybackState) {
+        self.filter();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use stream::SAMPLES_PER_BUFFER;
+
+    use super::*;
+
+    /// Load input and output signals
+    fn load_signals(filename: &str) -> (Vec<f32>, Vec<f32>) {
+        let contents = std::fs::read_to_string(filename).unwrap();
+
+        let mut iter = contents.lines();
+        let sig1 = iter
+            .next()
+            .unwrap()
+            .split(" ")
+            .map(|s| f32::from_str(s).unwrap())
+            .collect();
+        let sig2 = iter
+            .next()
+            .unwrap()
+            .split(" ")
+            .map(|s| f32::from_str(s).unwrap())
+            .collect();
+
+        return (sig1, sig2);
+    }
+
+    #[test]
+    fn test_filter() {
+        let project = config::ProjectConfig::new("dat/low_pass/low_pass1.yaml").unwrap();
+        let mut stream_catalog = stream::StreamCatalog::new();
+        let input_stream = stream_catalog.create_source("test").unwrap();
+
+        let mut low_pass = LowPass::new(&project.blocks[0], &mut stream_catalog).unwrap();
+        let output_stream = stream_catalog.bind_sink("test_filtered").unwrap();
+
+        // Load unit test data
+        let (input, output) = load_signals("dat/low_pass/low_pass_unit_test.txt");
+
+        // Set the input.
+        {
+            let mut s = input_stream.borrow_mut();
+            s.copy_from_slice(&input);
+        }
+
+        low_pass.filter();
+
+        // Validate the output.
+        {
+            let s = output_stream.borrow();
+            for i in 0..SAMPLES_PER_BUFFER {
+                // This tolerance is pretty high but an iterative algorithm in a different
+                // language is bound to diverge by a bit over 256 iterations.
+                log::assert_approx_eq!(s[i], output[i], 0.1);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-py_library(
+py_binary(
     name = "sim",
     srcs = ["sim.py"],
 )

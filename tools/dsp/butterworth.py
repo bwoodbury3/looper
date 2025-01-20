@@ -1,5 +1,6 @@
 from scipy import signal
 import numpy as np
+from numpy.typing import NDArray
 
 from tools.dsp.sim import SAMPLE_FREQ
 
@@ -7,8 +8,9 @@ from tools.dsp.sim import SAMPLE_FREQ
 def generate_filter(
     cutoff_frequency: float,
     order: int,
-    sample_freq: float
-) -> tuple[list[float], list[float]]:
+    sample_freq: float,
+    dtype=np.float32
+) -> tuple[NDArray, NDArray]:
     """
     Generate a filter low-pass Butterworth filter.
 
@@ -20,7 +22,7 @@ def generate_filter(
     Returns: The discrete filter (denominator, numerator) coefficients.
     """
     # Butterworth filter
-    n = order;              # Filter order
+    n = order
 
     # wc term
     wc = 2 * np.pi * cutoff_frequency
@@ -49,4 +51,4 @@ def generate_filter(
     a = -discrete_low_pass.den
     b = discrete_low_pass.num
 
-    return a, b
+    return dtype(a), dtype(b)
