@@ -19,7 +19,7 @@
 //!         config: &config::BlockConfig,
 //!         stream_catalog: &mut stream::StreamCatalog
 //!     ) -> Result<Self, ()> {
-//!         let int_param = config.get_int("int_param")?;
+//!         let int_param = config.get_i32("int_param")?;
 //!         let str_param = config.get_str("str_param")?;
 //!         ...
 //!     }
@@ -68,9 +68,6 @@ struct NamedVariables {
 
     /// Floating variables.
     pub vars_f32: HashMap<String, f32>,
-
-    /// String variables.
-    pub vars_str: HashMap<String, String>,
 }
 
 /// Configuration for a single Block.
@@ -104,9 +101,12 @@ pub struct ProjectConfig {
 }
 
 // Parse a yaml object as an i32.
-fn yaml_as_i32(obj: &Yaml) -> Result<i32, ()> {
+fn yaml_as_i32(obj: &Yaml, vars: &NamedVariables) -> Result<i32, ()> {
     let result = match obj {
         Yaml::Integer(i) => *i as i32,
+        Yaml::String(s) => {
+            log::opt_abort_msg!(vars.resolve_i32(s), format!("Could not resolve variable: {}", s))
+        }
         _ => {
             log::abort_msg!("Expected an integer value");
         }
@@ -115,18 +115,25 @@ fn yaml_as_i32(obj: &Yaml) -> Result<i32, ()> {
 }
 
 // Parse a yaml object as an i32.
-fn yaml_as_i32_opt(obj: &Yaml, default: &i32) -> i32 {
-    match obj {
+fn yaml_as_i32_opt(obj: &Yaml, vars: &NamedVariables, default: &i32) -> Result<i32, ()> {
+    let result = match obj {
         Yaml::Integer(i) => *i as i32,
+        Yaml::String(s) => {
+            log::opt_abort_msg!(vars.resolve_i32(s), format!("Could not resolve variable: {}", s))
+        }
         _ => *default,
-    }
+    };
+    Ok(result)
 }
 
 // Parse a yaml object as an f32. Supports casting if the object is an int.
-fn yaml_as_f32(obj: &Yaml) -> Result<f32, ()> {
+fn yaml_as_f32(obj: &Yaml, vars: &NamedVariables) -> Result<f32, ()> {
     let result = match obj {
         Yaml::Real(_) => obj.as_f64().unwrap() as f32,
         Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
+        Yaml::String(s) => {
+            log::opt_abort_msg!(vars.resolve_f32(s), format!("Could not resolve variable: {}", s))
+        }
         _ => {
             log::abort_msg!("Expected a number value");
         }
@@ -135,12 +142,16 @@ fn yaml_as_f32(obj: &Yaml) -> Result<f32, ()> {
 }
 
 // Parse a yaml object as an f32. Supports casting if the object is an int.
-fn yaml_as_f32_opt(obj: &Yaml, default: &f32) -> f32 {
-    match obj {
+fn yaml_as_f32_opt(obj: &Yaml, vars: &NamedVariables, default: &f32) -> Result<f32, ()> {
+    let result = match obj {
         Yaml::Real(_) => obj.as_f64().unwrap() as f32,
         Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
+        Yaml::String(s) => {
+            log::opt_abort_msg!(vars.resolve_f32(s), format!("Could not resolve variable: {}", s))
+        }
         _ => *default,
-    }
+    };
+    Ok(result)
 }
 
 impl ProjectConfig {
@@ -152,16 +163,10 @@ impl ProjectConfig {
         let global_config = &root["config"];
         log::abort_if_msg_str!(global_config.is_badvalue(), "Missing top-level \"config\" key");
 
-        let start_measure = yaml_as_f32_opt(&global_config["start_measure"], &0f32);
-        let stop_measure = yaml_as_f32_opt(&global_config["stop_measure"], &-1f32);
-        println!("Start measure: {}", start_measure);
-        println!("Stop measure: {}", stop_measure);
-
         // Load all of the variables.
         let mut vars_i32: HashMap<String, i32> = HashMap::new();
         let mut vars_f32: HashMap<String, f32> = HashMap::new();
-        let mut vars_str: HashMap<String, String> = HashMap::new();
-        match root["variables"].as_hash() {
+        match global_config["variables"].as_hash() {
             Some(var_config) => {
                 for (yk, value) in var_config.iter() {
                     let key = log::opt_abort_str!(yk.as_str(), "Variable key must be a string");
@@ -172,9 +177,6 @@ impl ProjectConfig {
                         }
                         Yaml::Real(_) => {
                             vars_f32.insert(key.to_owned(), value.as_f64().unwrap() as f32);
-                        }
-                        Yaml::String(s) => {
-                            vars_str.insert(key.to_owned(), s.to_owned());
                         }
                         _ => {
                             return Err(format!("Unsupport variable type for \"{}\"", key));
@@ -187,7 +189,6 @@ impl ProjectConfig {
         let variables = Rc::new(RefCell::new(NamedVariables {
             vars_i32: vars_i32,
             vars_f32: vars_f32,
-            vars_str: vars_str,
         }));
 
         // Load all of the blocks.
@@ -216,10 +217,22 @@ impl ProjectConfig {
             });
         }
 
+        // Load in the start/stop measure.
+        let start_measure = log::unwrap_abort_msg_str!(
+            yaml_as_f32_opt(&global_config["start_measure"], &variables.borrow(), &0f32),
+            ""
+        );
+        let stop_measure = log::unwrap_abort_msg_str!(
+            yaml_as_f32_opt(&global_config["stop_measure"], &variables.borrow(), &-1f32),
+            ""
+        );
+        println!("Start measure: {}", start_measure);
+        println!("Stop measure: {}", stop_measure);
+
         Ok(ProjectConfig {
             tempo_config: global_config["tempo"].clone(),
-            start_measure: start_measure as f32,
-            stop_measure: stop_measure as f32,
+            start_measure: start_measure,
+            stop_measure: stop_measure,
             blocks: blocks,
         })
     }
@@ -281,25 +294,25 @@ impl BlockConfig {
     /// Get an int value from config.
     pub fn get_i32(&self, key: &str) -> Result<i32, ()> {
         let value = self.get_value(key)?;
-        yaml_as_i32(value)
+        yaml_as_i32(value, &self.variables.borrow())
     }
 
     /// Get an optional int value from config with a default.
     pub fn get_i32_opt(&self, key: &str, default: &i32) -> Result<i32, ()> {
         let value = &self.root[key];
-        Ok(yaml_as_i32_opt(value, default))
+        yaml_as_i32_opt(value, &self.variables.borrow(), default)
     }
 
     /// Get a float value from config.
     pub fn get_f32(&self, key: &str) -> Result<f32, ()> {
         let value = self.get_value(key)?;
-        yaml_as_f32(value)
+        yaml_as_f32(value, &self.variables.borrow())
     }
 
     /// Get an optional float value from config with a default.
     pub fn get_f32_opt(&self, key: &str, default: &f32) -> Result<f32, ()> {
         let value = &self.root[key];
-        Ok(yaml_as_f32_opt(value, default))
+        yaml_as_f32_opt(value, &self.variables.borrow(), default)
     }
 
     /// Get a list of output channels.
@@ -335,8 +348,8 @@ impl BlockConfig {
                 SEGMENTS_KEY,
                 "Each segment must be an object"
             );
-            let start = log::unwrap_abort!(yaml_as_f32(&member["start"]));
-            let stop = log::unwrap_abort!(yaml_as_f32(&member["stop"]));
+            let start = log::unwrap_abort!(yaml_as_f32(&member["start"], &self.variables.borrow()));
+            let stop = log::unwrap_abort!(yaml_as_f32(&member["stop"], &self.variables.borrow()));
             let type_str = log::opt_abort!(member["type"].as_str());
             let name = match member["name"].as_str() {
                 Some(s) => Some(s.to_owned()),
@@ -359,6 +372,29 @@ impl BlockConfig {
         }
 
         Ok(segments)
+    }
+}
+
+impl NamedVariables {
+    // Get an int32 variable.
+    pub fn resolve_i32(self: &Self, s: &str) -> Option<i32> {
+        self.vars_i32.get(s).copied()
+    }
+
+    // Get an f32 variable. This can either be a direct f32 Real type or cast
+    // from an i32 Integer type.
+    pub fn resolve_f32(self: &Self, s: &str) -> Option<f32> {
+        let nf32 = self.vars_f32.get(s);
+        if nf32.is_some() {
+            return nf32.copied();
+        }
+
+        let ni32 = self.vars_i32.get(s);
+        if ni32.is_some() {
+            return Some(*ni32.unwrap() as f32);
+        }
+
+        None
     }
 }
 
@@ -429,6 +465,43 @@ mod tests {
         match ProjectConfig::new("dat/config/missing_device_type.yaml") {
             Ok(_) => {
                 panic!("Config should have failed to load");
+            }
+            Err(_) => {}
+        };
+    }
+
+    #[test]
+    fn test_variable_parsing() {
+        let project = ProjectConfig::new("dat/config/variables.yaml").unwrap();
+
+        let blocks = &project.blocks;
+        let block = &blocks[0];
+
+        // This project has one block with some segments backed by global variables.
+        // Assert all of the start/stop times match the variables.
+        let segments = block.get_segments().unwrap();
+        assert_eq!(segments[0].start, 1.0);
+        assert_eq!(segments[0].stop, 5.0);
+        assert_eq!(segments[1].start, 5.0);
+        assert_eq!(segments[1].stop, 10.0);
+        assert_eq!(segments[2].start, 10.0);
+        assert_eq!(segments[2].stop, 15.0);
+        assert_eq!(segments[3].start, 15.0);
+        assert_eq!(segments[3].stop, 20.0);
+    }
+
+    #[test]
+    fn test_missing_variables() {
+        let project = ProjectConfig::new("dat/config/missing_variables.yaml").unwrap();
+
+        let blocks = &project.blocks;
+        let block = &blocks[0];
+
+        // This project has one block with some segments backed by global variables.
+        // Some of the variables are missing.
+        match block.get_segments() {
+            Ok(_) => {
+                panic!("Some variables should not have resolved.");
             }
             Err(_) => {}
         };

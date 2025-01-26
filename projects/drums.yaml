@@ -1,0 +1,48 @@
+config:
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 4
+        bpm: 85
+    variables:
+        intro: 1
+        verse: 2
+        chorus: 5
+devices:
+-   name: drums
+    type: VirtualInstrument
+    output_channel: drums
+    instrument: drums1
+    volume: 0.2
+-   name: metronome
+    type: Metronome
+    output_channel: metronome
+    segments:
+    -   start: 0
+        stop: 2
+        type: output
+    sound: hihat-closed1
+    volume: 0.15
+-   name: drumloop
+    type: Loop
+    input_channels:
+    - drums
+    output_channel: drumloop
+    segments:
+    -   start: 1
+        stop: 2
+        type: input
+    -   start: 2
+        stop: 5
+        type: output
+-   name: combiner
+    type: Combiner
+    input_channels:
+    - drums
+    - drumloop
+    - metronome
+    output_channel: audio_out
+    segments: []
+-   name: laptop_speaker
+    type: AudioSink
+    input_channel: audio_out
+    device: Built-in Output

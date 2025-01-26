@@ -18,26 +18,23 @@
 //!     - Key: the key to press on the keyboard.
 //!     - File: The wav file sound to play when the key is pressed.
 //!     - Group: The sound group. Sounds in different groups can be played independently.
+//!              Two sounds in the same group will interrupt one another when played.
+//!              For example, two frets on the same guitar string cannot be played at the
+//!              same time. Playing fret 1 should interrupt the sound on fret 2.
 //!
 //! Example configuration:
-//!     "sounds": [
-//!         {
-//!             "key": "a",
-//!             "file": "kick_drum"
-//!             "group": 1
-//!         },
-//!         {
-//!             "key": "s",
-//!             "file": "snare_drum",
-//!             "group": 2
-//!         },
-//!     ]
+//!     sounds:
+//!     -   key: a
+//!         file: kick_drum
+//!         group: 1
+//!     -   key: s
+//!         file: snare_drum
+//!         group: 2
 
 extern crate block;
 extern crate config;
 extern crate log;
 extern crate sampler;
-extern crate segment;
 extern crate stream;
 extern crate tempo;
 extern crate wav;

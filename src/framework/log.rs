@@ -90,6 +90,21 @@ macro_rules! unwrap_abort_str {
     };
 }
 
+/// Unwrap a Result or return a custom message as a string.
+#[macro_export]
+macro_rules! unwrap_abort_msg_str {
+    ( $e:expr, $msg:expr ) => {
+        match $e {
+            Ok(x) => x,
+            Err(e) => {
+                let msg2 = format!("{}:{} abort({}): {}", file!(), line!(), stringify!($e), $msg);
+                println!("{}", msg2);
+                return Err(msg2);
+            }
+        }
+    };
+}
+
 /// Unwrap an Option or return Err(()).
 #[macro_export]
 macro_rules! opt_abort {

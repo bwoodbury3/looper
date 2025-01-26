@@ -18,6 +18,7 @@ Live audio streaming software
   * **beat_duration**: The bottom number in the time signature.
 * **start_measure**: Begin playing at this measure.
 * **stop_measure**: Stop playing at this measure.
+* **variables**: Named variables that can be substituted for numbers elsewhere in the project.
 
 ### Blocks
 
@@ -35,6 +36,7 @@ Available blocks:
 * [Combiner](https://github.com/bwoodbury3/looper/blob/main/src/transform/combiner.rs): Combines multiple input streams into one output stream.
 * [Toggle](https://github.com/bwoodbury3/looper/blob/main/src/transform/toggle.rs): Toggles an input stream on an off.
 * [Recorder](https://github.com/bwoodbury3/looper/blob/main/src/audio/recorder.rs): Records a partial stream and writes it to a file.
+* [LowPass](https://github.com/bwoodbury3/looper/blob/main/src/transform/low_pass.rs): Adds a low pass filter at a configurable frequency.
 
 ### Streams and Channels
 
@@ -43,3 +45,55 @@ Streams are used to connect blocks together. They're identified by a channel nam
 When you define an output channel, you must pick a new name. All output channel names must be unique to ensure that each stream can only have one block writing to it.
 
 When you define an input channel, it must match the name of some other output channel, otherwise the input would come from nowhere and that would be stupid.
+
+### Variables
+
+As mentioned above, named variables can be defined at the top-level configuration and substituted for arbitrary values elsewhere in the project. For example, take this common case:
+
+```yaml
+devices:
+-   name: Drumloop Chorus
+    type: Loop
+    input_channels:
+    -   drums
+    output_channel: drumloop-chorus
+    segments:
+    -   start: 1
+        stop: 3
+        type: input
+    -   start: 15 # Chorus 1
+        stop: 21
+        type: output
+    -   start: 33 # Chorus 2
+        stop: 39
+        type: output
+```
+
+Variables can be used to organize the project better and keep blocks in sync if the song structure changes:
+
+```yaml
+config:
+    variables:
+        # Define a top-level song structure
+        CHORUS_1_START: 15
+        CHORUS_1_END: 21
+        CHORUS_2_START: 33
+        CHORUS_2_END: 39
+
+devices:
+-   name: Drumloop Chorus
+    type: Loop
+    input_channels:
+    -   drums
+    output_channel: drumloop-chorus
+    segments:
+    -   start: 1
+        stop: 3
+        type: input
+    -   start: CHORUS_1_START
+        stop: CHORUS_1_END
+        type: output
+    -   start: CHORUS_2_START
+        stop: CHORUS_2_END
+        type: output
+```

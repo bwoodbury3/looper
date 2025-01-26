@@ -1,0 +1,22 @@
+config:
+    start_measure: 0
+    stop_measure: 20
+    tempo:
+        beat_duration: 4
+        beats_per_measure: 3
+        bpm: 101
+    variables:
+        INTRO: 1
+        VERSE1: 5
+devices:
+-   instrument: drums1
+    name: drums
+    type: VirtualInstrument
+    volume: 0.2
+    segments:
+    -   start: INTRO
+        stop: VERSE1
+        type: output
+    -   start: VERSE1
+        stop: CHORUS1
+        type: output
