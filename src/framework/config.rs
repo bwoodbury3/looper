@@ -33,6 +33,9 @@
 //!  - `Vec<str>`
 //!  - `Vec<segment::Segment>`
 
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
 use yaml_rust::{Yaml, YamlLoader};
 
 extern crate log;
@@ -48,27 +51,6 @@ pub fn read_yaml_file(filename: &str) -> Result<Vec<Yaml>, String> {
     return Ok(root);
 }
 
-// Parse a yaml object as an f32. Supports casting if the object is an int.
-pub fn yaml_as_f32(obj: &Yaml) -> Result<f32, ()> {
-    let result = match obj {
-        Yaml::Real(_) => obj.as_f64().unwrap() as f32,
-        Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
-        _ => {
-            log::abort_msg!("Expected a number value");
-        }
-    };
-    Ok(result)
-}
-
-// Parse a yaml object as an f32. Supports casting if the object is an int.
-pub fn yaml_as_f32_opt(obj: &Yaml, default: &f32) -> f32 {
-    match obj {
-        Yaml::Real(_) => obj.as_f64().unwrap() as f32,
-        Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
-        _ => *default,
-    }
-}
-
 /// Get the path of an audio clip.
 pub fn clip_path(clip_name: &str) -> String {
     return format!("assets/clips/{}.wav", clip_name);
@@ -77,6 +59,18 @@ pub fn clip_path(clip_name: &str) -> String {
 /// Get the path of an instrument.
 pub fn instrument_path(instrument_name: &str) -> String {
     return format!("assets/instruments/{}.yaml", instrument_name);
+}
+
+/// Named variables defined by the user.
+struct NamedVariables {
+    /// Integer variables.
+    pub vars_i32: HashMap<String, i32>,
+
+    /// Floating variables.
+    pub vars_f32: HashMap<String, f32>,
+
+    /// String variables.
+    pub vars_str: HashMap<String, String>,
 }
 
 /// Configuration for a single Block.
@@ -89,6 +83,9 @@ pub struct BlockConfig {
 
     /// The root yaml config object.
     root: Yaml,
+
+    /// User-defined variables.
+    variables: Rc<RefCell<NamedVariables>>,
 }
 
 /// Top level config.
@@ -106,22 +103,94 @@ pub struct ProjectConfig {
     pub blocks: Vec<BlockConfig>,
 }
 
+// Parse a yaml object as an i32.
+fn yaml_as_i32(obj: &Yaml) -> Result<i32, ()> {
+    let result = match obj {
+        Yaml::Integer(i) => *i as i32,
+        _ => {
+            log::abort_msg!("Expected an integer value");
+        }
+    };
+    Ok(result)
+}
+
+// Parse a yaml object as an i32.
+fn yaml_as_i32_opt(obj: &Yaml, default: &i32) -> i32 {
+    match obj {
+        Yaml::Integer(i) => *i as i32,
+        _ => *default,
+    }
+}
+
+// Parse a yaml object as an f32. Supports casting if the object is an int.
+fn yaml_as_f32(obj: &Yaml) -> Result<f32, ()> {
+    let result = match obj {
+        Yaml::Real(_) => obj.as_f64().unwrap() as f32,
+        Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
+        _ => {
+            log::abort_msg!("Expected a number value");
+        }
+    };
+    Ok(result)
+}
+
+// Parse a yaml object as an f32. Supports casting if the object is an int.
+fn yaml_as_f32_opt(obj: &Yaml, default: &f32) -> f32 {
+    match obj {
+        Yaml::Real(_) => obj.as_f64().unwrap() as f32,
+        Yaml::Integer(_) => obj.as_i64().unwrap() as f32,
+        _ => *default,
+    }
+}
+
 impl ProjectConfig {
     /// Initialze a new project config.
     pub fn new(filename: &str) -> Result<ProjectConfig, String> {
         let root = &log::unwrap_abort_str!(read_yaml_file(filename))[0];
 
-        // Read in the global and block configs.
+        // Read in the global configs.
         let global_config = &root["config"];
         log::abort_if_msg_str!(global_config.is_badvalue(), "Missing top-level \"config\" key");
 
-        let mut start_measure = yaml_as_f32_opt(&global_config["start_measure"], &0f32);
-        let mut stop_measure = yaml_as_f32_opt(&global_config["stop_measure"], &-1f32);
-
+        let start_measure = yaml_as_f32_opt(&global_config["start_measure"], &0f32);
+        let stop_measure = yaml_as_f32_opt(&global_config["stop_measure"], &-1f32);
         println!("Start measure: {}", start_measure);
         println!("Stop measure: {}", stop_measure);
 
-        // Populate all of the blocks.
+        // Load all of the variables.
+        let mut vars_i32: HashMap<String, i32> = HashMap::new();
+        let mut vars_f32: HashMap<String, f32> = HashMap::new();
+        let mut vars_str: HashMap<String, String> = HashMap::new();
+        match root["variables"].as_hash() {
+            Some(var_config) => {
+                for (yk, value) in var_config.iter() {
+                    let key = log::opt_abort_str!(yk.as_str(), "Variable key must be a string");
+                    match value {
+                        Yaml::Integer(v) => {
+                            vars_i32.insert(key.to_owned(), *v as i32);
+                            vars_f32.insert(key.to_owned(), *v as f32);
+                        }
+                        Yaml::Real(_) => {
+                            vars_f32.insert(key.to_owned(), value.as_f64().unwrap() as f32);
+                        }
+                        Yaml::String(s) => {
+                            vars_str.insert(key.to_owned(), s.to_owned());
+                        }
+                        _ => {
+                            return Err(format!("Unsupport variable type for \"{}\"", key));
+                        }
+                    }
+                }
+            }
+            None => {}
+        };
+        let variables = Rc::new(RefCell::new(NamedVariables {
+            vars_i32: vars_i32,
+            vars_f32: vars_f32,
+            vars_str: vars_str,
+        }));
+
+        // Load all of the blocks.
         let block_config = match root["devices"].as_vec() {
             Some(v) => v,
             None => {
@@ -143,6 +212,7 @@ impl ProjectConfig {
                 name: name.to_owned(),
                 block_type: block_type.to_owned(),
                 root: block.clone(),
+                variables: variables.clone(),
             });
         }
 
@@ -211,16 +281,13 @@ impl BlockConfig {
     /// Get an int value from config.
     pub fn get_i32(&self, key: &str) -> Result<i32, ()> {
         let value = self.get_value(key)?;
-        Ok(unwrap_config!(value.as_i64(), self.name, key, "Expected an int value") as i32)
+        yaml_as_i32(value)
     }
 
     /// Get an optional int value from config with a default.
     pub fn get_i32_opt(&self, key: &str, default: &i32) -> Result<i32, ()> {
         let value = &self.root[key];
-        if value.is_badvalue() {
-            return Ok(*default);
-        }
-        Ok(unwrap_config!(value.as_i64(), self.name, key, "Expected an int value") as i32)
+        Ok(yaml_as_i32_opt(value, default))
     }
 
     /// Get a float value from config.
